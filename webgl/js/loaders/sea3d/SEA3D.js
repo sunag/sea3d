@@ -497,8 +497,8 @@ SEA3D.Math.lerpQuat4x = function(val, tar, t) {
 //
 
 SEA3D.AnimationBlendMethod = {
-	linear : 'linear',
-	easing : 'easing'
+	LINEAR : 'linear',
+	EASING : 'easing'
 }
 
 //

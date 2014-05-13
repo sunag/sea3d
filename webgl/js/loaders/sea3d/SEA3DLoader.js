@@ -46,11 +46,11 @@ THREE.Object3D.prototype.getAnimateMatrix = function() {
 	return this.animateMatrix != null;
 }
  
-THREE.Mesh.prototype.setWeightByName = function(name, val) {
+THREE.Mesh.prototype.setWeight = function(name, val) {
 	this.morphTargetInfluences[ this.geometry.morphTargets[name] ] = val;
 }
 
-THREE.Mesh.prototype.getWeightByName = function(name) {
+THREE.Mesh.prototype.getWeight = function(name) {
 	return this.morphTargetInfluences[ this.geometry.morphTargets[name] ];
 }
 
@@ -455,18 +455,6 @@ THREE.SEA3D.prototype.vectorToVector3 = function(list) {
 	var i = 0, j = 0;
 	while(i < list.length)
 		n[j++] = new THREE.Vector3(list[i++], list[i++], list[i++]);
-	return n;
-}
-
-THREE.SEA3D.prototype.morphVectorToVector3 = function(lista, listb) {
-	var n = [];	
-	var i = 0, j = 0;
-	while(i < lista.length)
-		n[j++] = new THREE.Vector3(
-			lista[i] + listb[i++], 
-			lista[i] + listb[i++], 
-			lista[i] + listb[i++]
-		);
 	return n;
 }
 
@@ -1083,7 +1071,7 @@ THREE.SEA3D.prototype.readMesh2D = function(sea) {
 
 THREE.SEA3D.prototype.readMesh = function(sea) {
 	var geo = sea.geometry.tag,
-		mesh, mat, skeleton, skeletonAnimation, morpher, morpherNormals;
+		mesh, mat, skeleton, skeletonAnimation, morpher;
 		
 	for(var i = 0, count = sea.modifiers ? sea.modifiers.length : 0; i < count; i++) {
 		var mod = sea.modifiers[i];
@@ -1097,7 +1085,6 @@ THREE.SEA3D.prototype.readMesh = function(sea) {
 		
 			case SEA3D.Morph.prototype.type:
 				morpher = mod;
-				morpherNormals = sea.geometry.normal != null;
 				break;
 		}
 	}
@@ -1122,7 +1109,7 @@ THREE.SEA3D.prototype.readMesh = function(sea) {
 				mats[i] = sea.material[i].tag;
 				mats[i].skinning = skeleton != null;
 				mats[i].morphTargets = morpher != null;
-				mats[i].morpherNormals = morpherNormals;
+				mats[i].morphNormals = false;
 			}
 			
 			mat = new THREE.MeshFaceMaterial( mats );
@@ -1130,16 +1117,12 @@ THREE.SEA3D.prototype.readMesh = function(sea) {
 			mat = sea.material[0].tag;
 			mat.skinning = skeleton != null;
 			mat.morphTargets = morpher != null;
-			mat.morpherNormals = morpherNormals;
+			mat.morphNormals = false;
 		}
 	}
 	
-	if (morpher) {
-		geo.morphTargets = this.getMorpher( morpher, sea.geometry );
-		
-		if (!morpherNormals)
-			geo.computeMorphNormals();
-	}
+	if (morpher)
+		geo.morphTargets = this.getMorpher( morpher, sea.geometry );		
 	
 	if (skeleton) {
 		mesh = new THREE.SkinnedMesh( geo, mat, false );				
@@ -1621,14 +1604,20 @@ THREE.SEA3D.prototype.getMorpher = function(sea, geo) {
 	
 	for(var i = 0; i < sea.node.length; i++) {
 		var node = sea.node[i],
-			vertex = this.morphVectorToVector3(geo.vertex, node.vertex),
-			normal = sea.normal ? this.morphVectorToVector3(geo.normal, node.normal) : [];
+			vertex = [];
+				
+		var j = 0, k = 0;
+		while(j < geo.vertex.length)
+			vertex[k++] = new THREE.Vector3(
+				geo.vertex[j] + node.vertex[j++], 
+				geo.vertex[j] + node.vertex[j++], 
+				geo.vertex[j] + node.vertex[j++]
+			);
 		
 		morphs[node.name] = i;
 		morphs[i] = {
 			name:node.name, 
-			vertices:vertex,
-			normals:normal
+			vertices:vertex			
 		}
 	}
 	
@@ -1700,13 +1689,13 @@ THREE.SEA3D.prototype.loadBytes = function( data ) {
 	
 	switch(this.parser)
 	{
-		case 'auto': 
+		case THREE.SEA3D.AUTO: 
 			this.file.typeRead[SEA3D.Geometry.prototype.type] = 
 			this.file.typeRead[SEA3D.GeometryDelta.prototype.type] =
 				this.readGeometrySwitch; 
 			break;
 			
-		case 'buffer': 
+		case THREE.SEA3D.BUFFER: 
 			this.file.typeRead[SEA3D.Geometry.prototype.type] = 
 			this.file.typeRead[SEA3D.GeometryDelta.prototype.type] = 
 				this.readGeometryBuffer; 

@@ -40,8 +40,8 @@
 
 	<body>
 		<div id="info">
-		<a href="http://github.com/mrdoob/three.js" style="color:#f00" target="_blank">three.js</a> • <a href="https://code.google.com/p/sea3d/" style="color:#0099FF" target="_blank">SEA3D File Format</a> - Morph Example.
-		<br/>Morpher directly from 3ds Max.
+		<a href="https://code.google.com/p/sea3d/" style="color:#0099FF" target="_blank">SEA3D File Format</a> • <a href="http://github.com/mrdoob/three.js" style="color:#f00" target="_blank">Three.JS</a> - LightMap Example.
+		<br/>LightMap using secondary UV channel. Exported directly from 3ds Max.
 		</div>
 
 		<div id="loading">
@@ -67,7 +67,7 @@
 		<script>								
 			var container, stats;
 
-			var camera, scene, renderer, clock, loader, composer, renderPass, delta, teapot;
+			var camera, scene, renderer, clock, loader, composer, renderPass, delta;
 
 			var mouseX = 0, mouseY = 0;
 
@@ -102,11 +102,29 @@
 				controls.staticMoving = true;
 				controls.dynamicDampingFactor = 0.1;
 
+				// Scene
+
 				scene = new THREE.Scene();
 
+				//
+				// SEA3D
+				//
+				
+				var sea3dStandard = true;
+				
+				if (sea3dStandard)
+					camera.scale.set(-1, 1, 1);
+				
+				loader = new THREE.SEA3D( sea3dStandard );				
+				loader.onComplete = function( e ) {					
+					document.getElementById('loading').style.visibility = 'hidden';
+				};
+				loader.container = scene;
+				loader.load( 'lightmap.sea' );				
+				
 				// Lights
 				
-				var ambient = new THREE.AmbientLight( 0x666666 );
+				var ambient = new THREE.AmbientLight( 0xFFFFFF );
 				scene.add( ambient );												
 				
 				var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.5 );
@@ -147,51 +165,13 @@
 				// set last pass in composer chain to renderToScreen
 				copyPass.renderToScreen = true;
 				
-				// STAGE
+				//
 				
 				window.addEventListener( 'resize', onWindowResize, false );
-				
-				//
-				// SEA3D
-				//
-				
-				var sea3dStandard = true;
-				
-				if (sea3dStandard)
-					camera.scale.set(-1, 1, 1);
-				
-				loader = new THREE.SEA3D( sea3dStandard );	
-				
-				loader.onComplete = function( e ) {
-					// Camera01 from 3ds Max
-					var cam = loader.getCamera("Camera01");
-					camera.position = cam.position;
-					camera.rotation = cam.rotation;
-					
-					teapot = loader.getMesh("Teapot01");
-					document.addEventListener( 'mousemove', onMouseMove, false );
-
-					document.getElementById('loading').style.visibility = 'hidden';					
-				};
-				
-				loader.container = scene;
-				
-				// THREE.SEA3D.BUFFER is not compatible with morpher
-				loader.parser = THREE.SEA3D.DEFAULT;
-				
-				loader.load( 'morph.sea' );				
 			}	
 			
-			function onMouseMove( e ) {
-				var mouseX = e.clientX,
-					mouseY = e.clientY;
-				
-				// change morph weight
-				teapot.setWeight("OldTeapot", mouseX / window.innerWidth);
-				teapot.setWeight("Sphere", mouseY / window.innerHeight);
-			}
-			
 			function onWindowResize() {
+
 				windowHalfX = window.innerWidth / 2;
 				windowHalfY = window.innerHeight / 2;
 
