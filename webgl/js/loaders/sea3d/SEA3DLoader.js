@@ -1297,6 +1297,7 @@ THREE.SEA3D.prototype.materialTechnique =
 	// DEFAULT
 	techniques[SEA3D.Material.DEFAULT] = 	
 	function(tech, mat) {
+		mat.ambient.setHex(tech.ambientColor);
 		mat.emissive.setHex(tech.ambientColor);
 		mat.color.setHex(tech.diffuseColor);
 		mat.specular.setHex(this.scaleColor(tech.specularColor, tech.specular));
