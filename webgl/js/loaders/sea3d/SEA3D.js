@@ -820,6 +820,7 @@ SEA3D.AnimationHandler = function( animationSet ) {
 	this.easeSpeed = 2;
 	this.crossfade = 0;
 	this.updateAllStates = false;
+	this.blendMethod = SEA3D.AnimationBlendMethod.LINEAR;
 }
 
 SEA3D.AnimationHandler.prototype.update = function(delta) {
@@ -864,7 +865,7 @@ SEA3D.AnimationHandler.prototype.updateState = function() {
 		}
 		
 		if (weight < 0)				
-			weight = 0;
+			weight = 0;				
 		
 		this.currentState.weight = weight;
 	} else {
@@ -888,11 +889,11 @@ SEA3D.AnimationHandler.prototype.updateAnimation = function() {
 	var dataCount = this.animationSet.dataCount;		
 	var nodes = this.animationSet.animations;
 	var currentNode = this.currentState.node;
-		
+	
 	for(var i = 0; i < dataCount; i++) {
 		for(var n = 0; n < nodes.length; n++) {
-			var node = nodes[i],
-				state = this.states[i],
+			var node = nodes[n],
+				state = this.states[n],
 				data = node.dataList[i],				
 				iFunc = SEA3D.Animation.DefaultLerpFuncs[data.kind],
 				frame;
@@ -900,8 +901,9 @@ SEA3D.AnimationHandler.prototype.updateAnimation = function() {
 			if (n == 0) {
 				frame = currentNode.getInterpolationFrame(currentNode.dataList[i], iFunc);
 				
-				if (!currentNode.repeat && currentNode.time == currentNode.duration) {
-					console.log("ok");
+				if (!currentNode.repeat && currentNode.frame == currentNode.numFrames - 1) {
+					if (this.onComplete)
+						this.onComplete( this );
 				}
 			}
 			
