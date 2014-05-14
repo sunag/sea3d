@@ -166,16 +166,16 @@ SEA3D.Stream.prototype.readMatrix = function() {
 	return mtx;
 }
 
-SEA3D.Stream.prototype.readString = function(len) {
+SEA3D.Stream.prototype.readUTF = function(len) {
 	return String.fromCharCode.apply(null, new Uint16Array(this.readUBytes(len)));
 }
 
 SEA3D.Stream.prototype.readExt = function() {
-	return this.readString(4).replace(/\0/g, "");
+	return this.readUTF(4).replace(/\0/g, "");
 }
 
 SEA3D.Stream.prototype.readUTF8 = function() {
-	return this.readString(this.readUByte());
+	return this.readUTF(this.readUByte());
 }
 
 SEA3D.Stream.prototype.readBlendMode = function() {
@@ -306,7 +306,7 @@ SEA3D.DataTable.readToken = function(type, data) {
 		
 		// Undefined Values
 		case SEA3D.DataTable.STRING_TINY:
-			return data.readString();
+			return data.readUTF8();
 			break;
 	}
 	
@@ -1525,6 +1525,38 @@ SEA3D.SoundPoint = function(name, data, sea) {
 SEA3D.SoundPoint.prototype.type = "sp";
 
 //
+//	Container3D
+//
+
+SEA3D.Container3D = function(name, data, sea) {
+	this.name = name;
+	this.data = data;
+	this.sea = sea;
+	
+	SEA3D.Object3D.read(this);
+	
+	this.transform = data.readMatrix();
+	
+	SEA3D.Object3D.readTags(this);
+}
+
+SEA3D.Container3D.prototype.type = "c3d";
+
+//
+//	Texture URL
+//
+
+SEA3D.TextureURL = function(name, data, sea) {
+	this.name = name;
+	this.data = data;
+	this.sea = sea;
+	
+	this.url = data.readUTF( data.length );
+}
+
+SEA3D.TextureURL.prototype.type = "urlT";
+
+//
 //	Actions
 //
 
@@ -1536,7 +1568,7 @@ SEA3D.Actions = function(name, data, sea) {
 	this.count = data.readUInt();
 	this.action = [];
 	
-	for(var i = 0; i < count; i++) {
+	for(var i = 0; i < this.count; i++) {
 		var flag = data.readUByte();
 		var kind = data.readUShort();
 						
@@ -2694,6 +2726,8 @@ SEA3D.File = function(data) {
 	this.addClass(SEA3D.CubeRender);
 	this.addClass(SEA3D.Actions);
 	this.addClass(SEA3D.JavaScript);
+	this.addClass(SEA3D.TextureURL);
+	this.addClass(SEA3D.Container3D);
 	
 	// UNIVERSAL
 	this.addClass(SEA3D.JPEG);
@@ -2719,10 +2753,10 @@ SEA3D.File.prototype.readHead = function() {
 	if (this.stream.bytesAvailable() < 16)
 		return false;
 		
-	if (this.stream.readString(3) != "SEA")
+	if (this.stream.readUTF(3) != "SEA")
 		console.error("Invalid SEA3D format.");
 		
-	var sign = this.stream.readString(3);
+	var sign = this.stream.readUTF(3);
 		
 	if (sign != "S3D")
 		console.warn("Signature \"" + sign + "\" not recognized.");

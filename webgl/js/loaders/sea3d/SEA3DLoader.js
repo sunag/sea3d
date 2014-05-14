@@ -274,9 +274,15 @@ THREE.Sound3D.prototype.pause = function() {
 }
 
 THREE.Sound3D.prototype.update = function( camera ) {
-	var distance = this.position.distanceTo( camera.position );
+	var soundPosition = new THREE.Vector3();
+	soundPosition.setFromMatrixPosition( this.matrixWorld );
+	
+	var cameraPosition = new THREE.Vector3();
+	cameraPosition.setFromMatrixPosition( camera.matrixWorld );		
+	
+	var distance = soundPosition.distanceTo( cameraPosition );
 
-	var volume = this.volume * (1 - ( distance / (this.distance * 6) ));
+	var volume = this.volume * (1 - ( distance / (this.distance * 3) ));
 	
 	this.audio.volume = Math.max(0, Math.min(1, volume));
 }
@@ -436,6 +442,14 @@ THREE.SEA3D.prototype.getCubeMap = function(name) {
 
 THREE.SEA3D.prototype.getJointObject = function(name) {
 	return this.objects["jnt/" + name];
+}
+
+THREE.SEA3D.prototype.getSound3D = function(name) {
+	return this.objects["sn3d/" + name];
+}
+
+THREE.SEA3D.prototype.getSprite = function(name) {
+	return this.objects["m2d/" + name];
 }
 
 //
@@ -1032,6 +1046,22 @@ THREE.SEA3D.prototype.readLine = function(sea) {
 }
 
 //
+//	Container3D
+//
+
+THREE.SEA3D.prototype.readContainer3D = function(sea) {
+	var container = new THREE.Object3D();		
+	
+	this.containers = this.containers || [];
+	this.containers.push( this.objects["c3d/" + sea.name] = sea.tag = container );
+	
+	this.updateMatrix(container, sea);		
+	
+	this.addSceneObject( sea );
+	this.applyDefaultAnimation( sea, THREE.SEA3D.Object3DAnimator );
+}
+
+//
 //	Mesh2D | Sprite
 //
 
@@ -1045,6 +1075,8 @@ THREE.SEA3D.prototype.readMesh2D = function(sea) {
 			material = sea.material.tag.sprite = new THREE.SpriteMaterial();
 			
 			material.map = sea.material.tag.map;
+			material.map.flipY = true;
+			
 			material.color = sea.material.tag.emissive;
 			material.opacity = sea.material.tag.opacity;
 			material.blending = sea.material.tag.blending;
@@ -1158,8 +1190,10 @@ THREE.SEA3D.prototype.readSoundPoint = function(sea) {
 	
 	sound3d.position.set( sea.position.x, sea.position.y, this.invertZ && !sea.parent ? -sea.position.z : sea.position.z  );
 	
-	if (sea.autoPlay)
+	if (sea.autoPlay) {
+		sound3d.loop = true;
 		sound3d.play();
+	}
 	
 	sound3d.name = sea.name;
 	
@@ -1198,8 +1232,7 @@ THREE.SEA3D.prototype.readImage = function(sea) {
 	texture.wrapS = texture.wrapT = THREE.RepeatWrapping;	
 	texture.flipY = false;
 	
-	image.onload = function () { 
-		
+	image.onload = function () { 		
 		if (!scope.isPowerOfTwo(image.width) || 
 			!scope.isPowerOfTwo(image.height))
 		{		
@@ -1276,6 +1309,21 @@ THREE.SEA3D.prototype.readSound = function(sea) {
 	
 	this.sounds = this.sounds || [];
 	this.sounds.push( this.objects["snd/" + sea.name] = sea.tag = sound );
+}
+
+//
+//	Texture URL
+//
+
+THREE.SEA3D.prototype.readTextureURL = function(sea) {	
+	var texture = THREE.ImageUtils.loadTexture( sea.url );
+	
+	texture.name = sea.name;
+	texture.wrapS = texture.wrapT = THREE.RepeatWrapping;	
+	texture.flipY = false;
+	
+	this.textures = this.textures || [];
+	this.textures.push( this.objects["tex/" + sea.name] = sea.tag = texture );
 }
 
 //
@@ -1711,6 +1759,7 @@ THREE.SEA3D.prototype.loadBytes = function( data ) {
 	
 	this.file.typeRead[SEA3D.Mesh.prototype.type] = this.readMesh;	
 	this.file.typeRead[SEA3D.Mesh2D.prototype.type] = this.readMesh2D;	
+	this.file.typeRead[SEA3D.Container3D.prototype.type] = this.readContainer3D;	
 	this.file.typeRead[SEA3D.Dummy.prototype.type] = this.readDummy;	
 	this.file.typeRead[SEA3D.Line.prototype.type] = this.readLine;	
 	this.file.typeRead[SEA3D.Material.prototype.type] = this.readMaterial;
@@ -1724,6 +1773,7 @@ THREE.SEA3D.prototype.loadBytes = function( data ) {
 	this.file.typeRead[SEA3D.CubeRender.prototype.type] = this.readCubeRender;	
 	this.file.typeRead[SEA3D.Animation.prototype.type] = this.readAnimation;
 	this.file.typeRead[SEA3D.SoundPoint.prototype.type] = this.readSoundPoint;	
+	this.file.typeRead[SEA3D.TextureURL.prototype.type] = this.readTextureURL;	
 	
 	//	UNIVERSAL
 	this.file.typeRead[SEA3D.JPEG.prototype.type] = this.readImage;		

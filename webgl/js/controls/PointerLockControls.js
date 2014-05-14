@@ -2,10 +2,12 @@
  * @author mrdoob / http://mrdoob.com/
  */
 
-THREE.PointerLockControls = function ( camera ) {
+THREE.PointerLockControls = function ( camera, speed ) {
 
 	var scope = this;
 
+	this.speed = speed !== undefined ? speed : 400.0;
+	
 	camera.rotation.set( 0, 0, 0 );
 
 	var pitchObject = new THREE.Object3D();
@@ -18,7 +20,7 @@ THREE.PointerLockControls = function ( camera ) {
 	var moveForward = false;
 	var moveBackward = false;
 	var moveLeft = false;
-	var moveRight = false;
+	var moveRight = false;	
 
 	var isOnObject = false;
 	var canJump = false;
@@ -153,11 +155,11 @@ THREE.PointerLockControls = function ( camera ) {
 
 		velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
 
-		if ( moveForward ) velocity.z -= 400.0 * delta;
-		if ( moveBackward ) velocity.z += 400.0 * delta;
+		if ( moveForward ) velocity.z -= this.speed * delta;
+		if ( moveBackward ) velocity.z += this.speed * delta;
 
-		if ( moveLeft ) velocity.x -= 400.0 * delta;
-		if ( moveRight ) velocity.x += 400.0 * delta;
+		if ( moveLeft ) velocity.x -= this.speed * delta;
+		if ( moveRight ) velocity.x += this.speed * delta;
 
 		if ( isOnObject === true ) {
 
