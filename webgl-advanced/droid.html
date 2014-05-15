@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Sea3d Droid</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<style>
+    * {  margin: 0; padding: 0; border: 0;}
+    body { background-color: #444444; overflow: hidden; color:#c8c8c8; font-family:Verdana; font-size: 12px; }
+    input{ margin:0; padding:4px; height:30px;}
+    #interface{ position: absolute; left:10px; top:90px; width:0px; height:0px; }
+    #info{ pointer-events:none; position: absolute; left:20px; top:15px; width: 350px; height: 120px; }
+    #logo{ pointer-events:none; position: absolute; left:-10px; bottom:-10px; width: 300px; height: 150px; }
+</style>
+
+<script src="js/three.min.js"></script>
+<script src="js/BufferGeometryUtils.js"></script>
+<script src="js/Detector.js"></script>
+<script src="js/miniGUI.js"></script>
+<script src="build/loaders/Sea3dLoader.min.js"></script>
+
+</head>
+
+<body>
+<div id='container'></div>
+<div id="info"></div>
+<div id='interface'></div>
+<div id='logo'><object type="image/svg+xml" data="assets/sea3db.svg" id="logo"></object></div>
+
+<script>
+
+// Parameters
+var ToRad = Math.PI / 180;
+var info = document.getElementById("info");
+var menu = document.getElementById("interface");
+var sourceInfo = "<h3>DROID + ANIM BLENDING & MORPH</h3><br>";
+
+// THREE var
+var container, camera, scene, renderer, cam, mouse, key, clock, pool;
+var fps = [0,0,0,0];
+
+var bgcolor = 0x444444;
+var meshs = [];
+var anims = [];
+var squel = [];
+var animWeights = [];
+var loopAnimations = [];
+var animations, morphs;
+
+var animControl = { timeScale:1 };
+
+var isFrameStepping = false;
+var isSkeletonVisible = false;
+var timeToStep = 0;
+var gui = [];
+
+window.onload = init;
+
+function init() {
+    if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+    cam = { horizontal: 120, vertical: 80, distance: 50, automove: false };
+    mouse = { ox:0, oy:0, h:0, v:0, mx:0, my:0, down:false, over:false, moving:true };
+    key = [0,0,0,0,0,0,0,0];
+
+    clock = new THREE.Clock();
+
+    renderer = new THREE.WebGLRenderer( { antialias:true } );
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setClearColor( bgcolor, 1 );
+
+    container = document.getElementById("container");
+    container.appendChild( renderer.domElement );
+
+    renderer.gammaInput = true;
+    renderer.gammaOutput = true;
+    renderer.shadowMapCullFace = THREE.CullFaceBack;
+    renderer.shadowMapEnabled = true;
+    //renderer.autoClearColor = false;
+    renderer.autoClear = false;
+
+    scene = new THREE.Scene();
+
+    camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 0.5, 1000 );
+    center = new THREE.Vector3(0,3,0);
+    moveCamera();
+    scene.add( camera );
+
+    scene.add( new THREE.AmbientLight( bgcolor ) );
+
+    var light = new THREE.DirectionalLight( 0xffffff, 1.1 );
+    var d = 20;
+    light.position.set( d/3, d, d);
+    light.target = new THREE.Object3D(0,3,0);
+    light.castShadow = true;
+    //light.shadowCameraVisible = true;
+
+    light.shadowMapWidth = 1024;
+    light.shadowMapHeight = 1024;
+
+    light.shadowCameraLeft = -d;
+    light.shadowCameraRight = d;
+    light.shadowCameraTop = d;
+    light.shadowCameraBottom = -d;
+
+    light.shadowCameraFar = d*2;
+    light.shadowCameraNear = d;
+    light.shadowDarkness = 0.25;
+    light.shadowBias =  -0.002;
+    scene.add( light );
+
+    var lightPoint = new THREE.PointLight ( 0x4488ff, 1 );
+    lightPoint.position.set( -d/3, d, -d);
+    scene.add( lightPoint );
+
+
+    var backMat = new THREE.MeshBasicMaterial( { color: bgcolor, side:THREE.BackSide, depthWrite: false } );
+    var backGeo = new THREE.Mesh( new THREE.SphereGeometry( 500, 6, 6 ), backMat );
+    scene.add( backGeo );
+
+    var material = new THREE.MeshBasicMaterial( { color: bgcolor } );
+    geometry = THREE.BufferGeometryUtils.fromGeometry( new THREE.PlaneGeometry( 400, 400, 1, 1 ) );
+    var mesh = new THREE.Mesh( geometry, material );
+    mesh.castShadow = false;
+    mesh.receiveShadow = true;
+    mesh.rotation.x = -90 * ToRad;
+    scene.add( mesh );
+
+    // events
+    var body = document.body;
+    window.addEventListener( 'resize', resize, false );
+    container.addEventListener( 'mousemove', onMouseMove, false );
+    container.addEventListener( 'mousedown', onMouseDown, false );
+    container.addEventListener( 'mouseout', onMouseUp, false );
+    container.addEventListener( 'mouseup', onMouseUp, false );
+    if( body.addEventListener ){
+        body.addEventListener( 'mousewheel', onMouseWheel, false ); //chrome
+        body.addEventListener( 'DOMMouseScroll', onMouseWheel, false ); // firefox
+    }else if( body.attachEvent ){
+        body.attachEvent("onmousewheel" , onMouseWheel); // ie
+    }
+
+    loop();
+
+    // load sea3d model
+    pool = new SEA3D.Pool('assets/model/droid.sea', populate, true);
+}
+
+function resize() {
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+}
+
+function loop() {
+
+    requestAnimationFrame( loop, renderer.domElement );
+    var i;
+    var delta = clock.getDelta();
+    var stepSize = (!isFrameStepping) ? delta * animControl.timeScale: timeToStep;
+
+    // modify blend weights
+    i = anims.length;
+    while(i--) { anims[i].update( stepSize ); }
+    THREE.AnimationHandler.update( stepSize );
+    
+    // update skeleton
+    if(isSkeletonVisible){
+        i = squel.length;
+        while(i--) { squel[i].update(); }
+    }
+
+    renderer.render( scene, camera );
+
+    timeToStep = 0;
+    displayInfo()
+}
+
+function displayInfo(){
+    fps[2] = Date.now();
+    if (fps[2]-1000>fps[1]){ fps[1]=fps[2]; fps[3]=fps[0]; fps[0]=0; } fps[0]++;
+
+    var txtinfo =[
+        sourceInfo,
+        "Three: " + fps[3] +" fps"
+    ].join("\n");
+    info.innerHTML = txtinfo;
+}
+
+//--------------------------------
+// SEA3D
+//--------------------------------
+
+function populate(){
+    var dTexture = THREE.ImageUtils.loadTexture( 'assets/texture/droid.jpg' );
+    dTexture.wrapS = dTexture.wrapT = THREE.RepeatWrapping;
+    dTexture.anisotropy = renderer.getMaxAnisotropy();
+    dTexture.repeat.set( 1,-1);
+
+    var mat = new THREE.MeshPhongMaterial({ ambient:bgcolor, specular:0x606060, shininess:160, map:dTexture, skinning:true, morphTargets:true, metal:true });
+
+    var model = pool.getGeometry("droid");
+    animations = pool.getAnimations("droid");
+    morphs = pool.getMorphs("droid");
+
+    /*
+    console.log(animation[0]);// animation name
+    console.log(animation[1]);// animation loop
+    console.log(morphs);// morph name
+    */
+
+    var NumberModel = 5;
+    var size = 0.05;
+    var mesh, helper;
+
+    var i = NumberModel;
+    while(i--){
+        mesh = new THREE.SkinnedMesh(model, mat, false );
+        mesh.scale.set(size,size,-size);
+
+        helper = new THREE.SkeletonHelper( mesh );
+        helper.material.linewidth = 3;
+        mesh.add( helper );
+        squel[i] = helper;
+        squel[i].visible = isSkeletonVisible;
+
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        mesh.position.x = -10+i*5;
+        scene.add(mesh);
+        meshs[i] = mesh; 
+        
+        anims[i] = new SEA3D.Animator(mesh, "droid");
+        anims[i].addAnimations( animations );
+
+    }
+
+    initInterface();
+
+}
+
+function initInterface(){
+    gui[0] = new miniGUI.OnOff ({ container:menu, value:isSkeletonVisible, y:0,name:"Skeleton", onChange: function(value){ toogleSkeleton(value) } });
+    gui[1] = new miniGUI.Slide ({ container:menu, value:0, y:30,  color:[75, 200, 75], name:"DoorMorph", onChange: morphModels });
+    gui[2] = new miniGUI.Slide ({ container:menu, value:1, y:30*2, name:"Time", onChange: function(value){ animControl.timeScale = value; }  });
+
+    var name, i=0;
+    for(var j=0; j < animations[0].length; j++ ){
+        if(animations[1][j]){// add only loop animations
+            name =  animations[0][j];
+            loopAnimations[i] =  animations[0][j];
+            animWeights[i] = 0;
+            if(name=='walk') animWeights[i]=1; 
+            gui[i+3] = new miniGUI.Slide ({ container:menu, value:animWeights[i], y:30*(3+i)+20, id:i, name:name, color:[230, 125, 30], onChange: function(value){ animWeights[this.id] = value;  weight();}  });
+            i++;
+        }
+    }
+    onStartAnimation(getAnimationData());
+}
+
+var getAnimationData = function() {
+        return {
+            detail: {
+                anims: loopAnimations,
+                weights: animWeights
+            }
+        };
+}
+function weight() {
+    onWeightAnimation(getAnimationData());
+};
+
+function toogleSkeleton(value){
+    var i = squel.length;
+    isSkeletonVisible = value;
+    while(i--){ squel[i].visible = value; }
+}
+
+function morphModels(value){
+    var i = meshs.length;
+    while(i--){ meshs[i].setWeight("droid001", value); }
+}
+
+function onStartAnimation( event ) {
+    var data = event.detail;
+    var i = anims.length;
+    while(i--){ 
+        anims[i].stopAll();
+        // the blend mesh will combine 1 or more animations
+        var j = data.anims.length;
+        while(j--){
+            anims[i].play(data.anims[j], data.weights[j]);
+        }
+    }
+    isFrameStepping = false;
+}
+
+function onWeightAnimation(event) {
+    var data = event.detail;
+    var i = anims.length;
+    while(i--){
+        var j = data.anims.length;
+        while(j--){
+            anims[i].applyWeight(data.anims[j], data.weights[j]);
+        }
+    }
+}
+
+/*function onStopAnimation( event ) {
+    var i = anims.length;
+    while(i--){ anims[i].stopAll(); }
+    isFrameStepping = false;
+}
+
+function onPauseAnimation( event ) {
+    var i = anims.length;
+    while(i--){
+        ( isFrameStepping ) ?  anims[i].unPauseAll(): anims[i].pauseAll();
+    }
+    isFrameStepping = false;
+}
+
+function onStepAnimation( event ) {
+    var i = anims.length;
+    while(i--){ anims[i].unPauseAll(); }
+    isFrameStepping = true;
+    timeToStep = event.detail.stepSize;
+}
+
+function onCrossfade(event) {
+    var data = event.detail;
+    var i = anims.length;
+    while(i--){
+        anims[i].stopAll();
+        anims[i].crossfade( data.from, data.to, data.time );
+    }
+    isFrameStepping = false;
+}
+
+function onWarp( event ) {
+    var data = event.detail;
+    var i = anims.length;
+    while(i--){
+        anims[i].stopAll();
+        anims[i].warp( data.from, data.to, data.time );
+    }
+    isFrameStepping = false;
+}*/
+
+//-----------------------------------
+// MATH
+//-----------------------------------
+
+function Orbit(origine, horizontal, vertical, distance) {
+    var p = new THREE.Vector3();
+    var phi = vertical*ToRad;
+    var theta = horizontal*ToRad;
+    p.x = (distance * Math.sin(phi) * Math.cos(theta)) + origine.x;
+    p.z = (distance * Math.sin(phi) * Math.sin(theta)) + origine.z;
+    p.y = (distance * Math.cos(phi)) + origine.y;
+    return p;
+}
+
+//-----------------------------------
+// MOUSE & NAVIGATION 
+//-----------------------------------
+
+function moveCamera() {
+    camera.position.copy(Orbit(center, cam.horizontal, cam.vertical, cam.distance));
+    camera.lookAt(center);
+}
+
+function onMouseDown(e) {
+    e.preventDefault();
+    mouse.ox = e.clientX;
+    mouse.oy = e.clientY;
+    mouse.h = cam.horizontal;
+    mouse.v = cam.vertical;
+    mouse.down = true;
+}
+
+function onMouseUp(e) {
+    mouse.down = false;
+    document.body.style.cursor = 'auto';
+}
+
+function onMouseMove(e) {
+    e.preventDefault();
+    if (mouse.down ) {
+        document.body.style.cursor = 'move';
+        cam.horizontal = ((e.clientX - mouse.ox) * 0.3) + mouse.h;
+        cam.vertical = (-(e.clientY - mouse.oy) * 0.3) + mouse.v;
+        moveCamera();
+    }
+}
+
+function onMouseWheel(e) {
+    e.preventDefault();
+    var delta = 0;
+    if(e.wheelDelta){delta=e.wheelDelta*-1;}
+    else if(e.detail){delta=e.detail*20;}
+    cam.distance+=(delta/80);
+    if(cam.distance<0.01)cam.distance = 0.01;
+    if(cam.distance>150)cam.distance = 150;
+    moveCamera(); 
+}
+
+</script>
+</body>
+</html>

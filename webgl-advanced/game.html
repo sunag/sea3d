@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Sea3d Game</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<style>
+    * {  margin: 0; padding: 0; border: 0;}
+    body { background-color: #444444; overflow: hidden; color:#c8c8c8; font-family:Verdana; font-size: 12px; }
+    input{ margin:0; padding:4px; }
+    #interface{ position: absolute; left:0px; top:90px; width:0px; height:0px; }
+    #info{ pointer-events:none; position: absolute; left:10px; top:10px; width: 400px; height: 400px; }
+    #logo{ pointer-events:none; position: absolute; left:-10px; bottom:-10px; width: 300px; height: 150px; }
+</style>
+
+<script src="js/three.min.js"></script>
+<script src="js/BufferGeometryUtils.js"></script>
+<script src="js/Detector.js"></script>
+<script src="js/miniGUI.js"></script>
+<script src="build/loaders/Sea3dLoader.min.js"></script>
+
+</head>
+<body>
+<div id='container'></div>
+<div id="info"></div>
+<div id='interface'></div>
+<div id='logo'><object type="image/svg+xml" data="assets/sea3db.svg" id="logo"></object></div>
+
+<script>
+
+// Parameters
+var ToRad = Math.PI / 180;
+var info = document.getElementById("info");
+var menu = document.getElementById("interface");
+var sourceInfo = "<h3>GAME ASSETS</h3><br>";
+
+
+var container, camera, scene, renderer, cam, mouse, clock;
+var fps = [0,0,0,0];
+var bgcolor = 0x444444;
+var meshs = [];
+var squel = [];
+var nloop = 0;
+var pool;
+var isSkeletonVisible = false;
+
+window.onload = init;
+
+function init() {
+    if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+    var b1 = new miniGUI.OnOff ({ container:menu, value:isSkeletonVisible, y:10,name:"Skeleton", onChange: function(value){ toogleSkeleton(value) } });
+
+    cam = { horizontal: 90, vertical: 70, distance: 50, automove: false };
+    mouse = { ox:0, oy:0, h:0, v:0, mx:0, my:0, down:false, over:false, moving:true };
+
+    clock = new THREE.Clock();
+
+
+    renderer = new THREE.WebGLRenderer( {precision: "lowp", antialias: false } );
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setClearColor( bgcolor, 1 );
+
+    container = document.getElementById("container");
+    container.appendChild( renderer.domElement );
+
+    renderer.gammaInput = true;
+    renderer.gammaOutput = true;
+    renderer.shadowMapEnabled = true;
+    renderer.autoClearColor = false;
+    renderer.autoClear = false;
+
+    // scene
+    scene = new THREE.Scene();
+
+    // camera
+    camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 0.5, 1000 );
+    center = new THREE.Vector3();
+    moveCamera();
+
+    scene.add( camera );
+
+    // lights
+    /*var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 1 );
+    hemiLight.color.setHex( 0xb6a385 );
+    hemiLight.groundColor.setHex( 0x4b5054);
+    hemiLight.position.set( 0, 100, 0 );
+    scene.add( hemiLight );*/
+
+    scene.add( new THREE.AmbientLight( bgcolor ) );
+
+    var light = new THREE.DirectionalLight( 0xffffff, 1.1 );
+    var d = 40;
+    light.position.set( d, d, d );
+    light.castShadow = true;
+    //light.shadowCameraVisible = true;
+
+    light.shadowMapWidth = 1024;
+    light.shadowMapHeight = 1024;
+
+    light.shadowCameraLeft = -d;
+    light.shadowCameraRight = d;
+    light.shadowCameraTop = d;
+    light.shadowCameraBottom = -d;
+
+    light.shadowCameraFar = 3*d;
+    light.shadowCameraNear = d;
+    light.shadowDarkness = 0.5;
+
+    scene.add( light );
+
+    var lightPoint = new THREE.PointLight ( 0x4488ff, 1 );
+    lightPoint.position.set( -d/3, d, -d);
+    scene.add( lightPoint );
+
+    var backMat = new THREE.MeshBasicMaterial( { color: bgcolor, side:THREE.BackSide, depthWrite: false } );
+    var backGeo = new THREE.Mesh( new THREE.SphereGeometry( 500, 6, 6 ), backMat );
+    scene.add( backGeo );
+
+    var material = new THREE.MeshBasicMaterial( { color: bgcolor } );
+
+    geometry = THREE.BufferGeometryUtils.fromGeometry( new THREE.PlaneGeometry( 400, 400, 1, 1 ) );
+    
+    var mesh = new THREE.Mesh( geometry, material );
+    mesh.castShadow = false;
+    mesh.receiveShadow = true;
+    mesh.rotation.x = -90 * ToRad;
+    mesh.position.y = 0;
+    scene.add( mesh );
+       
+
+    pool = new SEA3D.Pool('assets/model/game.sea', populate);
+
+
+    var body = document.body;
+    window.addEventListener( 'resize', resize, false );
+    container.addEventListener( 'mousemove', onMouseMove, false );
+    container.addEventListener( 'mousedown', onMouseDown, false );
+    container.addEventListener( 'mouseout', onMouseUp, false );
+    container.addEventListener( 'mouseup', onMouseUp, false );
+    if( body.addEventListener ){
+        body.addEventListener( 'mousewheel', onMouseWheel, false ); //chrome
+        body.addEventListener( 'DOMMouseScroll', onMouseWheel, false ); // firefox
+    }else if( body.attachEvent ){
+        body.attachEvent("onmousewheel" , onMouseWheel); // ie
+    }
+
+    loop();
+}
+
+function resize() {
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+}
+
+function loop() {
+    requestAnimationFrame( loop );
+    var delta = clock.getDelta();
+    nloop++
+    if(nloop===2){
+        nloop = 0;
+        THREE.AnimationHandler.update( delta*2 );
+        if(squel.length && isSkeletonVisible){
+        for(var i=0, j=squel.length; i<j; i++){
+            squel[i].update()
+        }
+    }
+    }
+    renderer.render( scene, camera );
+    displayInfo();
+}
+
+function displayInfo(){
+    fps[2] = Date.now();
+    if (fps[2]-1000>fps[1]){ fps[1]=fps[2]; fps[3]=fps[0]; fps[0]=0; } fps[0]++;
+
+    var txtinfo =[
+        sourceInfo,
+        "Three: " + fps[3] +" fps"
+    ].join("\n");
+    info.innerHTML = txtinfo;
+}
+
+//--------------------------------
+// SEA3D
+//--------------------------------
+
+function toogleSkeleton(value){
+    for(var i=0, j=squel.length; i<j; i++){
+        isSkeletonVisible = value;
+        squel[i].visible = value;
+    }
+}
+
+function populate(){
+
+    var avatarTexture = THREE.ImageUtils.loadTexture( 'assets/texture/game/avatar.jpg' );
+    avatarTexture.wrapS = avatarTexture.wrapT = THREE.RepeatWrapping;
+    avatarTexture.anisotropy = renderer.getMaxAnisotropy();
+    avatarTexture.repeat.set( 1, -1 );
+    var avatarTexture2 = THREE.ImageUtils.loadTexture( 'assets/texture/game/avatar2.jpg' );
+    avatarTexture2.wrapS = avatarTexture2.wrapT = THREE.RepeatWrapping;
+    avatarTexture2.anisotropy = renderer.getMaxAnisotropy();
+    avatarTexture2.repeat.set( 1, -1 );
+    var avatarTexture3 = THREE.ImageUtils.loadTexture( 'assets/texture/game/avatar3.jpg' );
+    avatarTexture3.wrapS = avatarTexture3.wrapT = THREE.RepeatWrapping;
+    avatarTexture3.anisotropy = renderer.getMaxAnisotropy();
+    avatarTexture3.repeat.set( 1, -1 );
+    var avatarTexture4 = THREE.ImageUtils.loadTexture( 'assets/texture/game/avatar6.jpg' );
+    avatarTexture4.wrapS = avatarTexture4.wrapT = THREE.RepeatWrapping;
+    avatarTexture4.anisotropy = renderer.getMaxAnisotropy();
+    avatarTexture4.repeat.set( 1, -1 );
+
+    var mat3 = new THREE.MeshLambertMaterial({ ambient:bgcolor, specular:0x909090, shininess:30, map:avatarTexture, skinning:true });
+    var mat4 = new THREE.MeshLambertMaterial({ ambient:bgcolor, specular:0x909090, shininess:30, map:avatarTexture2, skinning:true });
+    var mat5 = new THREE.MeshLambertMaterial({ ambient:bgcolor, specular:0x909090, shininess:30, map:avatarTexture4, skinning:true });
+    var mat6 = new THREE.MeshLambertMaterial({ ambient:bgcolor, specular:0x909090, shininess:30, color: 0x805030  });
+    var mat7 = new THREE.MeshLambertMaterial({ ambient:bgcolor, specular:0x909090, shininess:30, map:avatarTexture3, skinning:true });
+
+    
+    
+    var models = ["hero_1_warrior", "hero_2_valkyrie", "hero_3_wizard", "hero_4_elf", "monster_chicken", "monster_nurce", "monster_zombi"];
+   
+    var materials = [mat3, mat3, mat4, mat4, mat5, mat7, mat7];
+
+    var h0 = pool.getGeometry(models[0]);
+    var h1 = pool.getGeometry(models[1]);
+    var h2 = pool.getGeometry(models[2]);
+    var h3 = pool.getGeometry(models[3]);
+    var h4 = pool.getGeometry(models[4]);
+    var h5 = pool.getGeometry(models[5]);
+    var h6 = pool.getGeometry(models[6]);
+
+
+    var w0 = THREE.BufferGeometryUtils.fromGeometry(pool.getGeometry("weapon0"));
+    var w1 = THREE.BufferGeometryUtils.fromGeometry(pool.getGeometry("weapon1"));
+    var w2 = THREE.BufferGeometryUtils.fromGeometry(pool.getGeometry("weapon2"));
+    var w3 = THREE.BufferGeometryUtils.fromGeometry(pool.getGeometry("weapon3"));
+
+    var modelsGeo = [h0, h1, h2, h3, h4, h5, h6];
+    var weapons = [w0, w1, w2, w3, null, null, null];
+
+    var i, rx, rz, m, w;
+
+    var nnn, anim, rand, bone;
+    var num = 66;
+    var size=0.1;
+
+    var skeletonHelper;
+    
+
+    for(i=0; i<num; i++){
+        rand = Math.floor(Math.random()*7);
+        rx =  -20+(Math.random()*40);
+        rz =  -20+(Math.random()*40);
+
+        m = new THREE.SkinnedMesh( modelsGeo[rand], materials[rand], false );
+        m.scale.set(size,size,-size);
+
+        skeletonHelper = new THREE.SkeletonHelper( m );
+        skeletonHelper.material.linewidth = 3;
+        m.add( skeletonHelper );
+        squel[i] = skeletonHelper;
+        squel[i].visible = isSkeletonVisible;
+
+        if(weapons[rand]!==null){
+            w = new THREE.Mesh( weapons[rand], mat6, false );
+            bone = m.skeleton.bones[12];
+            w.name = bone.name;
+            w.matrix = bone.skinMatrix;
+            w.matrixAutoUpdate = false;
+            m.add( w );
+        }
+
+        m.rotation.y = (Math.random()*360) * ToRad;
+
+        m.position.x = -rx;
+        m.position.z = -rz;
+        m.position.y = 2.5;
+        if(rand==4)m.position.y = 0.6;
+        
+
+       // m.position.copy( Orbit(center,rz,rx, 105));
+        m.castShadow = m.receiveShadow = true;
+        nnn = Math.round(Math.random()*2);
+        if(nnn>0) anim = models[rand]+"/walk";
+        else anim = models[rand]+"/idle"
+
+        var animation = new THREE.Animation( m, anim );
+        animation.play( 0.05 * Math.random() );
+        scene.add(m);
+    }
+
+    //construct();
+}
+
+/*function construct() {
+    var texture = THREE.ImageUtils.loadTexture( 'assets/texture/game/wall.jpg' );
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.anisotropy = renderer.getMaxAnisotropy();
+    texture.repeat.set( 1, -1 );
+
+    var mat = new THREE.MeshPhongMaterial({ map:texture, ambient: bgcolor, specular: 0x303030, shininess: 30});
+
+    var g0 = pool.getGeometry('floor', true, 0.1);
+    var gx = pool.getGeometry('floor001', true, 0.1);
+    var g1 = pool.getGeometry('wall005', true, 0.1);
+    var g2 = pool.getGeometry('wall010', true, 0.1);
+    var g3 = pool.getGeometry('wall003', true, 0.1);
+    var g4 = pool.getGeometry('wall006', true, 0.1);
+    var g5 = pool.getGeometry('wall012', true, 0.1);
+    var g6 = pool.getGeometry('wall009', true, 0.1);
+
+    var g = new THREE.Geometry();
+    var m, r;
+    for(var i=0; i<44; i++){
+        for(var j=0; j<22; j++){
+            r = Math.floor(Math.random()*4);
+            g0.applyMatrix(new THREE.Matrix4().makeRotationY((r*90)*ToRad));
+            gx.applyMatrix(new THREE.Matrix4().makeRotationY((r*90)*ToRad));
+            m = new THREE.Matrix4().makeTranslation(3.2*i,0,3.2*j);
+            if(i>4 && i<39)g.merge(g0,m);
+            else g.merge(gx,m);
+        }
+        m = new THREE.Matrix4().makeTranslation(3.2*i,0,-3.2);
+        g.merge(g2,m);
+        m = new THREE.Matrix4().makeTranslation(3.2*i,0,3.2*22);
+        g.merge(g2,m);
+    }
+
+    for(var j=0; j<22; j++){
+        m = new THREE.Matrix4().makeTranslation(-3.2,0,3.2*j);
+        g.merge(g1,m);
+        m = new THREE.Matrix4().makeTranslation(3.2*44,0,3.2*j);
+        g.merge(g1,m);
+    }
+
+    // corner
+    m = new THREE.Matrix4().makeTranslation(-3.2,0,-3.2);
+    g.merge(g4,m);
+    m = new THREE.Matrix4().makeTranslation(-3.2,0,3.2*22);
+    g.merge(g3,m);
+    m = new THREE.Matrix4().makeTranslation(3.2*44,0,-3.2);
+    g.merge(g5,m);
+    m = new THREE.Matrix4().makeTranslation(3.2*44,0,3.2*22);
+    g.merge(g6,m);
+
+    g.applyMatrix(new THREE.Matrix4().makeTranslation(-(22*3.2)+1.6,0,-(11*3.2)+1.6));
+
+    var m = new THREE.Mesh( THREE.BufferGeometryUtils.fromGeometry(g), mat );
+    scene.add(m);
+    m.castShadow = false;
+    m.receiveShadow = true;
+}*/
+
+//-----------------------------------
+// MATH
+//-----------------------------------
+
+function Orbit(origine, horizontal, vertical, distance) {
+    var p = new THREE.Vector3();
+    var phi = vertical*ToRad;
+    var theta = horizontal*ToRad;
+    p.x = (distance * Math.sin(phi) * Math.cos(theta)) + origine.x;
+    p.z = (distance * Math.sin(phi) * Math.sin(theta)) + origine.z;
+    p.y = (distance * Math.cos(phi)) + origine.y;
+    return p;
+}
+
+//-----------------------------------
+// MOUSE & NAVIGATION 
+//-----------------------------------
+
+function moveCamera() {
+    camera.position.copy(Orbit(center, cam.horizontal, cam.vertical, cam.distance));
+    camera.lookAt(center);
+}
+
+function onMouseDown(e) {
+    e.preventDefault();
+    mouse.ox = e.clientX;
+    mouse.oy = e.clientY;
+    mouse.h = cam.horizontal;
+    mouse.v = cam.vertical;
+    mouse.down = true;
+}
+
+function onMouseUp(e) {
+    mouse.down = false;
+    document.body.style.cursor = 'auto';
+}
+
+function onMouseMove(e) {
+    e.preventDefault();
+    if (mouse.down ) {
+        document.body.style.cursor = 'move';
+        cam.horizontal = ((e.clientX - mouse.ox) * 0.3) + mouse.h;
+        cam.vertical = (-(e.clientY - mouse.oy) * 0.3) + mouse.v;
+        moveCamera();
+    }
+}
+
+function onMouseWheel(e) {
+    e.preventDefault();
+    var delta = 0;
+    if(e.wheelDelta){delta=e.wheelDelta*-1;}
+    else if(e.detail){delta=e.detail*20;}
+    cam.distance+=(delta/80);
+    if(cam.distance<0.01)cam.distance = 0.01;
+    if(cam.distance>150)cam.distance = 150;
+    moveCamera(); 
+}
+
+</script>
+</body>
+</html>
