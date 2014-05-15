@@ -137,8 +137,12 @@
 					
 					console.log( new Date().getTime() - time );
 				}
-												
+				
 				loader.container = scene;
+				
+				// toggle ambient light to emissive light
+				//loader.emissive = true;
+				
 				loader.load( 'hello-world.sea' );
 			}
 			

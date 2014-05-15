@@ -178,7 +178,8 @@
 				
 				// THREE.SEA3D.BUFFER is not compatible with morpher
 				loader.parser = THREE.SEA3D.DEFAULT;
-				
+				// toggle ambient light to emissive light
+				loader.emissive = true;
 				loader.load( 'morph.sea' );				
 			}	
 			
