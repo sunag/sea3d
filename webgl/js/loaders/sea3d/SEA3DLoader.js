@@ -396,6 +396,7 @@ THREE.SEA3D.prototype.setShadowMap = function(light, opacity) {
 THREE.SEA3D.prototype.tangent = true;
 THREE.SEA3D.prototype.bounding = true;
 THREE.SEA3D.prototype.autoPlay = true;
+THREE.SEA3D.prototype.emissive = false;
 THREE.SEA3D.prototype.matrixAutoUpdate = true;
 
 THREE.SEA3D.prototype.parser = THREE.SEA3D.AUTO;
@@ -494,6 +495,14 @@ THREE.SEA3D.prototype.scaleColor = function(color, scale) {
     var b = (color & 0xFF) * scale;
 
     return (r << 16 | g << 8 | b);
+}
+
+THREE.SEA3D.prototype.updateScene = function () {
+	if (this.materials != undefined) {
+		for(var i = 0, l = this.materials.length; i < l; ++i) {
+			this.materials[i].needsUpdate = true;
+		}		
+	}
 }
 
 THREE.SEA3D.prototype.applyMatrix = function(obj3d, mtx, invZ) {		
@@ -1077,7 +1086,7 @@ THREE.SEA3D.prototype.readMesh2D = function(sea) {
 			material.map = sea.material.tag.map;
 			material.map.flipY = true;
 			
-			material.color = sea.material.tag.emissive;
+			material.color = this.emissive ? sea.material.tag.emissive : sea.material.tag.ambient;
 			material.opacity = sea.material.tag.opacity;
 			material.blending = sea.material.tag.blending;
 		}
@@ -1345,8 +1354,8 @@ THREE.SEA3D.prototype.materialTechnique =
 	// DEFAULT
 	techniques[SEA3D.Material.DEFAULT] = 	
 	function(tech, mat) {
-		mat.ambient.setHex(tech.ambientColor);
-		mat.emissive.setHex(tech.ambientColor);
+		if (this.emissive) mat.emissive.setHex(tech.ambientColor);
+		else mat.ambient.setHex(tech.ambientColor);
 		mat.color.setHex(tech.diffuseColor);
 		mat.specular.setHex(this.scaleColor(tech.specularColor, tech.specular));
 		mat.shininess = tech.gloss;
@@ -1461,9 +1470,11 @@ THREE.SEA3D.prototype.readPointLight = function(sea) {
 	
 	this.lights = this.lights || [];
 	this.lights.push( this.objects["lht/" + sea.name] = sea.tag = light );
-	
+		
 	this.addSceneObject( sea );	
 	this.applyDefaultAnimation( sea, THREE.SEA3D.LightAnimator );	
+	
+	this.updateScene();
 }
 
 //
@@ -1484,6 +1495,8 @@ THREE.SEA3D.prototype.readDirectionalLight = function(sea) {
 	
 	this.addSceneObject( sea );	
 	this.applyDefaultAnimation( sea, THREE.SEA3D.LightAnimator );
+	
+	this.updateScene();
 }
 
 //
