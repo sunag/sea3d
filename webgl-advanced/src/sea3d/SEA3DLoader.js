@@ -1460,7 +1460,7 @@ THREE.SEA3D.prototype.readMaterial = function(sea) {
 //
 
 THREE.SEA3D.prototype.readPointLight = function(sea) {	
-	var light = new THREE.PointLight( sea.color, sea.multiplier );
+	var light = new THREE.PointLight( sea.color, sea.multiplier, sea.attenuation !== undefined ? sea.attenuation.end : undefined );
 	light.name = sea.name;
 	
 	light.position.set( sea.position.x, sea.position.y, this.invertZ && !sea.parent ? -sea.position.z : sea.position.z );	

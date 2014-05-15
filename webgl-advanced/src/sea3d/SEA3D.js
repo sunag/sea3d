@@ -2237,9 +2237,6 @@ SEA3D.Light = {
 		
 		var data = scope.data;
 		
-		scope.attenStart = Number.MAX_VALUE;
-		scope.attenEnd = Number.MAX_VALUE;
-		
 		if (scope.attrib & 64) {
 			var shadowHeader = data.readUByte();
 			
@@ -2248,12 +2245,7 @@ SEA3D.Light = {
 			scope.shadow.opacity = shadowHeader & 1 ? data.readFloat() : 1;
 			scope.shadow.color = shadowHeader & 2 ? data.readUInt24() : 0x000000;
 		}
-		
-		if (scope.attrib & 512) {
-			scope.attenStart = data.readFloat();
-			scope.attenEnd = data.readFloat();
-		}
-					
+				
 		scope.color = data.readUInt24();
 		scope.multiplier = data.readFloat();		
 	}
