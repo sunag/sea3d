@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+hell<!DOCTYPE html>
 <html lang="en">
 	<head>
 		<title>SEA3D File Format - WebGL</title>
@@ -101,6 +101,11 @@
 
 				scene = new THREE.Scene();
 
+				//	Environment Light
+				
+				var ambient = new THREE.AmbientLight( 0xFFFFFF );
+				scene.add( ambient );	
+				
 				// Renderer
 				
 				renderer = new THREE.WebGLRenderer();								
