@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Car</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<style>
+* { margin:0; padding:0; border:0; }
+html { width:100%; height:100%; }
+body { background:#444; font:14px sans-serif; width:100%; height:100%;}
+#threeCanvas{ position:absolute; top:0; left:0px; display:block;}
+#canvas{ position:absolute; top:10px; left:10px; display:none;}
+#top{ position:absolute; top:10px; left:10px;width:300px; height:150px; pointer-events:auto;}
+#debug{ position:absolute; top:10px; right:10px; text-align:right; pointer-events:none;}
+#logo{ pointer-events:none; position:absolute; left:0; bottom:0; width:300px; height:150px; }
+select { display: inline-block; padding: 4px 3px 5px 5px; width: 70px; outline: none; color: #74646e; border: 1px solid #C8BFC4; border-radius: 4px; box-shadow: inset 1px 1px 2px #ddd8dc; background-color: #fff;}
+</style>
+<script src="js/three.min.js"></script>
+<script src="js/loaders/sea3d.min.js"></script>
+<script src="js/Detector.js"></script>
+<!--car controle from https://github.com/SHVV/Car-Demo-->
+<script src="js/cargame.min.js"></script>
+
+</head>
+<body>
+<canvas id="threeCanvas"></canvas>
+<canvas id="canvas" width='1024' height='1024'></canvas>
+<div id='logo'><object type="image/svg+xml" data="assets/sea3db.svg" id="logo"></object></div>
+
+<div id='top'>
+    <select id="selDRIVE">
+        <option value="RWD" selected="selected">RWD</option>
+        <option value="FWD">FWD</option>
+        <option value="AWD">AWD</option>
+    </select>
+    <input type="checkbox" checked="checked" id="chABS" onChange="">ABS
+    <input type="checkbox" checked="checked" id="chTCS" onChange="">TCS
+    <input type="checkbox" checked="checked" id="chSTEER" onChange="">Steering control
+</div>  
+<div id="debug"></div>
+
+<script>
+new Application('canvas', applyCar);
+var seaModel = "assets/model/car.sea";
+var worldSize = 0.02; 
+var isBestQuality = true;
+var isFullLoaded = false;
+var zoom = 1;
+var ToRad = Math.PI / 180;
+
+
+var camera, scene, sceneBack, renderer, center, cam, mouse, car, ground;
+var wheels = [];
+var lights = [];
+
+var key = [0,0,0,0,0,0 , 0,0,0,0];
+
+if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+init();
+
+function init(){
+    bindKeys();
+    
+
+    cam = { horizontal:0, vertical:80, distance:5 };
+    mouse = { ox:0, oy:0, h:0, v:0, mx:0, my:0, dx:0, dy:0, down:false, over:false, moving:true };
+    
+    renderer = new THREE.WebGLRenderer({ canvas:threeCanvas, antialias:isBestQuality });
+    renderer.setSize( window.innerWidth, window.innerHeight, true );
+    renderer.autoClear = false;
+    
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera( 50, (window.innerWidth)/window.innerHeight, 0.5, 10000 );
+    center = new THREE.Vector3();
+    moveCamera();
+
+    
+    if(isBestQuality){      
+        var d = 40;
+        var hemiLight = new THREE.HemisphereLight( 0xfffffe, 0x4488ff, 0.5 );
+        hemiLight.position.set( 0, 10, 0 ); 
+        var light = new THREE.DirectionalLight( 0xfffffe, 1 );
+        light.position.set( d/3, d, -d);
+        light.target = new THREE.Object3D(0,5,0);
+        light.shadowMapWidth = 1024;
+        light.shadowMapHeight = 1024;
+        light.shadowCameraLeft = -d;
+        light.shadowCameraRight = d;
+        light.shadowCameraTop = d;
+        light.shadowCameraBottom = -d;
+        light.shadowCameraFar = d*2;
+        light.shadowCameraNear = d;
+        light.shadowDarkness = 0.35;
+        light.shadowBias =  -0.002;
+        light.castShadow = true;
+        //light.shadowCameraVisible = true;
+        var lightPoint1 = new THREE.PointLight ( 0x4488ff, 0.5 );
+        lightPoint1.position.set( -d/3, -d/2, -d);
+        var lightPoint2 = new THREE.PointLight ( 0xFFCC44, 0.5 );
+        lightPoint2.position.set( -d/2, -d, -d);
+    
+        lights = [hemiLight, light, lightPoint1, lightPoint2 ];
+    
+        renderer.gammaInput = true;
+        renderer.gammaOutput = true;
+        renderer.shadowMapEnabled = true;
+
+        var i = lights.length;
+        while(i--){ scene.add( lights[i] );}
+    } 
+
+    // background
+    var back = new THREE.Mesh( new THREE.IcosahedronGeometry(300,1), new THREE.MeshBasicMaterial( { map:gradTexture([[0.75,0.5,0.45, 0.2], ['#2e3032','#4e5052','#69757e', '#86a4bc']]), side:THREE.BackSide, depthWrite: false }  ));
+    back.geometry.applyMatrix(new THREE.Matrix4().makeRotationZ(5*ToRad));
+    scene.add( back );
+
+    // ground
+    document.getElementById('canvas')
+    var groundtexture = new THREE.Texture(canvas);
+    groundtexture.needsUpdate = true;
+    ground = new THREE.Mesh( new THREE.PlaneGeometry( 43, 43, 4, 4 ), new THREE.MeshBasicMaterial( { map: groundtexture, transparent: true, blending:THREE[ "MultiplyBlending" ]}));
+    ground.geometry.applyMatrix(new THREE.Matrix4().makeRotationX(-90*ToRad));
+    ground.castShadow = false;
+    ground.receiveShadow = true;
+    ground.position.y = -17*worldSize;
+    scene.add( ground );
+    
+    window.addEventListener( 'resize', resize, false );
+
+    
+    threeCanvas.addEventListener( 'mousemove', onMouseMove, false );
+    threeCanvas.addEventListener( 'mousedown', onMouseDown, false );
+    threeCanvas.addEventListener( 'mouseup', onMouseUp, false );
+    threeCanvas.addEventListener( 'mouseout', onMouseUp, false );
+    
+    threeCanvas.addEventListener( 'touchstart', onMouseDown, false );
+    threeCanvas.addEventListener( 'touchend', onMouseUp, false );
+    threeCanvas.addEventListener( 'touchmove', onMouseMove, false );
+
+    var body = document.body;
+    if( body.addEventListener ){
+        body.addEventListener( 'mousewheel', onMouseWheel, false ); //chrome
+        body.addEventListener( 'DOMMouseScroll', onMouseWheel, false ); // firefox
+    }else if( body.attachEvent ){
+        body.attachEvent("onmousewheel" , onMouseWheel); // ie
+    }
+    
+    
+    //
+
+    loadSea3d();
+}
+
+function applyCar(x, y, z, r, zz, st, v) {
+    if(isFullLoaded){
+        ground.material.map.needsUpdate = true;
+        car.rotation.y = r;;
+
+        
+        for(var i=0; i<4; i++){
+            wheels[i].rotation.x += v * 3.6 * ToRad;
+        }
+
+        wheels[4].rotation.y = -st;
+        wheels[5].rotation.y = -st;
+        wheels[6].rotation.z = -st * 3;
+
+        renderer.render( scene, camera );
+    }
+}
+
+function resize() {
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth,window.innerHeight, true);
+}
+
+function loadSea3d(){
+    var loader = new THREE.SEA3D( true );
+    loader.onComplete = function( e ) {
+        var m;
+        var i = loader.meshes.length;
+        while(i--){
+            m = loader.meshes[i];
+            //console.log(m.name);
+            if(m.name == 'wheel_av_l') wheels[0] = m;
+            if(m.name == 'wheel_av_r') wheels[1] = m;
+            if(m.name == 'wheel_ar_l') wheels[2] = m;
+            if(m.name == 'wheel_ar_r') wheels[3] = m;
+            if(m.name == 'axe_l') {wheels[4] = m; m.visible = false;}
+            if(m.name == 'axe_r') {wheels[5] = m; m.visible = false;}
+            if(m.name == 'steeringWheel') wheels[6] = m;
+            if(m.name == 'glass') m.material.transparent = true;
+            if(m.name == 'body'){ scene.add( m ); m.scale.set(worldSize, worldSize, -worldSize); car = m;}//}
+        }
+
+        isFullLoaded = true;
+    }
+    loader.load( seaModel );
+}
+
+function scaleGeometry(g, s){
+    var mtx = new THREE.Matrix4().makeScale(s, s, -s);
+    g.applyMatrix(mtx);
+    g.computeFaceNormals();
+    g.computeVertexNormals();
+}
+
+function Orbit(origine, horizontal, vertical, distance) {
+    var p = new THREE.Vector3();
+    var phi = vertical*ToRad;
+    var theta = horizontal*ToRad;
+    p.x = (distance * Math.sin(phi) * Math.cos(theta)) + origine.x;
+    p.z = (distance * Math.sin(phi) * Math.sin(theta)) + origine.z;
+    p.y = (distance * Math.cos(phi)) + origine.y;
+    return p;
+}
+
+function moveCamera() {
+    camera.position.copy(Orbit(center, cam.horizontal, cam.vertical, cam.distance));
+    camera.lookAt(center);
+}
+
+function onMouseDown(e) {
+    e.preventDefault();
+    var px, py;
+    if(e.touches){
+        px = e.clientX || e.touches[ 0 ].pageX;
+        py = e.clientY || e.touches[ 0 ].pageY;
+    } else {
+        px = e.clientX;
+        py = e.clientY;
+    }
+    mouse.ox = px;
+    mouse.oy = py;
+    mouse.h = cam.horizontal;
+    mouse.v = cam.vertical;
+    mouse.down = true;
+}
+
+function onMouseUp(e) {
+    mouse.down = false;
+    document.body.style.cursor = 'auto';
+}
+
+function onMouseMove(e) {
+    e.preventDefault();
+    var px, py;
+    if(e.touches){
+        px = e.clientX || e.touches[ 0 ].pageX;
+        py = e.clientY || e.touches[ 0 ].pageY;
+    } else {
+        px = e.clientX;
+        py = e.clientY;
+    }
+    
+    if (mouse.down) {      
+        document.body.style.cursor = 'move';
+        cam.horizontal = ((px - mouse.ox) * 0.3) + mouse.h;
+        cam.vertical = (-(py - mouse.oy) * 0.3) + mouse.v;
+        moveCamera();
+    }
+}
+
+function onMouseWheel(e) {
+    e.preventDefault();
+    var delta = 0;
+    if(e.wheelDelta){delta=e.wheelDelta*-1;}
+    else if(e.detail){delta=e.detail*20;}
+    cam.distance+=(delta/80);
+    if(cam.distance<0.01)cam.distance = 0.01;
+    if(cam.distance>150)cam.distance = 150;
+    moveCamera(); 
+}
+
+function bindKeys() {
+    document.onkeydown = function(e) {
+        e = e || window.event;
+        switch ( e.keyCode ) {
+            case 38: case 87: case 90: key[0] = 1; break; // up, W, Z
+            case 40: case 83: key[1] = 1; break;          // down, S
+            case 37: case 65: case 81: key[2] = 1; break; // left, A, Q
+            case 39: case 68: key[3] = 1; break;          // right, D
+            case 17: case 67: key[4] = 1; break;          // ctrl, c
+            case 32: key[5] = 1; break;                   // space
+            case 97:case 49: key[6]=1; break; //1
+            case 98:case 50: key[7]=1; break; //2
+            case 99:case 51: key[8]=1; break; //3
+            case 100:case 52: key[9]=1; break; //4
+        }
+    }
+    document.onkeyup = function(e) {
+        e = e || window.event
+        switch( e.keyCode ) {
+            case 38: case 87: case 90: key[0] = 0; break; // up, W, Z
+            case 40: case 83: key[1] = 0; break;          // down, S
+            case 37: case 65: case 81: key[2] = 0; break; // left, A, Q
+            case 39: case 68: key[3] = 0; break;          // right, D
+            case 17: case 67: key[4] = 0; break;          // ctrl, c
+            case 32: key[5] = 0; break;                   // space
+            case 97:case 49: key[6]=0; break; //1
+            case 98:case 50: key[7]=0; break; //2
+            case 99:case 51: key[8]=0; break; //3
+            case 100:case 52: key[9]=0; break; //4
+        }
+    }
+    self.focus();
+}
+
+function gradTexture(color) {
+    var c = document.createElement("canvas");
+    var ct = c.getContext("2d");
+    c.width = 16; c.height = 256;
+    var gradient = ct.createLinearGradient(0,0,0,256);
+    var i = color[0].length;
+    while(i--){ gradient.addColorStop(color[0][i],color[1][i]); }
+    ct.fillStyle = gradient;
+    ct.fillRect(0,0,16,256);
+    var texture = new THREE.Texture(c);
+    texture.needsUpdate = true;
+    return texture;
+}
+
+</script>
+</body>
+</html>

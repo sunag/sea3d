@@ -1,25 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Sea3d Droid</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<title>Droid</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 <style>
-    * {  margin: 0; padding: 0; border: 0;}
-    body { background-color: #444444; overflow: hidden; color:#c8c8c8; font-family:Verdana; font-size: 12px; }
-    input{ margin:0; padding:4px; height:30px;}
-    #interface{ position: absolute; left:10px; top:90px; width:0px; height:0px; }
-    #info{ pointer-events:none; position: absolute; left:20px; top:15px; width: 350px; height: 120px; }
-    #logo{ pointer-events:none; position: absolute; left:-10px; bottom:-10px; width: 300px; height: 150px; }
+    * {  margin:0; padding:0; border:0;}
+    body { background-color:#444444; overflow:hidden; color:#c8c8c8; font-family:Verdana; font-size:12px; }
+    #container { overflow:hidden; }
+    #interface{ position:absolute; left:0; top:90px; width:0px; height:0px; }
+    #info{ pointer-events:none; position:absolute; left:10px; top:10px; width:400px; height:400px; }
+    #logo{ pointer-events:none; position:absolute; left:0; bottom:0; width:300px; height:150px; }
 </style>
 
 <script src="js/three.min.js"></script>
-<script src="js/BufferGeometryUtils.js"></script>
+<script src="js/controls/OrbitControls.js"></script>
+<script src="js/loaders/sea3d.min.js"></script>
+<script src="js/loaders/animatorClone.js"></script>
 <script src="js/Detector.js"></script>
 <script src="js/miniGUI.js"></script>
-<script src="build/loaders/Sea3dLoader.min.js"></script>
 
 </head>
+
+<!-- Author CODE & MODEL: loth - http://3dflashlo.wordpress.com/ -->
 
 <body>
 <div id='container'></div>
@@ -28,6 +31,7 @@
 <div id='logo'><object type="image/svg+xml" data="assets/sea3db.svg" id="logo"></object></div>
 
 <script>
+if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 // Parameters
 var ToRad = Math.PI / 180;
@@ -36,9 +40,9 @@ var menu = document.getElementById("interface");
 var sourceInfo = "<h3>DROID + ANIM BLENDING & MORPH</h3><br>";
 
 // THREE var
-var container, camera, scene, renderer, cam, mouse, key, clock, pool;
+var container, camera, scene, renderer, controls, clock;
 var fps = [0,0,0,0];
-
+var gui = [];
 var bgcolor = 0x444444;
 var meshs = [];
 var anims = [];
@@ -46,22 +50,15 @@ var squel = [];
 var animWeights = [];
 var loopAnimations = [];
 var animations, morphs;
-
 var animControl = { timeScale:1 };
-
 var isFrameStepping = false;
 var isSkeletonVisible = false;
 var timeToStep = 0;
-var gui = [];
 
-window.onload = init;
+init();
+loop();
 
 function init() {
-    if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
-
-    cam = { horizontal: 120, vertical: 80, distance: 50, automove: false };
-    mouse = { ox:0, oy:0, h:0, v:0, mx:0, my:0, down:false, over:false, moving:true };
-    key = [0,0,0,0,0,0,0,0];
 
     clock = new THREE.Clock();
 
@@ -76,15 +73,16 @@ function init() {
     renderer.gammaOutput = true;
     renderer.shadowMapCullFace = THREE.CullFaceBack;
     renderer.shadowMapEnabled = true;
-    //renderer.autoClearColor = false;
     renderer.autoClear = false;
 
     scene = new THREE.Scene();
 
     camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 0.5, 1000 );
-    center = new THREE.Vector3(0,3,0);
-    moveCamera();
-    scene.add( camera );
+    camera.position.set( -20, 10, 30 );
+    controls = new THREE.OrbitControls(camera, container);
+    controls.target =  new THREE.Vector3(0,3,0);
+    controls.maxDistance = 300;
+    controls.update();
 
     scene.add( new THREE.AmbientLight( bgcolor ) );
 
@@ -113,37 +111,21 @@ function init() {
     lightPoint.position.set( -d/3, d, -d);
     scene.add( lightPoint );
 
-
-    var backMat = new THREE.MeshBasicMaterial( { color: bgcolor, side:THREE.BackSide, depthWrite: false } );
-    var backGeo = new THREE.Mesh( new THREE.SphereGeometry( 500, 6, 6 ), backMat );
+    // background
+    var backGeo = new THREE.Mesh( new THREE.IcosahedronGeometry(500,1), new THREE.MeshBasicMaterial( { map:gradTexture([[0.5,0], ['#444444', 'black']]), side:THREE.BackSide, depthWrite: false }  ));
     scene.add( backGeo );
 
-    var material = new THREE.MeshBasicMaterial( { color: bgcolor } );
-    geometry = THREE.BufferGeometryUtils.fromGeometry( new THREE.PlaneGeometry( 400, 400, 1, 1 ) );
-    var mesh = new THREE.Mesh( geometry, material );
+    // ground
+    var mesh = new THREE.Mesh( new THREE.PlaneGeometry( 400, 400, 1, 1 ), new THREE.MeshBasicMaterial( { color: bgcolor } ) );
     mesh.castShadow = false;
     mesh.receiveShadow = true;
     mesh.rotation.x = -90 * ToRad;
     scene.add( mesh );
 
-    // events
-    var body = document.body;
     window.addEventListener( 'resize', resize, false );
-    container.addEventListener( 'mousemove', onMouseMove, false );
-    container.addEventListener( 'mousedown', onMouseDown, false );
-    container.addEventListener( 'mouseout', onMouseUp, false );
-    container.addEventListener( 'mouseup', onMouseUp, false );
-    if( body.addEventListener ){
-        body.addEventListener( 'mousewheel', onMouseWheel, false ); //chrome
-        body.addEventListener( 'DOMMouseScroll', onMouseWheel, false ); // firefox
-    }else if( body.attachEvent ){
-        body.attachEvent("onmousewheel" , onMouseWheel); // ie
-    }
-
-    loop();
 
     // load sea3d model
-    pool = new SEA3D.Pool('assets/model/droid.sea', populate, true);
+    loadSea3d();
 }
 
 function resize() {
@@ -187,57 +169,60 @@ function displayInfo(){
     info.innerHTML = txtinfo;
 }
 
-//--------------------------------
-// SEA3D
-//--------------------------------
+//-----------------------------------
+// SEA3D LOADING
+//-----------------------------------
 
-function populate(){
-    var dTexture = THREE.ImageUtils.loadTexture( 'assets/texture/droid.jpg' );
-    dTexture.wrapS = dTexture.wrapT = THREE.RepeatWrapping;
-    dTexture.anisotropy = renderer.getMaxAnisotropy();
-    dTexture.repeat.set( 1,-1);
+function loadSea3d(){
+    var loader = new THREE.SEA3D( true );
+    loader.onComplete = function( e ) {
+        var m = loader.meshes[0];
+        var geoDroid = loader.meshes[0].geometry;
+        var matDroid = loader.meshes[0].material;
+        // get animation name and loop
+        animations = [[], []];
+        var i = m.animations.length;
+        while(i--){
+            animations[0][i] = m.animations[i].name;
+            animations[1][i] = m.animations[i].loop;
+        }
 
-    var mat = new THREE.MeshPhongMaterial({ ambient:bgcolor, specular:0x606060, shininess:160, map:dTexture, skinning:true, morphTargets:true, metal:true });
+        var NumberModel = 5;
+        var size = 0.05;
+        var mesh, helper;
 
-    var model = pool.getGeometry("droid");
-    animations = pool.getAnimations("droid");
-    morphs = pool.getMorphs("droid");
+        i = NumberModel;
+        while(i--){
+            mesh = new THREE.SkinnedMesh(geoDroid, matDroid, false );
+            mesh.scale.set(size,size,-size);
 
-    /*
-    console.log(animation[0]);// animation name
-    console.log(animation[1]);// animation loop
-    console.log(morphs);// morph name
-    */
+            helper = new THREE.SkeletonHelper( mesh );
+            helper.material.linewidth = 3;
+            mesh.add( helper );
+            squel[i] = helper;
+            squel[i].visible = isSkeletonVisible;
 
-    var NumberModel = 5;
-    var size = 0.05;
-    var mesh, helper;
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            mesh.position.x = -10+i*5;
+            scene.add(mesh);
 
-    var i = NumberModel;
-    while(i--){
-        mesh = new THREE.SkinnedMesh(model, mat, false );
-        mesh.scale.set(size,size,-size);
+            anims[i] = new SEA3D.Animator(mesh, "droid");
+            anims[i].addAnimations( animations );
 
-        helper = new THREE.SkeletonHelper( mesh );
-        helper.material.linewidth = 3;
-        mesh.add( helper );
-        squel[i] = helper;
-        squel[i].visible = isSkeletonVisible;
+            meshs[i] = mesh;
+        }
 
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        mesh.position.x = -10+i*5;
-        scene.add(mesh);
-        meshs[i] = mesh; 
-        
-        anims[i] = new SEA3D.Animator(mesh, "droid");
-        anims[i].addAnimations( animations );
-
+        initInterface();
     }
-
-    initInterface();
-
+    // THREE.SEA3D.BUFFER is not compatible with morpher
+    loader.parser = THREE.SEA3D.DEFAULT;
+    loader.load( 'assets/model/droid.sea' );
 }
+
+//-----------------------------------
+// MINI GUI
+//-----------------------------------
 
 function initInterface(){
     gui[0] = new miniGUI.OnOff ({ container:menu, value:isSkeletonVisible, y:0,name:"Skeleton", onChange: function(value){ toogleSkeleton(value) } });
@@ -246,7 +231,8 @@ function initInterface(){
 
     var name, i=0;
     for(var j=0; j < animations[0].length; j++ ){
-        if(animations[1][j]){// add only loop animations
+        // add only loop animations
+        if(animations[1][j]){
             name =  animations[0][j];
             loopAnimations[i] =  animations[0][j];
             animWeights[i] = 0;
@@ -306,103 +292,22 @@ function onWeightAnimation(event) {
     }
 }
 
-/*function onStopAnimation( event ) {
-    var i = anims.length;
-    while(i--){ anims[i].stopAll(); }
-    isFrameStepping = false;
-}
+//-----------------------------------------------------
+//  TEXTURE
+//-----------------------------------------------------
 
-function onPauseAnimation( event ) {
-    var i = anims.length;
-    while(i--){
-        ( isFrameStepping ) ?  anims[i].unPauseAll(): anims[i].pauseAll();
-    }
-    isFrameStepping = false;
-}
-
-function onStepAnimation( event ) {
-    var i = anims.length;
-    while(i--){ anims[i].unPauseAll(); }
-    isFrameStepping = true;
-    timeToStep = event.detail.stepSize;
-}
-
-function onCrossfade(event) {
-    var data = event.detail;
-    var i = anims.length;
-    while(i--){
-        anims[i].stopAll();
-        anims[i].crossfade( data.from, data.to, data.time );
-    }
-    isFrameStepping = false;
-}
-
-function onWarp( event ) {
-    var data = event.detail;
-    var i = anims.length;
-    while(i--){
-        anims[i].stopAll();
-        anims[i].warp( data.from, data.to, data.time );
-    }
-    isFrameStepping = false;
-}*/
-
-//-----------------------------------
-// MATH
-//-----------------------------------
-
-function Orbit(origine, horizontal, vertical, distance) {
-    var p = new THREE.Vector3();
-    var phi = vertical*ToRad;
-    var theta = horizontal*ToRad;
-    p.x = (distance * Math.sin(phi) * Math.cos(theta)) + origine.x;
-    p.z = (distance * Math.sin(phi) * Math.sin(theta)) + origine.z;
-    p.y = (distance * Math.cos(phi)) + origine.y;
-    return p;
-}
-
-//-----------------------------------
-// MOUSE & NAVIGATION 
-//-----------------------------------
-
-function moveCamera() {
-    camera.position.copy(Orbit(center, cam.horizontal, cam.vertical, cam.distance));
-    camera.lookAt(center);
-}
-
-function onMouseDown(e) {
-    e.preventDefault();
-    mouse.ox = e.clientX;
-    mouse.oy = e.clientY;
-    mouse.h = cam.horizontal;
-    mouse.v = cam.vertical;
-    mouse.down = true;
-}
-
-function onMouseUp(e) {
-    mouse.down = false;
-    document.body.style.cursor = 'auto';
-}
-
-function onMouseMove(e) {
-    e.preventDefault();
-    if (mouse.down ) {
-        document.body.style.cursor = 'move';
-        cam.horizontal = ((e.clientX - mouse.ox) * 0.3) + mouse.h;
-        cam.vertical = (-(e.clientY - mouse.oy) * 0.3) + mouse.v;
-        moveCamera();
-    }
-}
-
-function onMouseWheel(e) {
-    e.preventDefault();
-    var delta = 0;
-    if(e.wheelDelta){delta=e.wheelDelta*-1;}
-    else if(e.detail){delta=e.detail*20;}
-    cam.distance+=(delta/80);
-    if(cam.distance<0.01)cam.distance = 0.01;
-    if(cam.distance>150)cam.distance = 150;
-    moveCamera(); 
+function gradTexture(color) {
+    var c = document.createElement("canvas");
+    var ct = c.getContext("2d");
+    c.width = 16; c.height = 256;
+    var gradient = ct.createLinearGradient(0,0,0,256);
+    var i = color[0].length;
+    while(i--){ gradient.addColorStop(color[0][i],color[1][i]); }
+    ct.fillStyle = gradient;
+    ct.fillRect(0,0,16,256);
+    var texture = new THREE.Texture(c);
+    texture.needsUpdate = true;
+    return texture;
 }
 
 </script>

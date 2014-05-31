@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Game Assets</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<style>
+    * {  margin:0; padding:0; border:0;}
+    body { background-color:#444444; overflow:hidden; color:#c8c8c8; font-family:Verdana; font-size:12px; }
+    #container { overflow:hidden; }
+    #interface{ position:absolute; left:0; top:90px; width:0px; height:0px; }
+    #info{ pointer-events:none; position:absolute; left:10px; top:10px; width:400px; height:400px; }
+    #logo{ pointer-events:none; position:absolute; left:0; bottom:0; width:300px; height:150px; }
+</style>
+
+<script src="js/three.min.js"></script>
+<script src="js/controls/OrbitControls.js"></script>
+<script src="js/loaders/sea3d.min.js"></script>
+<script src="js/Detector.js"></script>
+<script src="js/miniGUI.js"></script>
+
+</head>
+
+<!-- Author CODE & MODEL: loth - http://3dflashlo.wordpress.com/ -->
+
+<body>
+<div id='container'></div>
+<div id="info"></div>
+<div id='interface'></div>
+<div id='logo'><object type="image/svg+xml" data="assets/sea3db.svg" id="logo"></object></div>
+
+<script>
+
+if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+var seaModel = "assets/model/game.sea";
+//var seaModel = "assets/model/game.low.sea";
+
+// Parameters
+var ToRad = Math.PI / 180;
+var info = document.getElementById("info");
+var menu = document.getElementById("interface");
+var sourceInfo = "<h3>GAME ASSETS</h3><br>";
+
+// THREE var
+var container, camera, scene, renderer, controls, clock;
+var fps = [0,0,0,0];
+var bgcolor = 0x444444;
+var meshs = [];
+var squel = [];
+var materials = [];
+var nloop = 0;
+var pool;
+var isSkeletonVisible = false;
+
+init();
+loop();
+
+function init() {
+
+    var b1 = new miniGUI.OnOff ({ container:menu, value:isSkeletonVisible, y:10,name:"Skeleton", onChange: function(value){ toogleSkeleton(value) } });
+
+    clock = new THREE.Clock();
+
+    renderer = new THREE.WebGLRenderer( {precision: "lowp", antialias: false } );
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setClearColor( bgcolor, 1 );
+
+    container = document.getElementById("container");
+    container.appendChild( renderer.domElement );
+
+    renderer.gammaInput = true;
+    renderer.gammaOutput = true;
+    renderer.shadowMapEnabled = true;
+    renderer.autoClearColor = false;
+    renderer.autoClear = false;
+
+    // scene
+    scene = new THREE.Scene();
+
+    // camera
+    camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 0.5, 1000 );
+    camera.position.set( -20, 30, 50 );
+    controls = new THREE.OrbitControls(camera, container);
+    controls.maxDistance = 300;
+    controls.update();
+
+    // lights
+    scene.add( new THREE.AmbientLight( bgcolor ) );
+
+    var light = new THREE.DirectionalLight( 0xffffff, 1.1 );
+    var d = 40;
+    light.position.set( d, d, d );
+    light.castShadow = true;
+    //light.shadowCameraVisible = true;
+
+    light.shadowMapWidth = 1024;
+    light.shadowMapHeight = 1024;
+
+    light.shadowCameraLeft = -d;
+    light.shadowCameraRight = d;
+    light.shadowCameraTop = d;
+    light.shadowCameraBottom = -d;
+
+    light.shadowCameraFar = 3*d;
+    light.shadowCameraNear = d;
+    light.shadowDarkness = 0.5;
+
+    scene.add( light );
+
+    var lightPoint = new THREE.PointLight ( 0x4488ff, 1 );
+    lightPoint.position.set( -d/3, d, -d);
+    scene.add( lightPoint );
+
+    // background
+    var backGeo = new THREE.Mesh( new THREE.IcosahedronGeometry(500,1), new THREE.MeshBasicMaterial( { map:gradTexture([[0.5,0], ['#444444', 'black']]), side:THREE.BackSide, depthWrite: false }  ));
+    scene.add( backGeo );
+
+    // ground
+    var mesh = new THREE.Mesh( new THREE.PlaneGeometry( 400, 400, 1, 1 ), new THREE.MeshBasicMaterial( { color: bgcolor } ) );
+    mesh.castShadow = false;
+    mesh.receiveShadow = true;
+    mesh.rotation.x = -90 * ToRad;
+    mesh.position.y = 0;
+    scene.add( mesh );
+
+    window.addEventListener( 'resize', resize, false );
+    
+    // load sea3d model
+    loadSea3d();
+}
+
+function resize() {
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+}
+
+function loop() {
+    requestAnimationFrame( loop );
+    var delta = clock.getDelta();
+    nloop++
+    if(nloop===2){
+        nloop = 0;
+        THREE.AnimationHandler.update( delta*2 );
+        if(squel.length && isSkeletonVisible){
+            for(var i=0, j=squel.length; i<j; i++){
+                squel[i].update()
+            }
+        }
+    }
+    renderer.render( scene, camera );
+    displayInfo();
+}
+
+function displayInfo(){
+    fps[2] = Date.now();
+    if (fps[2]-1000>fps[1]){ fps[1]=fps[2]; fps[3]=fps[0]; fps[0]=0; } fps[0]++;
+
+    var txtinfo =[
+        sourceInfo,
+        "Three: " + fps[3] +" fps"
+    ].join("\n");
+    info.innerHTML = txtinfo;
+}
+
+//-----------------------------------
+// SEA3D LOADING
+//-----------------------------------
+
+function loadSea3d(){
+    var loader = new THREE.SEA3D( true );
+    loader.onComplete = function( e ) {
+        var models = ["hero_1_warrior", "hero_2_valkyrie", "hero_3_wizard", "hero_4_elf", "monster_chicken", "monster_nurce", "monster_zombi"];
+        modelsGeo=[];
+        weaponsGeo=[];
+        var m;
+        var i = loader.meshes.length;
+        while(i--){
+            m = loader.meshes[i];
+            switch(m.name){
+                case models[0]: modelsGeo[0] = m.geometry; materials[0] = m.material; break;
+                case models[1]: modelsGeo[1] = m.geometry; materials[1] = m.material;break;
+                case models[2]: modelsGeo[2] = m.geometry; materials[2] = m.material;break;
+                case models[3]: modelsGeo[3] = m.geometry; materials[3] = m.material;break;
+                case models[4]: modelsGeo[4] = m.geometry; materials[4] = m.material;break;
+                case models[5]: modelsGeo[5] = m.geometry; materials[5] = m.material;break;
+                case models[6]: modelsGeo[6] = m.geometry; materials[6] = m.material;break;
+                case "weapon0": weaponsGeo[0] = m.geometry; materials[7] = m.material; break;
+                case "weapon1": weaponsGeo[1] = m.geometry; break;
+                case "weapon2": weaponsGeo[2] = m.geometry; break;
+                case "weapon3": weaponsGeo[3] = m.geometry; break;
+            }
+        }
+        var m = loader.meshes[0];
+        populate(models, modelsGeo, weaponsGeo);
+    }
+    loader.load( seaModel );
+}
+
+function toogleSkeleton(value){
+    for(var i=0, j=squel.length; i<j; i++){
+        isSkeletonVisible = value;
+        squel[i].visible = value;
+    }
+}
+
+function populate(models, modelsGeo, weaponsGeo){
+    var i, rx, rz, m, w;
+    var nnn, anim, rand, bone;
+    var num = 66;
+    var size=0.1;
+
+    var skeletonHelper;
+
+    for(i=0; i<num; i++){
+        rand = Math.floor(Math.random()*7);
+        rx =  -20+(Math.random()*40);
+        rz =  -20+(Math.random()*40);
+
+        m = new THREE.SkinnedMesh( modelsGeo[rand], materials[rand], false );
+        m.scale.set(size,size,-size);
+
+        skeletonHelper = new THREE.SkeletonHelper( m );
+        skeletonHelper.material.linewidth = 3;
+        m.add( skeletonHelper );
+        squel[i] = skeletonHelper;
+        squel[i].visible = isSkeletonVisible;
+
+        if(weaponsGeo[rand]){
+            w = new THREE.Mesh( weaponsGeo[rand], materials[7], false );
+            bone = m.skeleton.bones[12];
+            //w.name = bone.name;
+            w.matrix = bone.skinMatrix;
+            w.matrixAutoUpdate = false;
+            m.add( w );
+        }
+
+        m.rotation.y = (Math.random()*360) * ToRad;
+
+        m.position.x = -rx;
+        m.position.z = -rz;
+        m.position.y = 2.5;
+        if(rand==4)m.position.y = 0.6;
+        
+        m.castShadow = m.receiveShadow = true;
+        nnn = Math.round(Math.random()*2);
+        if(nnn>0) anim = models[rand]+"/walk";
+        else anim = models[rand]+"/idle"
+
+        var animation = new THREE.Animation( m, anim );
+        animation.play( 0.05 * Math.random() );
+        scene.add(m);
+    }
+
+    //construct();
+}
+
+/*function construct() {
+    var texture = THREE.ImageUtils.loadTexture( 'assets/texture/game/wall.jpg' );
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.anisotropy = renderer.getMaxAnisotropy();
+    texture.repeat.set( 1, -1 );
+
+    var mat = new THREE.MeshPhongMaterial({ map:texture, ambient: bgcolor, specular: 0x303030, shininess: 30});
+
+    var g0 = pool.getGeometry('floor', true, 0.1);
+    var gx = pool.getGeometry('floor001', true, 0.1);
+    var g1 = pool.getGeometry('wall005', true, 0.1);
+    var g2 = pool.getGeometry('wall010', true, 0.1);
+    var g3 = pool.getGeometry('wall003', true, 0.1);
+    var g4 = pool.getGeometry('wall006', true, 0.1);
+    var g5 = pool.getGeometry('wall012', true, 0.1);
+    var g6 = pool.getGeometry('wall009', true, 0.1);
+
+    var g = new THREE.Geometry();
+    var m, r;
+    for(var i=0; i<44; i++){
+        for(var j=0; j<22; j++){
+            r = Math.floor(Math.random()*4);
+            g0.applyMatrix(new THREE.Matrix4().makeRotationY((r*90)*ToRad));
+            gx.applyMatrix(new THREE.Matrix4().makeRotationY((r*90)*ToRad));
+            m = new THREE.Matrix4().makeTranslation(3.2*i,0,3.2*j);
+            if(i>4 && i<39)g.merge(g0,m);
+            else g.merge(gx,m);
+        }
+        m = new THREE.Matrix4().makeTranslation(3.2*i,0,-3.2);
+        g.merge(g2,m);
+        m = new THREE.Matrix4().makeTranslation(3.2*i,0,3.2*22);
+        g.merge(g2,m);
+    }
+
+    for(var j=0; j<22; j++){
+        m = new THREE.Matrix4().makeTranslation(-3.2,0,3.2*j);
+        g.merge(g1,m);
+        m = new THREE.Matrix4().makeTranslation(3.2*44,0,3.2*j);
+        g.merge(g1,m);
+    }
+
+    // corner
+    m = new THREE.Matrix4().makeTranslation(-3.2,0,-3.2);
+    g.merge(g4,m);
+    m = new THREE.Matrix4().makeTranslation(-3.2,0,3.2*22);
+    g.merge(g3,m);
+    m = new THREE.Matrix4().makeTranslation(3.2*44,0,-3.2);
+    g.merge(g5,m);
+    m = new THREE.Matrix4().makeTranslation(3.2*44,0,3.2*22);
+    g.merge(g6,m);
+
+    g.applyMatrix(new THREE.Matrix4().makeTranslation(-(22*3.2)+1.6,0,-(11*3.2)+1.6));
+
+    var m = new THREE.Mesh( THREE.BufferGeometryUtils.fromGeometry(g), mat );
+    scene.add(m);
+    m.castShadow = false;
+    m.receiveShadow = true;
+}*/
+
+//-----------------------------------------------------
+//  TEXTURE
+//-----------------------------------------------------
+
+function gradTexture(color) {
+    var c = document.createElement("canvas");
+    var ct = c.getContext("2d");
+    c.width = 16; c.height = 256;
+    var gradient = ct.createLinearGradient(0,0,0,256);
+    var i = color[0].length;
+    while(i--){ gradient.addColorStop(color[0][i],color[1][i]); }
+    ct.fillStyle = gradient;
+    ct.fillRect(0,0,16,256);
+    var texture = new THREE.Texture(c);
+    texture.needsUpdate = true;
+    return texture;
+}
+
+</script>
+</body>
+</html>
