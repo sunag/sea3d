@@ -5,7 +5,7 @@
  * 	http://sea3d.poonya.com/
  */
 
-var SEA3D = { VERSION : 16500, REVISION : 1 }
+var SEA3D = { VERSION : 16500, REVISION : 2 }
 
 //
 //	Timer
@@ -2739,6 +2739,14 @@ SEA3D.File.setDecompressionEngine = function(id, name, method) {
 	SEA3D.File.DecompressionMethod[id] = method;
 }
 
+SEA3D.File.readStage = function(scope) {
+	while (scope.stage && scope.stage());
+	if (scope.stage) {
+		window.setTimeout(SEA3D.File.readStage, 16, scope);
+		scope.dispatchProgress();
+	}
+}
+
 SEA3D.File.prototype.addClass = function(clazz) {
 	this.typeClass[clazz.prototype.type] = clazz;
 }
@@ -2865,19 +2873,11 @@ SEA3D.File.prototype.readComplete = function() {
 	this.dispatchComplete();
 }
 
-SEA3D.File.prototype.readStage = function(scope) {
-	while (scope.stage && scope.stage());
-	if (scope.stage) {
-		window.setInterval(scope.readStage, 10, scope);
-		scope.dispatchProgress();
-	}
-}
-
 SEA3D.File.prototype.read = function() {	
 	this.timer = new SEA3D.Timer();
 	this.stage = this.readHead;
 	
-	this.readStage(this);
+	SEA3D.File.readStage(this);
 }
 
 SEA3D.File.prototype.dispatchCompleteObject = function(obj) {
