@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>sea3d loader</title>
+<meta charset="utf-8">
+<style>
+	body {
+		color: #000;
+		font-family:Monospace;
+		font-size:13px;
+		text-align:center;
+		background-color: #000;
+		margin: 0px;
+		overflow: hidden;
+	}
+	#progress {
+		color:red;
+		top:7em;
+		width: 100%;
+		font-size:3em;
+		font-variant:small-caps;
+		font-weight:bold;
+		position:absolute;
+		z-index:100;
+		text-align: center;
+		text-shadow: #000 0px 0px 10px;
+	}
+	#progressbar {
+		text-align: center;
+		background: #888;
+		width: 250px;
+		height: 10px;
+	}
+	#bar {
+		background:#d00;
+		width:1px;
+		height:10px;
+	}
+	.shadow {
+		-moz-box-shadow: 0px 0px 5px #000;
+		-webkit-box-shadow: 0px 0px 5px #000;
+		box-shadow: 0px 0px 5px #000;
+	}
+</style>
+</head>
+<body>
+	<div id="progress">
+		<center><div id="progressbar" class="shadow"><div id="bar" class="shadow"></div></div></center>
+	</div>
+	<div id="container" style="background:0x000000; margin:0 auto;"></div>
+	<script src="three.js"></script>
+	<script src="SEA3D.js"></script>
+	<script src="SEA3DLoader.js"></script>
+	<script src="SEA3DDeflate.js"></script>
+	<script src="SEA3DLZMA.js"></script>
+	<script>
+		var scl_m = new THREE.Matrix4().scale(new THREE.Vector3(-1, 1, 1));
+		
+		
+		// WARN: Scale invert Matrix on three.js not work with position
+		var scl = new THREE.Matrix4();
+		scl.setPosition(new THREE.Vector3(20, 0, 0));
+		console.log(scl.elements);
+		scl.multiply(scl_m);		
+		console.log(scl.elements);
+		//
+		
+		
+		var winW = window.innerWidth;
+		var winH = window.innerHeight;
+		var container = document.getElementById( 'container' );
+		var camera, scene, renderer;
+		var clock = new THREE.Clock();
+		var mouseX = 0, mouseY = 0;
+		var windowHalfX = winW / 2;
+		var windowHalfY = winH / 2;
+		var lara = new THREE.SkinnedMesh();
+		camera = new THREE.PerspectiveCamera( 45, winW / winH, 1, 2400 );
+		camera.position.set( 1.6, 1.0, 1.6 );
+		scene = new THREE.Scene();
+		var ambient = new THREE.AmbientLight( 0x404040 );
+		scene.add( ambient );
+		var light = new THREE.SpotLight( 0xffffff, 1.2 );
+		light.position.set( 100, 100, 100 );
+		scene.add( light );
+		renderer = new THREE.WebGLRenderer( { antialias: true } );
+		renderer.setClearColor( 0xf0e0c0 );
+		renderer.setPixelRatio( window.devicePixelRatio );
+		renderer.setSize( winW, winH );
+		renderer.sortObjects = false;
+		container.appendChild( renderer.domElement );
+
+		var skeletonHelper ;
+		var loader = new THREE.SEA3D();
+		loader.invertZ = false;
+		loader.flipX = true;
+		loader.parser = THREE.SEA3D.DEFAULT;
+		loader.onProgress = function( e ) {
+			var bar = Math.floor( 250 * e.progress );
+				var loadbar = document.getElementById( 'bar' );
+				loadbar.style.width = bar+"px";
+		}
+		loader.onComplete = function( e ) {
+			lara = new THREE.SkinnedMesh(loader.meshes[0].geometry, loader.meshes[0].material, false );
+			lara.material.skinning = true;			
+			lara.scale.multiplyScalar( 0.009 );				
+			var Lanim = new THREE.Animation( lara, loader.meshes[0].geometry.animations[0] );
+			Lanim.timeScale = 0.5;
+			Lanim.play();
+			camera.lookAt( lara.position );
+			scene.add( lara );
+
+			skeletonHelper = new THREE.SkeletonHelper( lara );
+			skeletonHelper.material.linewidth = 3;
+			scene.add( skeletonHelper );
+			
+			var progbar = document.getElementById( 'progressbar' );
+			progbar.style.display = "none";
+			document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+			animate();
+		}
+		loader.load( 'Lara.sea' );
+		//loader.load( 'SimpleRun.sea' );
+
+		function onWindowResize() {
+			winW = window.innerWidth;
+			winH = window.innerHeight;
+			windowHalfX = winW / 2;
+			windowHalfY = winH / 2;
+			camera.aspect = winW / winH;
+			camera.updateProjectionMatrix();
+			renderer.setSize( winW, winH );
+		}
+		function onDocumentMouseMove( event ) {
+			mouseX = ( event.clientX - windowHalfX ) / 2;
+			mouseY = ( event.clientY - windowHalfY ) / 2;
+		}
+		function animate() {
+			requestAnimationFrame( animate);
+			THREE.AnimationHandler.update( clock.getDelta() );
+			lara.rotation.y -= ( mouseX - scene.rotation.y ) * .0001;
+			skeletonHelper.update();
+			renderer.render( scene, camera );
+		}
+</script>
+</body>
+</html>
