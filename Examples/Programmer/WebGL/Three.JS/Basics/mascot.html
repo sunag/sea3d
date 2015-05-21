@@ -126,7 +126,7 @@
 				var copyPass = new THREE.ShaderPass( THREE.CopyShader );				
 				composer.addPass( renderPass );
 				
-				var vh = 1.05, vl = 1.2;
+				var vh = 1.2, vl = 1.2;
 				
 				var colorCorrectionPass = new THREE.ShaderPass( THREE.ColorCorrectionShader );
 				colorCorrectionPass.uniforms[ "powRGB" ].value = new THREE.Vector3( vh, vh, vh );
