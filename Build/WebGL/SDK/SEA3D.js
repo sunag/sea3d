@@ -2974,8 +2974,8 @@ SEA3D.File.prototype.dispatchProgress = function() {
 	
 	this.onProgress({
 			file:this,
-			position:this.position,
-			length:this.length,
+			loaded:this.position,			
+			total:this.length,
 			progress:this.position / this.length
 		});	
 }
@@ -2985,8 +2985,8 @@ SEA3D.File.prototype.dispatchDownloadProgress = function(position, length) {
 	
 	this.onDownloadProgress({
 			file:this,
-			position:position,
-			length:length,
+			loaded:position,
+			total:length,
 			progress:position / length
 		});	
 }
