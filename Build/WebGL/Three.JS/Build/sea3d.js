@@ -4886,8 +4886,8 @@ THREE.SEA3D.prototype.getJointObject = function(name) {
 	return this.objects["jnt/" + name];
 }
 
-THREE.SEA3D.prototype.getSound3D = function(name) {
-	return this.objects["sn3d/" + name];
+THREE.SEA3D.prototype.getContainer3D = function(name) {
+	return this.objects["c3d/" + name];
 }
 
 THREE.SEA3D.prototype.getSprite = function(name) {
