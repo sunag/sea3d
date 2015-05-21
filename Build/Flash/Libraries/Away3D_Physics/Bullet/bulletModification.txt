@@ -1,0 +1,23 @@
+BulletCollision/CollisionDispatch/btCollisionObject.h line52 changed protected to public
+BulletCollision/CollisionShapes/btCompoundShape.h line57 add btAlignedObjectArray<btTransform> m_originTransform;
+BulletCollision/CollisionShapes/btCompoundShape.cpp line84 add m_originTransform.push_back(localTransform);
+BulletCollision/CollisionShapes/btCompoundShape.cpp line284 changed to btTransform childTrans = m_originTransform[i];
+BulletCollision/CollisionShapes/btCompoundShape.cpp line288 changed to m_children[i].m_childShape->setLocalScaling(scaling);
+BulletDynamics/Dynamics/btRigidBody.h line57 added public
+BulletDynamics/Dynamics/btRigidBody.h line94 move m_angularFactor to public
+BulletDynamics/Dynamics/btRigidBody.h line95 move m_invMass to public
+BulletDynamics/Character/btKinematicCharacterController.h line38 changed protected to public
+BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h line38 changed protected to public 
+BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h line57 added bool  m_collisionCallbackOn;
+BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h line59 added btAlignedObjectArray<btActionInterface*> m_vehicles;
+BulletDynamics/Dynamics/btDiscreteDynamicsWorld.cpp line509 added m_vehicles.push_back(vehicle);
+BulletDynamics/Dynamics/btDiscreteDynamicsWorld.cpp line515 added m_vehicles.remove(vehicle);
+BulletDynamics/ConstraintSolver/btTypedConstraint.h line318 added public
+BulletDynamics/ConstraintSolver/btHingeConstraint.h line52 removed #ifdef IN_PARALLELL_SOLVER
+BulletDynamics/ConstraintSolver/btHingeConstraint.h  removed all #ifdef _BT_USE_CENTER_LIMIT_
+BulletDynamics/ConstraintSolver/btHingeConstraint.cpp removed all #ifdef _BT_USE_CENTER_LIMIT_
+BulletDynamics/ConstraintSolver/btConeTwistConstraint.h line55 removed #ifdef IN_PARALLELL_SOLVER
+BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h line273 changed protected to public
+BulletDynamics/ConstraintSolver/btSliderConstraint.h line65 changed protected to public
+LinearMath/btMatrix3x3.h line33 add public
+LinearMath/btTransform.h line36 add public
