@@ -24,6 +24,10 @@ An open-source cross-platform file format for games.
 * Binary format
 * And More+
 
+Official Page / Examples
+--
+**http://sunag.github.io/sea3d/**
+
 SEA3D Studio 1.1 Viva!
 --
 Free cross-platform 3D IDE for games.
@@ -37,19 +41,6 @@ Free cross-platform 3D IDE for games.
 **Debugger - Player** http://sea3d.poonya.com/debugger-player/
 
 **SDK Framework** https://github.com/sunag/sea3d_studio_sdk
-
-Examples
---
-
-*http://sunag.github.io/sea3d/*
-
-SEA3D GP 1.0
---
-SEA3D GP or SEA3D Game Player is an improvement from SEA3D Player with support for **Poonya Script** compiled by SEA3D Studio. Here you find several libraries to facilitate the game development all integrated with SEA3D Studio.
-
-**Join now** http://sea3d.poonya.com/gp/
-
-*Click on the first button to open your file*
 
 SEA3D Player 1.6.5
 --
@@ -81,6 +72,14 @@ Help and Questions? Use SEA3D Forum
 **Introduction to WebGL** - http://developers.poonya.com/forum/viewtopic.php?t=55
 
 **List of tutorials** - http://developers.poonya.com/forum/viewforum.php?f=11
+
+SEA3D GP 1.0
+--
+SEA3D GP or SEA3D Game Player is an improvement from SEA3D Player with support for **Poonya Script** compiled by SEA3D Studio. Here you find several libraries to facilitate the game development all integrated with SEA3D Studio.
+
+**Join now** http://sea3d.poonya.com/gp/
+
+*Click on the first button to open your file*
 
 SEA3D Lip Sync
 --
