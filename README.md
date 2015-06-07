@@ -28,6 +28,11 @@ Official Page / Examples
 --
 **http://sunag.github.io/sea3d/**
 
+Help and Questions? Use SEA3D Forum
+--
+
+**http://community.poonya.com/**
+
 SEA3D Studio 1.1 Viva!
 --
 Free cross-platform 3D IDE for games.
@@ -57,31 +62,6 @@ SEA3D Exporter 1.6.5.10
 Easy and wide range of 3d features, export entire scenes to SEA3D with just few clicks.
 
 [![SEA3D Exporter](http://img.youtube.com/vi/dTCztYwwEdE/0.jpg)](http://www.youtube.com/watch?v=dTCztYwwEdE)
-
-Help and Questions? Use SEA3D Forum
---
-
-**Introduction to 1.6.5 and Poonya Script** - http://developers.poonya.com/forum/viewtopic.php?t=120
-
-**Introduction to 1.6 and Studio** - http://developers.poonya.com/forum/viewtopic.php?t=72
-
-**Introduction to 1.5** - http://developers.poonya.com/forum/viewtopic.php?t=36
-
-**Introduction to 1.4** - http://developers.poonya.com/forum/viewtopic.php?t=25
-
-**Introduction to WebGL** - http://developers.poonya.com/forum/viewtopic.php?t=55
-
-**List of tutorials** - http://developers.poonya.com/forum/viewforum.php?f=11
-
-**Questions, bugs and others** - http://developers.poonya.com/forum/viewforum.php?f=10
-
-SEA3D GP 1.0
---
-SEA3D GP or SEA3D Game Player is an improvement from SEA3D Player with support for **Poonya Script** compiled by SEA3D Studio. Here you find several libraries to facilitate the game development all integrated with SEA3D Studio.
-
-**Join now** http://sea3d.poonya.com/gp/
-
-*Click on the first button to open your file*
 
 SEA3D Lip Sync
 --
