@@ -45,9 +45,9 @@ Free cross-platform 3D IDE for games.
 
 SEA3D Player 1.7
 --
-SE3D Player is focused for artists and very useful to view models, animations and others. Not support **Poonya Script**.
+SE3D Player is focused for artists and very useful to view models, animations and others.
 
-http://sea3d.poonya.com/player/
+**http://sea3d.poonya.com/player/**
 
 *Click on the first button to open your file*
 
