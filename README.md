@@ -41,19 +41,13 @@ Free cross-platform 3D IDE for games.
 
 **Join now** http://sea3d.poonya.com/studio/
 
-**Debugger - GP** http://sea3d.poonya.com/debugger/
-
-**Debugger - Player** http://sea3d.poonya.com/debugger-player/
-
 **SDK Framework** https://github.com/sunag/sea3d_studio_sdk
 
 SEA3D Player 1.7
 --
 SE3D Player is focused for artists and very useful to view models, animations and others. Not support **Poonya Script**.
 
-**Flash** http://sea3d.poonya.com/player/
-
-**WebGL** http://sea3d.poonya.com/player-webgl/
+http://sea3d.poonya.com/player/
 
 *Click on the first button to open your file*
 
