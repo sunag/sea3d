@@ -108,7 +108,7 @@
 
 				// Lights
 				
-				var ambient = new THREE.AmbientLight( 0x666666 );
+				var ambient = new THREE.AmbientLight( 0x333333 );
 				scene.add( ambient );												
 				
 				var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.5 );
@@ -160,7 +160,8 @@
 				var time = new Date().getTime();
 				
 				loader = new THREE.SEA3D({
-					container : scene					
+					container : scene,
+					multiplier : .5 // light multiplier
 				});	
 				
 				loader.onComplete = function( e ) {

@@ -101,7 +101,7 @@
 
 				// Lights
 				
-				var ambient = new THREE.AmbientLight( 0x666666 );
+				var ambient = new THREE.AmbientLight( 0x555555 );
 				scene.add( ambient );												
 				
 				var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.5 );
@@ -126,7 +126,7 @@
 				var copyPass = new THREE.ShaderPass( THREE.CopyShader );				
 				composer.addPass( renderPass );
 				
-				var vh = 1.2, vl = 1.2;
+				var vh = 1.1, vl = 1.2;
 				
 				var colorCorrectionPass = new THREE.ShaderPass( THREE.ColorCorrectionShader );
 				colorCorrectionPass.uniforms[ "powRGB" ].value = new THREE.Vector3( vh, vh, vh );
@@ -156,7 +156,8 @@
 				//
 				
 				loader = new THREE.SEA3D({
-					autoPlay : true
+					autoPlay : true,
+					multiplier : .73 // light multiplier		
 				});	
 				
 				loader.onComplete = function( e ) {
