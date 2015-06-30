@@ -33,7 +33,7 @@ Help and Questions? Use SEA3D Forum
 
 **http://community.poonya.com/**
 
-SEA3D Studio 1.1 Viva!
+SEA3D Studio 1.1.7 Viva!
 --
 Free cross-platform 3D IDE for games.
 
@@ -47,7 +47,7 @@ Free cross-platform 3D IDE for games.
 
 **SDK Framework** https://github.com/sunag/sea3d_studio_sdk
 
-SEA3D Player 1.6.5
+SEA3D Player 1.7
 --
 SE3D Player is focused for artists and very useful to view models, animations and others. Not support **Poonya Script**.
 
@@ -57,7 +57,7 @@ SE3D Player is focused for artists and very useful to view models, animations an
 
 *Click on the first button to open your file*
 
-SEA3D Exporter 1.6.5.10
+SEA3D Exporter 1.7
 --
 Easy and wide range of 3d features, export entire scenes to SEA3D with just few clicks.
 
