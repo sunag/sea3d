@@ -8,6 +8,7 @@ package sunag.sea3d.events
 	{		
 		public static const UPDATE:String = "update";
 		public static const COMPLETE:String = "complete";
+		public static const ANIMATOR:String = "animator";
 		
 		public var type:String;		
 		public var target:Object;

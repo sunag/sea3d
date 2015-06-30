@@ -1,5 +1,5 @@
 -- SEA3D Exporter (Sunag Entertainment Assets 3D)
--- Copyright (C) 2014 Sunag Entertainment
+-- Copyright (C) 2015 Sunag Entertainment
 
 -- SEA3D - A file format for games
 -- https://code.google.com/p/sea3d/
@@ -16,7 +16,7 @@ if (LoadSEADLL() == false) then exit
 
 global
 	-- Extensions (Max 4chars ASCII Compatible 32bit)
-	EXT_INFO = ".inf",
+	EXT_INFO = ".info",
 	EXT_GEOMETRY = ".geo",
 	EXT_GEOMETRY_DELTA = ".geDL",
 	EXT_SCENE_OBJECT = ".o3d",
@@ -317,7 +317,7 @@ if (LoadSEAConfig() == false) then
 	seaconfig.AddBoolean "joinvertices" false	
 	seaconfig.AddBoolean "forcelights" false
 	seaconfig.AddBoolean "fileinfo" false
-	seaconfig.AddString "fileinfo-title" ""
+	seaconfig.AddString "fileinfo-name" ""
 	seaconfig.AddString "fileinfo-author" ""
 	seaconfig.AddString "fileinfo-website" "http://"
 	seaconfig.AddBoolean "fog" false
@@ -396,7 +396,7 @@ fn LoadSEA3DExporterConfig seaconfig =
 	seaconfig_relativesize =  seaconfig.GetBoolean "relativesize",
 	seaconfig_meshoptimizer = seaconfig.GetBoolean "meshoptimizer",
 	seaconfig_joinvertices = seaconfig.GetBoolean "joinvertices",
-	seaconfig_fileinfo = #(seaconfig.getBoolean "fileinfo",seaconfig.GetString "fileinfo-title",seaconfig.GetString "fileinfo-author",seaconfig.GetString "fileinfo-website"),
+	seaconfig_fileinfo = #(seaconfig.getBoolean "fileinfo",seaconfig.GetString "fileinfo-name",seaconfig.GetString "fileinfo-author",seaconfig.GetString "fileinfo-website"),
 	seaconfig_fog = #(seaconfig.getBoolean "fog", color (seaconfig.GetRed "fog-color") (seaconfig.GetGreen "fog-color") (seaconfig.GetBlue "fog-color"), seaconfig.GetFloat "fog-min", seaconfig.GetFloat "fog-max")
 )
 
@@ -491,7 +491,7 @@ fn SaveSEA3DExporterConfig seaconfig =
 	seaconfig.AddBoolean "meshoptimizer" seaconfig_meshoptimizer
 	seaconfig.AddBoolean "joinvertices" seaconfig_joinvertices
 	seaconfig.AddBoolean "fileinfo" seaconfig_fileinfo[1]
-	seaconfig.AddString "fileinfo-title" seaconfig_fileinfo[2]
+	seaconfig.AddString "fileinfo-name" seaconfig_fileinfo[2]
 	seaconfig.AddString "fileinfo-author" seaconfig_fileinfo[3]
 	seaconfig.AddString "fileinfo-website" seaconfig_fileinfo[4]
 	seaconfig.AddBoolean "fog" seaconfig_fog[1]
@@ -1582,7 +1582,7 @@ fn bakeTexture tex filename: size: =
 	
 	if size == unsupplied do 
 	(
-		if classof tex == BitmapTexture then		
+		if classof tex == BitmapTexture and (openBitMap tex.filename) != undefined then		
 		(
 			local _bmp = openBitMap tex.filename
 			
@@ -1644,7 +1644,7 @@ fn bakeMesh obj temp: filename: size: =
 		)
 		else
 		(
-			filename = creatTempFile seaconfig_bakeext
+			filename = creatTempFile seaconfig_bakeext			
 		)
 	)
 	
@@ -3923,6 +3923,7 @@ fn compileObject n =
 			local skinAt = 0
 			local morphAt = 0					
 			local smoothAt = 0
+			local editNormalsAt = 0
 			local colorAt = 0
 			
 			local attribs = undefined
@@ -4027,6 +4028,11 @@ fn compileObject n =
 					else if (ClassOf obj.modifiers[m] == VertexPaint and obj.modifiers[m].enabled) then 
 					(
 						colorAt = m
+						--warning2004 n.name				
+					)
+					else if (ClassOf obj.modifiers[m] == EditNormals and obj.modifiers[m].enabled) then 
+					(
+						editNormalsAt = m
 						--warning2004 n.name				
 					)
 					else if (ClassOf obj.modifiers[m] == VertexWeld and obj.modifiers[m].enabled and joinVertices != undefined) then 
@@ -4203,7 +4209,7 @@ fn compileObject n =
 				
 				selectMod normalNObj normalObj	
 
-				if (getnumverts obj) != (normalObj.GetNumNormals()) then
+				if editNormalsAt > 0 or (getnumverts obj) != (normalObj.GetNumNormals()) then
 				(
 					local nA = (GetNormal obj 1) as point3
 					nA.x = roundNum nA.x
@@ -7470,28 +7476,44 @@ function getFileInfoAsset =
 	local asset = newAsset()
 	local data = asset.Data
 	
-	asset.Filename = "file" + EXT_INFO
+	asset.Filename = "Info" + EXT_INFO
 	
 	local fileInfo = #()
 	
-	local title = seaconfig_fileinfo[2]
+	local name = seaconfig_fileinfo[2]
 	local author = seaconfig_fileinfo[3] 
 	local website = seaconfig_fileinfo[4]
 	
-	if title.count > 0 then append fileInfo #("title", title)
-	if author.count > 0 then append fileInfo #("author", author)
-	if website != "http://" and website.count > 0 then append fileInfo #("website", website)
+	if name.count > 0 then append fileInfo #("name", name, String)
+	if author.count > 0 then append fileInfo #("author", author, String)
+	if website != "http://" and website.count > 0 then append fileInfo #("website", website, String)
 	
-	append fileInfo #("localtime", localtime)
-	append fileInfo #("version", sea_rawversion as string)
-	append fileInfo #("region", (dotNetClass "System.Globalization.RegionInfo").CurrentRegion.Name) -- Your Country
+	append fileInfo #("datetime", localtime, String)
+	append fileInfo #("exporter", sea_rawversion, Integer)
+	append fileInfo #("region", (dotNetClass "System.Globalization.RegionInfo").CurrentRegion.Name, String) -- Your Country
 	
 	data.WriteByte fileInfo.count
 	
 	for i = 1 to fileInfo.count do
 	(
+		local c = fileInfo[i][3]	
+		
 		data.WriteUTF8 fileInfo[i][1]
-		data.WriteUTF8 fileInfo[i][2]
+		
+		if c == Integer then
+		(
+			data.WriteByte 8
+			data.WriteInt32 fileInfo[i][2]
+		)		
+		else if c == String then
+		(
+			data.WriteByte 128
+			WriteStr data fileInfo[i][2]
+		)			
+		else
+		(
+			data.WriteByte 0
+		)
 	)
 	
 	return asset
@@ -7983,7 +8005,7 @@ rollout _SEA "SEA3D"
 	button exportButton "Export" pos:[159,106] 		
 	
 	hyperLink __url "sea3d.poonya.com/exporter/" address:("http://sea3d.poonya.com/exporter/?p=3dsmax&v="+(sea_rawversion as string)) align:#center
-	label __copyright "SEA3D 1.7(B) © Sunag Entertainment 2014" align:#center
+	label __copyright "SEA3D 1.7 © Sunag Entertainment 2015" align:#center
 		
 	on compressItem changed s do
 	(
@@ -8774,6 +8796,9 @@ rollout _SEAUtils "Utils"
 	
 	on saveButton pressed do
 	(
+		if seaconfig == undefined do
+			seaconfig = dotNetObject "Poonya.Utils.Hashmap"
+		
 		SaveSEA3DExporterConfig seaconfig
 		SaveSEA3DConfig()
 	)
@@ -8825,8 +8850,8 @@ rollout _SEAFileInfo "File Info"
 	
 	groupbox grp1 "Summary" pos:[7,27] width:200 height:140
 	
-	label _title "Title" pos:[15,41]
-	edittext _titleField pos:[15,60] width:180 text:seaconfig_fileinfo[2] enabled:seaconfig_fileinfo[1]	
+	label _name "Name" pos:[15,41]
+	edittext _nameField pos:[15,60] width:180 text:seaconfig_fileinfo[2] enabled:seaconfig_fileinfo[1]	
 	
 	label _author "Author / Copyright" pos:[15,82] 
 	edittext _authorField pos:[15,101] width:180 text:seaconfig_fileinfo[3] enabled:seaconfig_fileinfo[1]	
@@ -8850,11 +8875,11 @@ rollout _SEAFileInfo "File Info"
 	
 	on _enabled changed s do
 	(
-		_titleField.enabled = _authorField.enabled = _websiteField.enabled = seaconfig_fileinfo[1] = s
+		_nameField.enabled = _authorField.enabled = _websiteField.enabled = seaconfig_fileinfo[1] = s
 		updateRolloutSize()
 	)
 	
-	on _titleField changed s do seaconfig_fileinfo[2] = s	
+	on _nameField changed s do seaconfig_fileinfo[2] = s	
 	on _authorField changed s do seaconfig_fileinfo[3] = s	
 	on _websiteField changed s do seaconfig_fileinfo[4] = s	
 )

@@ -22,18 +22,18 @@ package sunag.sea3d.controllers
 		public function TopNavitation(camera:OrthographicCamera)
 		{
 			_camera = camera;			
-			_camera.view3d.addEventListener(MouseEvent.MOUSE_DOWN, onViewMouseDown);			
-			_camera.view3d.addEventListener(Event.ENTER_FRAME, onFrame);
-			SEA3DGP.content.addEventListener(MouseEvent.MOUSE_WHEEL, onViewMouseWheel);
-			SEA3DGP.content.addEventListener(MouseEvent.MIDDLE_MOUSE_DOWN, onViewMouseMiddleDown);
+			SEA3DGP.area.addEventListener(MouseEvent.MOUSE_DOWN, onViewMouseDown);			
+			SEA3DGP.area.addEventListener(Event.ENTER_FRAME, onFrame);
+			SEA3DGP.area.addEventListener(MouseEvent.MOUSE_WHEEL, onViewMouseWheel);
+			SEA3DGP.area.addEventListener(MouseEvent.MIDDLE_MOUSE_DOWN, onViewMouseMiddleDown);
 		}				
 		
 		override public function dispose():void
 		{			
-			_camera.view3d.removeEventListener(MouseEvent.MOUSE_DOWN, onViewMouseDown);			
-			_camera.view3d.removeEventListener(Event.ENTER_FRAME, onFrame);
-			SEA3DGP.content.removeEventListener(MouseEvent.MOUSE_WHEEL, onViewMouseWheel);
-			SEA3DGP.content.removeEventListener(MouseEvent.MIDDLE_MOUSE_DOWN, onViewMouseMiddleDown);			
+			SEA3DGP.area.removeEventListener(MouseEvent.MOUSE_DOWN, onViewMouseDown);			
+			SEA3DGP.area.removeEventListener(Event.ENTER_FRAME, onFrame);
+			SEA3DGP.area.removeEventListener(MouseEvent.MOUSE_WHEEL, onViewMouseWheel);
+			SEA3DGP.area.removeEventListener(MouseEvent.MIDDLE_MOUSE_DOWN, onViewMouseMiddleDown);			
 		}
 		
 		protected function onFrame(e:Event):void
@@ -71,6 +71,9 @@ package sunag.sea3d.controllers
 		
 		sea3dgp function onViewMouseDown(e:MouseEvent):void
 		{
+			if (!inView(_camera.view3d))
+				return;
+			
 			SEA3DGP.mouseEnabled = mousePickerOnMove;
 			
 			_referenceX = SEA3DGP.stage.mouseX;
@@ -103,6 +106,9 @@ package sunag.sea3d.controllers
 		
 		sea3dgp function onViewMouseWheel(e:MouseEvent):void
 		{
+			if (!inView(_camera.view3d))
+				return;
+			
 			_camera.lens.projectionHeight += -e.delta * 10;
 			
 			if (_camera.lens.projectionHeight < 100) 

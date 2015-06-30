@@ -175,7 +175,7 @@ package away3d.containers
 			notifySceneChange();
 		}
 		
-		private function notifySceneTransformChange():void
+		arcane function notifySceneTransformChange():void
 		{
 			if (_sceneTransformDirty || _ignoreTransform)
 				return;

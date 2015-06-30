@@ -1,10 +1,13 @@
 package sunag.sea3d.framework
 {
+	import flash.geom.Vector3D;
+	
 	import awayphysics.dynamics.AWPRigidBody;
-	import awayphysics.events.AWPEvent;
 	
 	import sunag.sea3dgp;
 	import sunag.sea3d.engine.SEA3DGP;
+	import sunag.sea3d.objects.SEAObject;
+	import sunag.sea3d.objects.SEARigidBody;
 	
 	use namespace sea3dgp;
 	
@@ -17,6 +20,7 @@ package sunag.sea3d.framework
 		
 		sea3dgp var _linearDamping:Number = 0;
 		sea3dgp var _angularDamping:Number = 0;
+		sea3dgp var _rollingFriction:Number = 0;
 		
 		public function RigidBody(shape:Shape=null, target:Object3D=null, mass:Number=0)
 		{
@@ -24,6 +28,21 @@ package sunag.sea3d.framework
 			
 			this.shape = shape;
 			this.target = target;					
+		}
+		
+		override sea3dgp function load(sea:SEAObject):void
+		{
+			super.load(sea);
+			
+			//
+			//	RIGID BODY
+			//
+			
+			var seaRb:SEARigidBody = sea as SEARigidBody;				
+			
+			rb.mass = seaRb.mass;
+			rb.friction = seaRb.friction
+			rb.restitution = seaRb.restitution;
 		}
 		
 		sea3dgp override function setScene(scene:Scene3D):void
@@ -43,7 +62,7 @@ package sunag.sea3d.framework
 			{
 				_scene.physics.push( this );
 				
-				SEA3DGP.world.addRigidBody( rb );				
+				SEA3DGP.world.addRigidBodyWithGroup( rb, groupId, maskId );				
 			}
 		}
 		
@@ -64,15 +83,41 @@ package sunag.sea3d.framework
 				rb.restitution = _restitution;
 				rb.linearDamping = _linearDamping;
 				rb.angularDamping = _angularDamping;
+				rb.rollingFriction = _rollingFriction;
 				rb.extra = this;
 				
 				updateCallback();
 				
 				if (_scene)
 				{
-					SEA3DGP.world.addRigidBody( rb );
+					SEA3DGP.world.addRigidBodyWithGroup( rb, groupId, maskId );
 				}
 			}
+		}
+		
+		public function set angularVelocity(val:Vector3D):void
+		{
+			rb.angularVelocity = val;
+		}
+		
+		public function get angularVelocity():Vector3D
+		{
+			return rb.angularVelocity;
+		}
+		
+		public function set linearVelocity(val:Vector3D):void
+		{
+			rb.linearVelocity = val;
+		}
+		
+		public function get linearVelocity():Vector3D
+		{
+			return rb.linearVelocity;
+		}
+		
+		public function applyCentralImpulse(impulse:Vector3D):void
+		{
+			rb.applyCentralImpulse(impulse);
 		}
 		
 		public function set mass(val:Number):void
@@ -123,6 +168,34 @@ package sunag.sea3d.framework
 		public function get angularDamping():Number
 		{			
 			return _angularDamping;
+		}
+		
+		public function set rollingFriction(val:Number):void
+		{			
+			rb.rollingFriction = _rollingFriction = val;
+		}
+		
+		public function get rollingFriction():Number
+		{			
+			return _rollingFriction;
+		}
+		
+		override sea3dgp function copyFrom(asset:Asset):void
+		{
+			super.copyFrom(asset);
+			
+			var rb:RigidBody = asset as RigidBody;
+			
+			mass = rb.mass;
+			friction = rb.friction;
+			restitution = rb.restitution;
+		}
+		
+		override public function clone(force:Boolean=false):Asset
+		{
+			var rb:RigidBody = new RigidBody();
+			rb.copyFrom(this);
+			return rb;
 		}
 	}
 }

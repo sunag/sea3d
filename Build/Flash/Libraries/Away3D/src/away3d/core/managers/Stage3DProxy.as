@@ -1,9 +1,5 @@
 package away3d.core.managers
 {
-	import away3d.arcane;
-	import away3d.debug.Debug;
-	import away3d.events.Stage3DEvent;
-	
 	import flash.display.Shape;
 	import flash.display.Stage3D;
 	import flash.display3D.Context3D;
@@ -14,6 +10,10 @@ package away3d.core.managers
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.geom.Rectangle;
+	
+	import away3d.arcane;
+	import away3d.debug.Debug;
+	import away3d.events.Stage3DEvent;
 
 	use namespace arcane;
 	
@@ -54,6 +54,9 @@ package away3d.core.managers
 		private var _renderSurfaceSelector:int;
 		private var _scissorRect:Rectangle;
 		private var _color:uint;
+		private var _colorRed:Number = 0;
+		private var _colorGreen:Number = 0;
+		private var _colorBlue:Number = 0;
 		private var _backBufferDirty:Boolean;
 		private var _viewPort:Rectangle;
 		private var _enterFrame:Event;
@@ -236,11 +239,7 @@ package away3d.core.managers
 				_backBufferDirty = false;
 			}
 			
-			_context3D.clear(
-				((_color >> 16) & 0xff)/255.0,
-				((_color >> 8) & 0xff)/255.0,
-				(_color & 0xff)/255.0,
-				((_color >> 24) & 0xff)/255.0);
+			_context3D.clear(_colorRed, _colorGreen, _colorBlue);
 			
 			_bufferClear = true;
 		}
@@ -460,6 +459,9 @@ package away3d.core.managers
 		public function set color(color:uint):void
 		{
 			_color = color;
+			_colorRed = ((_color >> 16) & 0xff)/255
+			_colorGreen = ((_color >> 8) & 0xff)/255
+			_colorBlue = (_color & 0xff)/255
 		}
 		
 		/**

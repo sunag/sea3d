@@ -23,12 +23,12 @@
 
 package away3d.textures
 {
+	import flash.geom.Matrix3D;
+	import flash.geom.Vector3D;
+	
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.events.Object3DEvent;
-	
-	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
 	
 	use namespace arcane;
 	

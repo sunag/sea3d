@@ -23,16 +23,19 @@ package sunag.sea3d.framework
 		static sea3dgp var CACHE:Object = {};
 		
 		sea3dgp var stream:Boolean = true;
-		sea3dgp var cache:Boolean = SEA3DGP.config.cacheable;
+		sea3dgp var cache:Boolean = SEA3DGP.config.cacheableScene;
 		sea3dgp var scripts:Vector.<Script> = new Vector.<Script>();
 		sea3dgp var references:Vector.<Reference> = new Vector.<Reference>();
 		sea3dgp var objects:Vector.<IGameObject> = new Vector.<IGameObject>();
-		sea3dgp var physics:Vector.<Physics> = new Vector.<Physics>();
+		sea3dgp var physics:Array = [];
 		sea3dgp var collided:Vector.<Physics> = new Vector.<Physics>();
+		sea3dgp var ray:Vector.<Physics> = new Vector.<Physics>();
+		sea3dgp var isRoot:Boolean = true;
 		
 		sea3dgp var list:Vector.<Asset> = new Vector.<Asset>();
 		sea3dgp var lib:Object = {};	
 				
+		sea3dgp var URL:String;
 		sea3dgp var loader:Scene3DLoader;
 		
 		public function Scene3D()
@@ -142,12 +145,43 @@ package sunag.sea3d.framework
 		
 		private function onLoadCompleteCache(assets:Object):void
 		{
-			for each(var asset:Asset in assets)
+			var asset:Asset,
+				clone:Asset,
+				mesh:Mesh
+			
+			for each(asset in assets)
 			{
 				if (!(asset is Object3D && Object3D(asset).parent))
 				{
-					asset = asset.clone();
-					asset.setScene( this );
+					clone = asset.clone();
+					clone.setScene( this );
+				}				
+			}
+			
+			//
+			//	UPDATE CLONABLE DEPEDENCIES
+			//
+			
+			for each(asset in list)
+			{
+				if (asset is Mesh)
+				{
+					mesh = asset as Mesh;
+					
+					if (mesh.material)
+						mesh.material = getMaterial(mesh.material.name);
+					else if (mesh.multiMtl)
+					{
+						var mats:Array = [];
+						
+						for each(var m:Material in mesh.multiMtl)
+							mats.push(getMaterial(m.name));
+							
+						mesh.multiMaterial = mats;
+					}
+					
+					if (mesh.skeletonReference)
+						mesh.skeletonReference = getMesh(mesh.skeletonReference.name);
 				}
 			}
 			
@@ -171,7 +205,12 @@ package sunag.sea3d.framework
 		
 		public function load( url:String ):void
 		{
-			loadScene( url );
+			loadScene( URL = url );
+		}
+		
+		public function get url():String
+		{
+			return URL;
 		}
 		
 		public function loadMesh( name:String ) : Mesh
@@ -182,6 +221,14 @@ package sunag.sea3d.framework
 			return asset;
 		}
 					
+		public function loadStandardMaterial( name:String ) : StandardMaterial
+		{			
+			var asset:StandardMaterial = loader.getAsset( name + '.mat' ) as StandardMaterial;			
+			if (cache) asset = asset.clone() as StandardMaterial;			
+			asset.setScene( this );
+			return asset;
+		}
+		
 		public function set cacheable(val:Boolean):void
 		{
 			cache = val;
@@ -204,42 +251,32 @@ package sunag.sea3d.framework
 		
 		public function set camera(camera:Camera3D):void
 		{
-			SEA3DGP.setCamera(0, camera);	
+			if (isRoot) SEA3DGP.setCamera(0, camera);	
 		}
 		
 		public function get camera():Camera3D
 		{
-			return SEA3DGP.getCamera(0);
-		}
-		
-		public static function setCamera(camera:Camera3D, screen:int):void
-		{
-			SEA3DGP.setCamera(screen, camera);
-		}
-		
-		public static function getCamera(screen:int):Camera3D
-		{
-			return SEA3DGP.getCamera(screen);
+			return isRoot ? SEA3DGP.getCamera(0) : null;
 		}
 		
 		public function set fog(val:Boolean):void
 		{
-			SEA3DGP.fog = val;
+			if (isRoot) SEA3DGP.fog = val;
 		}
 		
 		public function get fog():Boolean
 		{
-			return SEA3DGP.fog;
+			return isRoot ? SEA3DGP.fog : false;
 		}
 		
 		public function set fogColor(color:Number):void
 		{
-			SEA3DGP.fogColor = color;
+			if (isRoot) SEA3DGP.fogColor = color;
 		}
 		
 		public function get fogColor():Number
 		{
-			return SEA3DGP.fogColor;
+			return isRoot ? SEA3DGP.fogColor : 0;
 		}
 		
 		public function set fogMin(val:Number):void
@@ -249,7 +286,7 @@ package sunag.sea3d.framework
 		
 		public function get fogMin():Number
 		{
-			return SEA3DGP.fogMin;
+			return isRoot ? SEA3DGP.fogMin : 0;
 		}
 		
 		public function set fogMax(min:Number):void
@@ -259,7 +296,7 @@ package sunag.sea3d.framework
 		
 		public function get fogMax():Number
 		{
-			return SEA3DGP.fogMax;
+			return isRoot ? SEA3DGP.fogMax : 0;
 		}
 		
 		public function set environment(cube:CubeMap):void
@@ -269,17 +306,17 @@ package sunag.sea3d.framework
 		
 		public function get environment():CubeMap
 		{
-			return SEA3DGP.environment;
+			return isRoot ? SEA3DGP.environment : null;
 		}
 		
 		public function set environmentColor(color:Number):void
 		{
-			SEA3DGP.environmentColor = color;
+			if (isRoot) SEA3DGP.environmentColor = color;
 		}
 		
 		public function get environmentColor():Number
 		{
-			return SEA3DGP.environmentColor;
+			return isRoot ? SEA3DGP.environmentColor : 0;
 		}
 		
 		public function getAsset(ns:String):Asset
@@ -322,9 +359,44 @@ package sunag.sea3d.framework
 			return lib[Object3D.TYPE+name];
 		}
 		
+		public function getLight(name:String):Light
+		{
+			return lib[Object3D.TYPE+name];
+		}
+		
+		public function getParticleContainer(name:String):ParticleContainer
+		{
+			return lib[Object3D.TYPE+name];
+		}
+		
+		public function getDummy(name:String):Dummy
+		{
+			return lib[Object3D.TYPE+name];
+		}
+		
+		public function getCamera(name:String):Camera3D
+		{
+			return lib[Object3D.TYPE+name];
+		}
+		
 		public function getSkeleton(name:String):Skeleton
 		{
 			return lib[Skeleton.TYPE+name];
+		}
+		
+		public function getShape(name:String):Shape
+		{
+			return lib[Shape.TYPE+name];
+		}
+		
+		public function getSound(name:String):SoundFile
+		{
+			return lib[SoundFile.TYPE+name];
+		}
+		
+		public function getPointSound(name:String):PointSound
+		{
+			return lib[Object3D.TYPE+name];
 		}
 		
 		public function getTexture(name:String):Texture
@@ -342,6 +414,11 @@ package sunag.sea3d.framework
 			return lib;
 		}
 		
+		public function get physic():Array
+		{
+			return physics;
+		}
+		
 		override sea3dgp function setScene(scene:Scene3D):void
 		{
 			if (scene) throw new ReferenceError("This is already a scene");
@@ -352,7 +429,7 @@ package sunag.sea3d.framework
 			return this;
 		}
 		
-		override public function clone():Asset			
+		override public function clone(force:Boolean=false):Asset			
 		{
 			var game:Scene3D = new Scene3D();
 			game.copyFrom( this );			
@@ -366,12 +443,29 @@ package sunag.sea3d.framework
 			var scene:Scene3D = asset as Scene3D;
 						
 			scripts = scene.scripts.concat();
+			
+			for each(var phy:Physics in scene.physics)
+			{
+				addPhysic( phy.clone() as Physics );					
+			}
+			
+			for (var ns:String in scene.lib)
+			{
+				if (!lib[ns])
+				{
+					// non connable object
+					lib[ns] = scene.lib[ns];
+				}
+			}
 		}
 		
 		override public function dispose():void
 		{
 			super.dispose();
 					
+			while(list.length)
+				list[0].dispose();
+			
 			if (loader && loader.deps > 0)
 			{
 				if (cache) loader.removeCallback(onLoadCompleteCache, null, onProgress);

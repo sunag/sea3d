@@ -1,10 +1,16 @@
 package away3d.animators.states
 {
-	import away3d.animators.*;
-	import away3d.animators.data.*;
-	import away3d.animators.nodes.*;
+	import flash.geom.Vector3D;
 	
-	import flash.geom.*;
+	import away3d.arcane;
+	import away3d.animators.IAnimator;
+	import away3d.animators.SkeletonAnimator;
+	import away3d.animators.data.JointPose;
+	import away3d.animators.data.Skeleton;
+	import away3d.animators.data.SkeletonPose;
+	import away3d.animators.nodes.SkeletonClipNode;
+	
+	use namespace arcane;
 	
 	/**
 	 *
@@ -15,9 +21,14 @@ package away3d.animators.states
 		private var _frames:Vector.<SkeletonPose>;
 		private var _skeletonClipNode:SkeletonClipNode;
 		private var _skeletonPose:SkeletonPose = new SkeletonPose();
-		private var _skeletonPoseDirty:Boolean = true;
+		arcane var _skeletonPoseDirty:Boolean = true;
 		private var _currentPose:SkeletonPose;
 		private var _nextPose:SkeletonPose;
+		
+		public function invalidateSkeletonPose():void
+		{
+			_skeletonPoseDirty = true;
+		}
 		
 		/**
 		 * Returns the current skeleton pose frame of animation in the clip based on the internal playhead position.

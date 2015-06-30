@@ -253,10 +253,10 @@ package sunag.sea3d
 		protected function readMaterial(sea:SEAMaterial):void
 		{
 			var mat:IPassMaterial = _config.createMaterial();					
-			
-			mat.repeat = true;
+						
 			mat.smooth = true;			
 			mat.mipmap = _config.mipmap;
+			mat.repeat = sea.repeat;
 			mat.writeDepth = sea.depthMask;
 			mat.autoWriteDepth = _config.autoWriteDepth;
 			

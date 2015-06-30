@@ -27,14 +27,17 @@ package sunag.sea3d.core.assets
 		
 		public function loadBytes(bytes:ByteArray):void
 		{
+			var context:LoaderContext = new LoaderContext(false, new ApplicationDomain())
+			context.allowCodeImport = true;
+				
 			loader = new Loader();
 			loader.contentLoaderInfo.addEventListener(flash.events.Event.COMPLETE, onLoaderComplete);
-			loader.loadBytes(bytes, new LoaderContext(false, new ApplicationDomain()));				
+			loader.loadBytes(bytes, context);				
 		}
 		
 		protected function onLoaderComplete(e:flash.events.Event):void
 		{
-			script = Object(loader.content).GET_SCRIPTS(TopLevel)
+			script = Object(loader.content).GET_SCRIPTS()
 			
 			for each(var scripter:ScripterABC in waiting)
 			{
@@ -52,7 +55,7 @@ package sunag.sea3d.core.assets
 			
 			if (script)
 			{
-				script[abc.method](SEA3DGP.REFERENCE, SEA3DGP.GLOBAL, LOCAL, abc.scope, abc.params);				
+				script[abc.method](TopLevel, SEA3DGP.REFERENCE, SEA3DGP.GLOBAL, LOCAL, abc.scope, abc.params);				
 			}
 			else
 			{

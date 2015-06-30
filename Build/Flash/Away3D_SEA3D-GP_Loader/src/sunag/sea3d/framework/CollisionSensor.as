@@ -32,7 +32,7 @@ package sunag.sea3d.framework
 			{
 				_scene.physics.push( this );
 			
-				SEA3DGP.world.addCollisionObject( scope );				
+				SEA3DGP.world.addCollisionObject( scope, groupId, maskId );				
 			}
 		}
 		
@@ -55,9 +55,16 @@ package sunag.sea3d.framework
 				
 				if (_scene)
 				{
-					SEA3DGP.world.addCollisionObject( scope );
+					SEA3DGP.world.addCollisionObject( scope, groupId, maskId );
 				}
 			}
-		}				
+		}			
+		
+		override public function clone(force:Boolean=false):Asset
+		{
+			var cls:CollisionSensor = new CollisionSensor();
+			cls.copyFrom(this);
+			return cls;
+		}
 	}
 }

@@ -62,8 +62,8 @@ package sunag.sea3d.math
 		
 		public static function angleDifference(x:Number, y:Number):Number
 		{
-			x = x * RADIANS;
-			y = y * RADIANS;
+			x *= RADIANS;
+			y *= RADIANS;
 			return Math.atan2(Math.sin(x-y), Math.cos(x-y)) * DEGREES;
 		}
 		
@@ -72,12 +72,25 @@ package sunag.sea3d.math
 			return Math.abs( angleDifference(angle,target) ) <= area;
 		}
 		
-		public static function zero(val:Number, precision:Number):Number
+		public static function zero(val:Number, precision:Number=1.0E-3):Number
 		{
-			precision = Math.pow(10, precision);
 			var pValue:Number = val < 0 ? -val : val;			
 			if (pValue - precision < 0) val = 0;			
 			return val;			
+		}
+		
+		public static function zeroVector3D(val:flash.geom.Vector3D, precision:Number=1.0E-3):void
+		{
+			var pValue:Number;
+						
+			pValue = val.x < 0 ? -val.x : val.x;			
+			if (pValue - precision < 0) val.x = 0;		
+			
+			pValue = val.y < 0 ? -val.y : val.y;			
+			if (pValue - precision < 0) val.y = 0;
+			
+			pValue = val.z < 0 ? -val.z : val.z;			
+			if (pValue - precision < 0) val.z = 0;		
 		}
 		
 		public static function round(val:Number, precision:Number):Number
@@ -153,6 +166,14 @@ package sunag.sea3d.math
 			return val + ((tar - val) * t);
 		}
 						
+		public static function lerpVector3D(val:flash.geom.Vector3D, tar:flash.geom.Vector3D, t:Number):flash.geom.Vector3D
+		{
+			return new flash.geom.Vector3D(
+				val.x + ((tar.x - val.x) * t),
+				val.y + ((tar.y - val.y) * t),
+				val.z + ((tar.z - val.z) * t));
+		}
+		
 		public static function lerpColor(val:Number, tar:Number, t:Number):Number
 		{
 			var a0:Number = val >> 24 & 0xff;
@@ -192,12 +213,25 @@ package sunag.sea3d.math
 			return angle(val);
 		}
 		
-		public static function physicLerp(val:Number, to:Number, delta:Number, speed:Number):Number			
+		public static function physicLerp(val:Number, to:Number, deltaTime:Number, duration:Number):Number			
 		{
-			return val + ( (to - val) * (speed * delta) );
+			var t:Number = deltaTime/duration;			
+			if (t > 1) t = 1;
+			
+			return val + ((to - val) * t);
+		}	
+		
+		public static function physicLerpVector3D(vec:flash.geom.Vector3D, to:flash.geom.Vector3D, deltaTime:Number, duration:Number):void			
+		{
+			var t:Number = deltaTime/duration;			
+			if (t > 1) t = 1;
+			
+			vec.x = vec.x + ((to.x - vec.x) * t);
+			vec.y = vec.y + ((to.y - vec.y) * t);
+			vec.z = vec.z + ((to.z - vec.z) * t);
 		}
 		
-		public static function physicLerpAngle(val:Number, to:Number, delta:Number, speed:Number):Number			
+		public static function physicLerpAngle(val:Number, to:Number, deltaTime:Number, duration:Number):Number			
 		{				
 			if (Math.abs(val - to) > 180)
 			{
@@ -211,7 +245,10 @@ package sunag.sea3d.math
 				}
 			}
 			
-			return angle( val + ( (to - val) * (speed * delta) ) );			
+			var t:Number = deltaTime/duration;			
+			if (t > 1) t = 1;
+			
+			return angle( val + ((to - val) * t) );			
 		}
 		
 		public static function distance(x1:Number, y1:Number, x2:Number, y2:Number):Number

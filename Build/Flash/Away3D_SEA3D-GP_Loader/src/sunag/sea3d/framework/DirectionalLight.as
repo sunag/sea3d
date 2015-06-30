@@ -23,7 +23,7 @@ package sunag.sea3d.framework
 		
 		sea3dgp var shadowMapper:ShadowMapperBase;
 		sea3dgp var shadowMap:SimpleShadowMapMethodBase;
-		sea3dgp var shadowMapMethod:ShadowMapMethodBase;
+		sea3dgp var shadowMapMethod:ShadowMapMethodBase;				
 		
 		public function DirectionalLight(color:Number=0xFFFFFF, intensity:Number=1)
 		{
@@ -39,6 +39,7 @@ package sunag.sea3d.framework
 			shadowMap.dispose();
 			shadowMapMethod.dispose();
 			dirLight.shadowMapper.dispose();
+			dirLight.castsShadows = false;
 			
 			shadowMap = null;
 			shadowMapMethod = null;												
@@ -49,31 +50,38 @@ package sunag.sea3d.framework
 		
 		protected function createShadow():void
 		{
-			dirLight.shadowMapper = new NearDirectionalShadowMapper(.3);
+			dirLight.shadowMapper = new NearDirectionalShadowMapper(SEA3DGP.config.shadowFadeRatio);
+			dirLight.shadowMapper.depthMapSize = SEA3DGP.config.shadowMaxSize;			
+			dirLight.castsShadows = true;
 			
 			shadowMap = new FilteredShadowMapMethod(dirLight);			
-			shadowMapMethod = new NearShadowMapMethod(shadowMap, .1);
+			shadowMapMethod = new NearShadowMapMethod(shadowMap, SEA3DGP.config.shadowFadeRatio);
+			
+			NearShadowMapMethod(shadowMapMethod).epsilon = .1;
 			
 			SEA3DGP.shadowLight = this;
+			SEA3DGP.events.dispatchEvent(new SEA3DGPEvent(SEA3DGPEvent.INVALIDATE_MATERIAL));
+		}
+		
+		override protected function updateShadow():void
+		{
+			if (dirLight.shadowMapper)			
+				disposeShadow();							
+			
+			if (shd && visible)			
+				createShadow();								
+			
+			SEA3DGP.events.dispatchEvent(new SEA3DGPEvent(SEA3DGPEvent.INVALIDATE_MATERIAL));
 		}
 		
 		override public function set shadow(val:Boolean):void
 		{
-			if (val == shadow && !(SEA3DGP.shadowLight || SEA3DGP.shadowLight == this)) 
+			if (shd == val && !(SEA3DGP.shadowLight || SEA3DGP.shadowLight == this)) 
 				return;
 			
-			if (dirLight.shadowMapper)
-				disposeShadow();
+			shd = val;
 			
-			if (val)			
-				createShadow();								
-			
-			SEA3DGP.events.dispatchEvent(new SEA3DGPEvent(SEA3DGPEvent.INVALIDATE_MATERIAL));	
-		}
-		
-		override public function get shadow():Boolean
-		{
-			return dirLight.shadowMapper != null;
+			updateShadow();
 		}
 		
 		public function set shadowAlpha(alpha:Number):void
@@ -134,8 +142,7 @@ package sunag.sea3d.framework
 		
 		override public function dispose():void
 		{
-			if (dirLight.shadowMapper)
-				disposeShadow();
+			shadow = false;
 			
 			super.dispose();
 		}

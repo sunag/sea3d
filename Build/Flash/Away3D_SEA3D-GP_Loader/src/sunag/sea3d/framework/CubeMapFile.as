@@ -13,7 +13,7 @@ package sunag.sea3d.framework
 	
 	public class CubeMapFile extends CubeMap
 	{
-		sea3dgp var cache:Boolean = SEA3DGP.config.cacheable;
+		sea3dgp var cache:Boolean = SEA3DGP.config.cacheableTexture;
 		sea3dgp var cubeMap:AsynBitmapCubeTexture;		
 		
 		public function CubeMapFile()

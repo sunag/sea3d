@@ -106,6 +106,7 @@ package away3d.materials.utils
 		 * Called if the player is no longer needed
 		 */
 		function dispose():void;
-	
+		
+		function clone():IVideoPlayer;	
 	}
 }

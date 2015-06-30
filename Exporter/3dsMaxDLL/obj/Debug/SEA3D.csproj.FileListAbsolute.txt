@@ -1,0 +1,10 @@
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\SEA3D_SDK\SEA3D\bin\Debug\SEA3D.dll
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\SEA3D_SDK\SEA3D\bin\Debug\SEA3D.pdb
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\SEA3D_SDK\SEA3D\obj\Debug\SEA3D.dll
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\SEA3D_SDK\SEA3D\obj\Debug\SEA3D.pdb
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\SEA3D_SDK\SEA3D\obj\Debug\SEA3D.csprojResolveAssemblyReference.cache
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\SEA3D\bin\Debug\SEA3D.dll
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\SEA3D\bin\Debug\SEA3D.pdb
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\SEA3D\obj\Debug\SEA3D.dll
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\SEA3D\obj\Debug\SEA3D.pdb
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\SEA3D\obj\Debug\SEA3D.csprojResolveAssemblyReference.cache

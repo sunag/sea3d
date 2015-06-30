@@ -20,6 +20,11 @@ package away3d.animators.states
 		private var _baseInput:ISkeletonAnimationState;
 		private var _differenceInput:ISkeletonAnimationState;
 		
+		public function invalidateSkeletonPose():void
+		{
+			_skeletonPoseDirty = true;
+		}
+		
 		/**
 		 * Defines a fractional value between 0 and 1 representing the blending ratio between the base input (0) and difference input (1),
 		 * used to produce the skeleton pose output.

@@ -14,16 +14,24 @@ package away3d.materials.methods
 	public class WrapDiffuseMethod extends BasicDiffuseMethod
 	{
 		private var _wrapDataRegister:ShaderRegisterElement;
+		private var _wrapColorRegister:ShaderRegisterElement;
 		private var _wrapFactor:Number;
+		private var _factor:Number;
+		
+		private var _color:uint;
+		private var _colorR:Number;
+		private var _colorG:Number;
+		private var _colorB:Number;
 		
 		/**
 		 * Creates a new WrapDiffuseMethod object.
 		 * @param wrapFactor A factor to indicate the amount by which the light is allowed to wrap
 		 */
-		public function WrapDiffuseMethod(wrapFactor:Number = .5)
+		public function WrapDiffuseMethod(wrapFactor:Number = .5, color:uint=0)
 		{
 			super();
 			this.wrapFactor = wrapFactor;
+			this.color = color;
 		}
 
 		/**
@@ -33,8 +41,25 @@ package away3d.materials.methods
 		{
 			super.cleanCompilationData();
 			_wrapDataRegister = null;
+			_wrapColorRegister = null;
 		}
 
+		/**
+		 * The color
+		 */
+		public function get color():uint
+		{
+			return _color;
+		}
+		
+		public function set color(value:uint):void
+		{
+			_color = value;
+			_colorR = ((value >> 16) & 0xff)/0xff;
+			_colorG = ((value >> 8) & 0xff)/0xff;
+			_colorB = (value & 0xff)/0xff;
+		}
+		
 		/**
 		 * A factor to indicate the amount by which the light is allowed to wrap.
 		 */
@@ -46,7 +71,7 @@ package away3d.materials.methods
 		public function set wrapFactor(value:Number):void
 		{
 			_wrapFactor = value;
-			_wrapFactor = 1/(value + 1);
+			_factor = 1/(_wrapFactor + 1);
 		}
 
 		/**
@@ -57,6 +82,8 @@ package away3d.materials.methods
 			var code:String = super.getFragmentPreLightingCode(vo, regCache);
 			_isFirstLight = true;
 			_wrapDataRegister = regCache.getFreeFragmentConstant();
+			_wrapColorRegister = regCache.getFreeFragmentConstant();
+			
 			vo.secondaryFragmentConstantsIndex = _wrapDataRegister.index*4;
 			
 			return code;
@@ -69,10 +96,11 @@ package away3d.materials.methods
 		{
 			var code:String = "";
 			var t:ShaderRegisterElement;
+			var c:ShaderRegisterElement;
 			
 			// write in temporary if not first light, so we can add to total diffuse colour
 			if (_isFirstLight)
-				t = _totalLightColorReg;
+				t = _totalLightColorReg;							
 			else {
 				t = regCache.getFreeFragmentVectorTemp();
 				regCache.addFragmentTempUsages(t, 1);
@@ -85,11 +113,19 @@ package away3d.materials.methods
 				"mul " + t + ".xz, " + t + ".w, " + lightDirReg + ".wz\n";
 			
 			if (_modulateMethod != null)
-				code += _modulateMethod(vo, t, regCache, _sharedRegisters);
+				code += _modulateMethod(vo, t, regCache, _sharedRegisters);									
 			
-			code += "mul " + t + ", " + t + ".x, " + lightColReg + "\n";
+			code += "mul " + t + ".xyz, " + t + ".x, " + lightColReg + "\n";
 			
-			if (!_isFirstLight) {
+			//	APPLY COLOR
+			c = regCache.getFreeFragmentVectorTemp();
+			regCache.addFragmentTempUsages(c, 1);			
+			code += "mul " + c + ".xyz, " + t + ".w, " + _wrapColorRegister + ".xyz\n";												
+			code += "add " + t + ".xyz, " + t + ".xyz, " + c + ".xyz\n";
+			regCache.removeFragmentTempUsage(c);
+			// --
+						
+			if (!_isFirstLight) {								
 				code += "add " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + t + ".xyz\n";
 				regCache.removeFragmentTempUsage(t);
 			}
@@ -108,7 +144,11 @@ package away3d.materials.methods
 			var index:int = vo.secondaryFragmentConstantsIndex;
 			var data:Vector.<Number> = vo.fragmentData;
 			data[index] = _wrapFactor;
-			data[index + 1] = 1/(_wrapFactor + 1);
+			data[index + 1] = _factor;
+			
+			data[index + 4] = _colorR;
+			data[index + 5] = _colorG;
+			data[index + 6] = _colorB;
 		}
 	}
 }

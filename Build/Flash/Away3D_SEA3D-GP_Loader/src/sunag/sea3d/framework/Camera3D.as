@@ -23,6 +23,9 @@ package sunag.sea3d.framework
 		
 		public function Camera3D(camera:away3d.cameras.Camera3D, animatorClass:Class=null)
 		{
+			camera.lens.near = SEA3DGP.config.near;
+			camera.lens.far = SEA3DGP.config.far;
+			
 			super(this.camera = camera, animatorClass);
 		}
 		

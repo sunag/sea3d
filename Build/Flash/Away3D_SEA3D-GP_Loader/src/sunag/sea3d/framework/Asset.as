@@ -102,7 +102,7 @@ package sunag.sea3d.framework
 			return _scene;
 		}
 		
-		public function clone():Asset
+		public function clone(force:Boolean=false):Asset
 		{
 			trace("Clone not implemented:", this);
 			return this;			

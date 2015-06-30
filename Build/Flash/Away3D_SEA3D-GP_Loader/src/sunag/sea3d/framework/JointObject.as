@@ -19,14 +19,26 @@ package sunag.sea3d.framework
 			super(jointObj = new away3d.entities.JointObject(null, 0, false));
 		}
 		
+		private function updateInternal():void
+		{
+			if (mesh && _scene)
+			{
+				jointObj.target = mesh.mesh;
+				jointObj.autoUpdate = true;
+			}
+			else
+			{
+				jointObj.autoUpdate = false;
+			}
+		}
+		
 		public function set target(val:Mesh):void
 		{
-			if ((mesh = val)) 
-			{
-				jointObj.target = target.mesh;
-			}
+			if (mesh == val) return;
 			
-			jointObj.autoUpdate = mesh != null;
+			mesh = val;
+			
+			updateInternal();
 		}
 		
 		public function get target():Mesh
@@ -37,7 +49,7 @@ package sunag.sea3d.framework
 		public function set jointIndex(index:Number):void
 		{
 			jointObj.jointIndex = index;
-			jointObj.update();
+			updateInternal();
 		}
 		
 		public function get jointIndex():Number
@@ -48,12 +60,21 @@ package sunag.sea3d.framework
 		public function set jointName(name:String):void
 		{
 			jointObj.jointName = name;
-			jointObj.update();
+			updateInternal();
 		}
 		
 		public function get jointName():String
 		{
 			return jointObj.jointName;
+		}
+		
+		sea3dgp override function setScene(scene:Scene3D):void
+		{
+			super.setScene(scene);
+			
+			target = parent as Mesh;
+			
+			updateInternal();
 		}
 		
 		//
@@ -72,6 +93,22 @@ package sunag.sea3d.framework
 			
 			target = jnt.target.tag;			
 			jointIndex = jnt.joint;
+		}
+		
+		override sea3dgp function copyFrom(asset:Asset):void
+		{
+			super.copyFrom(asset);
+			
+			var jo:JointObject = asset as JointObject;
+			//target = jo.target;
+			jointIndex = jo.jointIndex;			
+		}
+		
+		override public function clone(force:Boolean=false):Asset
+		{
+			var jo:JointObject = new JointObject();		
+			jo.copyFrom(this);
+			return jo;
 		}
 	}
 }

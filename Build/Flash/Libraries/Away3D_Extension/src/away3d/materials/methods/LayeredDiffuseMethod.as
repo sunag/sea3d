@@ -39,15 +39,17 @@ package away3d.materials.methods
 		private var _enabledOffset:Boolean = true;
 		private var _enabledScale:Boolean = true;
 		
+		protected var _layerTexIndex:int = -1;
 		protected var _layers:Vector.<LayeredTexture> = new Vector.<LayeredTexture>();						
 		protected var _layersData:Array;
-				
+		protected var _firstTexture:Boolean;
+		
 		public function LayeredDiffuseMethod()
 		{						
 			super();
 			validLayers();
 		}
-				
+		
 		override arcane function initVO(vo : MethodVO) : void
 		{
 			super.initVO(vo);			
@@ -62,6 +64,7 @@ package away3d.materials.methods
 				}												
 			}
 			
+			vo.needsUV = true;
 			vo.needsSecondaryUV = multiUV;
 		}
 		
@@ -75,21 +78,26 @@ package away3d.materials.methods
 		}
 		
 		public override function set texture(value:Texture2DBase):void
-		{						
-			if (_layers.length > 0)			
-				super.texture = _layers[0].texture = value;			
+		{		
+			if (_layers.length > 0)	
+			{
+				if (Boolean(_layers[0].texture) != Boolean(value))
+					invalidateShaderProgram();
+			
+				if (_layers.length > 0)			
+					super.texture = _layers[0].texture = value;			
+			}
 			
 			validLayers();
 		}
-				
+		
 		public function addLayer(layer:LayeredTexture):void
 		{
 			_layers.push(layer);
-					
+			
 			layer.addEventListener(Event.CHANGE, onLayerChange);
 			
 			validLayers();
-			validTextures();
 			invalidateShaderProgram();
 		}
 		
@@ -100,7 +108,6 @@ package away3d.materials.methods
 			layer.removeEventListener(Event.CHANGE, onLayerChange);
 			
 			validLayers();
-			validTextures();
 			invalidateShaderProgram();
 		}
 		
@@ -136,14 +143,39 @@ package away3d.materials.methods
 			return layers;
 		}
 		
-		private function validTextures():void
+		private function validLayers():void
 		{
-			var texBase:Texture2DBase = _layers.length > 0 ? _layers[0].texture : null;
+			var texBase:Texture2DBase;
 			
-			_useTexture = texBase != null;
+			_layerTexIndex = -1;			
 			
-			if (texture != texBase) 
-				texture = texBase;				
+			var usesOffset:Boolean = false;
+			var usesScale:Boolean = false;
+			
+			for (var i:int = 0; i < _layers.length; i++)
+			{
+				var layer:LayeredTexture = _layers[i];
+				
+				if (_layerTexIndex == -1 && layer._texture)
+				{
+					_layerTexIndex = i;
+				}
+				
+				if (layer._offsetU != 0 && layer._offsetV != 0)
+				{
+					usesOffset = true;
+				}
+				
+				if (layer._scaleU != 1 && layer._scaleV != 1)
+				{
+					usesScale = true;
+				}
+			}
+			
+			enabledOffset = usesOffset;
+			enabledScale = usesScale;			
+							
+			_useTexture = _layerTexIndex > -1;		
 		}
 		
 		override public function copyFrom(method : ShadingMethodBase) : void
@@ -152,12 +184,6 @@ package away3d.materials.methods
 			alphaThreshold = diff.alphaThreshold;
 			diffuseAlpha = diff.diffuseAlpha;
 			diffuseColor = diff.diffuseColor;
-		}
-		
-		private function validLayers():void
-		{
-			if (_layers.length > 4) 
-				throw new Error("More than 4 layers is not supported!");
 		}
 		
 		public function set enabledOffset(value:Boolean):void
@@ -199,7 +225,7 @@ package away3d.materials.methods
 				if (_shadowRegister)
 					code += "mul " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + _shadowRegister + ".w\n";
 				code += "add " + targetReg + ".xyz, " + _totalLightColorReg + ".xyz, " + targetReg + ".xyz\n" +
-					"sat " + targetReg + ".xyz, " + targetReg + ".xyz\n";
+						"sat " + targetReg + ".xyz, " + targetReg + ".xyz\n";
 				regCache.removeFragmentTempUsage(_totalLightColorReg);
 				
 				target = regCache.getFreeFragmentVectorTemp();
@@ -208,8 +234,6 @@ package away3d.materials.methods
 			else
 				target = targetReg;
 			
-			if (!_useTexture) 
-				throw new Error("LayeredDiffuseMethod requires a diffuse texture!");
 			
 			// CreatTemp
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
@@ -240,43 +264,55 @@ package away3d.materials.methods
 			var half : String = constReg + ".y";
 			
 			var texReg : ShaderRegisterElement, maskReg : ShaderRegisterElement;
+			var uvReg : ShaderRegisterElement;
 			
 			vo.fragmentConstantsIndex = constReg.index*4;			
 			
-			// First Layer
-			_diffuseInputRegister = regCache.getFreeTextureReg();		
-			vo.texturesIndex = _diffuseInputRegister.index;
+			_firstTexture = false;
 			
-			// layers
-			layersDic[_layers[0].texture] = _diffuseInputRegister;
-			addLayerData(_diffuseInputRegister.index, _layers[0].texture);			
-			
-			var uvReg : ShaderRegisterElement;
-			
-			uvReg = _layers[0].textureUVChannel > 0 ? 
-				_sharedRegisters.secondaryUVVarying : 
-				_sharedRegisters.uvVarying;
-			
-			// First Layer Code
-			code += "mov " + temp + ".zw , " + uvReg + ".zw\n";
-			
-			if (_enabledOffset)
+			if (_layers[0].texture)
 			{
-				code +=	"add " + temp + ".x , " + uvReg + ".x , " + offsetUReg + ".x\n" +
-						"add " + temp + ".y , " + uvReg + ".y , " + offsetVReg + ".x\n";
+				// First Layer
+				_diffuseInputRegister = regCache.getFreeTextureReg();		
+				
+				vo.texturesIndex = _diffuseInputRegister.index;
+				_firstTexture = true;
+				
+				// layers
+				layersDic[_layers[0].texture] = _diffuseInputRegister;
+				addLayerData(_diffuseInputRegister.index, _layers[0].texture);			
+				
+				uvReg = _layers[0].textureUVChannel > 0 ? 
+					_sharedRegisters.secondaryUVVarying : 
+					_sharedRegisters.uvVarying;
+				
+				// First Layer Code
+				code += "mov " + temp + ".zw , " + uvReg + ".zw\n";
+				
+				if (_enabledOffset)
+				{
+					code +=	"add " + temp + ".x , " + uvReg + ".x , " + offsetUReg + ".x\n" +
+							"add " + temp + ".y , " + uvReg + ".y , " + offsetVReg + ".x\n";
+				}
+				else
+				{
+					code +=	"mov " + temp + ".xy , " + uvReg + ".xy\n";
+				}
+				
+				if (_enabledScale)
+					code += "mul " + temp + ".x , " + temp + ".x , " + scaleUReg + ".x\n" +
+							"mul " + temp + ".y , " + temp + ".y , " + scaleVReg + ".x\n";
+				
+				code += getSplatSampleCode(vo, target, _diffuseInputRegister, temp, _layers[0].repeat);
+				
+				code += "mul " + target + ".w , " + target + ".w , " + alphaReg + ".x\n";						
 			}
 			else
 			{
-				code +=	"mov " + temp + ".xy , " + uvReg + ".xy\n";
+				var colorFReg:ShaderRegisterElement = regCache.getFreeFragmentConstant();
+				code += "mov " + target + ", " + colorFReg + "\n";
+				code += "mul " + target + ".w , " + target + ".w , " + alphaReg + ".x\n";
 			}
-			
-			if (_enabledScale)
-				code += "mul " + temp + ".x , " + temp + ".x , " + scaleUReg + ".x\n" +
-						"mul " + temp + ".y , " + temp + ".y , " + scaleVReg + ".x\n";
-					
-			code += getSplatSampleCode(vo, target, _diffuseInputRegister, temp, _layers[0].repeat);
-									
-			code += "mul " + target + ".w , " + target + ".w , " + alphaReg + ".x\n";						
 			
 			// alpha
 			if (_layers[0].mask)
@@ -288,53 +324,81 @@ package away3d.materials.methods
 				if (!layersDic[_layers[0].mask])
 				{
 					layersDic[_layers[0].mask] = maskReg = regCache.getFreeTextureReg();
+					
+					if (!_firstTexture)
+					{
+						vo.texturesIndex = maskReg.index;
+						_firstTexture = true;
+					}
+					
 					addLayerData(maskReg.index, _layers[0].mask);									
 				}
 				else maskReg = layersDic[_layers[0].mask];
 				
 				code += getSplatSampleCode(vo, temp2, maskReg, uvReg, _layers[0].repeat) + 	
-						"mul " + target + ".w , " + target + ".w , " + temp2 + ".x\n";								
+					"mul " + target + ".w , " + target + ".w , " + temp2 + ".x\n";								
 			}
 			
 			var comps : Array = [ ".x",".y",".z",".w" ];
 			for(var i:int=1;i<_layers.length;i++)
 			{
 				var layer:LayeredTexture = _layers[i];
-												
-				if (!layersDic[layer.texture])				
-				{
-					layersDic[layer.texture] = texReg = regCache.getFreeTextureReg();
-					addLayerData(texReg.index, layer.texture);				
-				}
-				else texReg = layersDic[layer.texture];				
 				
-				uvReg = _layers[i].textureUVChannel > 0 ? 
-					_sharedRegisters.secondaryUVVarying : 
-					_sharedRegisters.uvVarying;
-				
-				if (_enabledOffset)
+				if (layer.texture)
 				{
-					code += "add " + temp + ".x , " + uvReg + ".x , " + offsetUReg + comps[i] + "\n" +
-							"add " + temp + ".y , " + uvReg + ".y , " + offsetVReg + comps[i] + "\n";
+					if (!_firstTexture)
+					{
+						vo.texturesIndex = _diffuseInputRegister.index;
+						_firstTexture = true;
+					}
+					
+					if (!layersDic[layer.texture])				
+					{
+						layersDic[layer.texture] = texReg = regCache.getFreeTextureReg();
+						
+						if (!_firstTexture)
+						{
+							vo.texturesIndex = texReg.index;
+							_firstTexture = true;
+						}
+						
+						addLayerData(texReg.index, layer.texture);				
+					}
+					else texReg = layersDic[layer.texture];				
+					
+					uvReg = _layers[i].textureUVChannel > 0 ? 
+						_sharedRegisters.secondaryUVVarying : 
+						_sharedRegisters.uvVarying;
+					
+					if (_enabledOffset)
+					{
+						code += "add " + temp + ".x , " + uvReg + ".x , " + offsetUReg + comps[i] + "\n" +
+								"add " + temp + ".y , " + uvReg + ".y , " + offsetVReg + comps[i] + "\n";
+					}
+					else
+					{
+						code +=	"mov " + temp + ".xy , " + uvReg + ".xy\n";
+					}
+					
+					if (_enabledScale)
+					{
+						code +=	"mul " + temp + ".x , " + temp + ".x , " + scaleUReg + comps[i] + "\n" +
+								"mul " + temp + ".y , " + temp + ".y , " + scaleVReg + comps[i] + "\n";
+					}
+					
+					code += getSplatSampleCode(vo, blend, texReg, temp, layer.repeat);
 				}
 				else
 				{
-					code +=	"mov " + temp + ".xy , " + uvReg + ".xy\n";
+					var colorReg:ShaderRegisterElement = regCache.getFreeFragmentConstant();
+					code += "mov " + blend + ", " + colorReg + "\n";
 				}
 				
-				if (_enabledScale)
-				{
-					code +=	"mul " + temp + ".x , " + temp + ".x , " + scaleUReg + comps[i] + "\n" +
-							"mul " + temp + ".y , " + temp + ".y , " + scaleVReg + comps[i] + "\n";
-				}
-						
-				code += getSplatSampleCode(vo, blend, texReg, temp, layer.repeat);
-						
 				// Blending		
 				if (layer.blendMode != LayeredTexture.NORMAL)
 				{				
 					var baseColor:ShaderRegisterElement, blendColor:ShaderRegisterElement,
-						blendLum:String, baseLum:String, minRGB:String, maxRGB:String;
+					blendLum:String, baseLum:String, minRGB:String, maxRGB:String;
 					
 					// Reference
 					// https://github.com/Barliesque/EasyAGAL/blob/master/src/com/barliesque/shaders/macro/Blend.as
@@ -408,10 +472,10 @@ package away3d.materials.methods
 								"mul " + temp2 + ".xyz , " + temp2 + ".xyz , " + temp + ".xyz\n" +
 								"add " + temp2 + ".xyz , " + temp2 + ".xyz , " + temp2 + ".xyz\n" +
 								"sub " + temp2 + ".xyz , " + one + " , " + temp2 + ".xyz\n" +
-								
-								// (source >= .5) = 1 or 0
+						
+						// (source >= .5) = 1 or 0
 								"sge " + temp + ".xyz , " + target + ".xyz , " + half + "\n" +
-								// temp = 1 or 0
+						// temp = 1 or 0
 								"mul " + blend + ".xyz , " + temp2 + ".xyz , " + temp2 + ".xyz\n";*/
 						
 						case LayeredTexture.OVERLAY:
@@ -433,19 +497,19 @@ package away3d.materials.methods
 									"mul " + temp2 + ".xyz , " + temp2 + ".xyz , " + temp + ".xyz\n" +
 									"add " + temp2 + ".xyz , " + temp2 + ".xyz , " + temp2 + ".xyz\n" +
 									"sub " + temp2 + ".xyz , " + one + " , " + temp2 + ".xyz\n" +
-						
-									// (source >= .5) = 1 or 0
+							
+							// (source >= .5) = 1 or 0
 									"sge " + temp + ".xyz , " + baseColor + ".xyz , " + half + "\n" +
-									// temp = 1 or 0
+							// temp = 1 or 0
 									"mul " + temp + ".xyz , " + temp2 + ".xyz , " + temp + ".xyz\n" +
 							
 							// Low:  temp2 = 2 * base * blend									
 									"mul " + temp2 + ".xyz , " + blendColor + ".xyz , " + baseColor + ".xyz\n" +
 									"add " + temp2 + ".xyz , " + temp2 + ".xyz , " + temp2 + ".xyz\n" +
-									
-									// (source < .5) = 1 or 0
-									// temp.x = 1 or 0 
-									// no slot avalible =S
+							
+							// (source < .5) = 1 or 0
+							// temp.x = 1 or 0 
+							// no slot avalible =S
 									"slt " + temp2 + ".w , " + baseColor + ".x , " + half + "\n" +									
 									"mul " + temp2 + ".x , " + temp2 + ".x , " + temp2 + ".w\n" +
 									
@@ -456,41 +520,41 @@ package away3d.materials.methods
 									"mul " + temp2 + ".z , " + temp2 + ".z , " + temp2 + ".w\n" +
 							
 							// High or Low?							
-									// ...and combine results
+							// ...and combine results
 									"add " + blend + ".xyz , " + temp + ".xyz , " + temp2 + ".xyz\n";						
 							break;
 						
 						/*case "pinlight":
-							// darken = min(base, 2*Blend);
-							code += "add " + temp2 + ".xyz , " + blend + ".xyz , " + blend + ".xyz\n" +									
-									"min " + temp2 + ".xyz , " + target + ".xyz , " + temp2 + ".xyz\n" +
-									
-									// (source >= .5) = 1 or 0
-									"sge " + temp + ".xyz , " + baseColor + ".xyz , " + half + "\n" +
-									// temp = 1 or 0
-									"mul " + temp + ".xyz , " + temp2 + ".xyz , " + temp + ".xyz\n" +
-									
-									// lighten = max(base, 2*Blend-1)
-									"add " + temp2 + ".xyz , " + blend + ".xyz , " + blend + ".xyz\n" +	
-									"sub " + temp2 + ".xyz , " + temp2 + ".xyz , " + one + "\n" +
-									"max " + temp2 + ".xyz , " + temp2 + ".xyz , " + target + ".xyz\n" +
-									
-									// (source < .5) = 1 or 0
-									// temp.x = 1 or 0 
-									// no slot avalible =S
-									"slt " + temp2 + ".w , " + baseColor + ".x , " + half + "\n" +									
-									"mul " + temp2 + ".x , " + temp2 + ".x , " + temp2 + ".w\n" +
-									
-									"slt " + temp2 + ".w , " + baseColor + ".y , " + half + "\n" +									
-									"mul " + temp2 + ".y , " + temp2 + ".y , " + temp2 + ".w\n" +
-									
-									"slt " + temp2 + ".w , " + baseColor + ".z , " + half + "\n" +									
-									"mul " + temp2 + ".z , " + temp2 + ".z , " + temp2 + ".w\n" +
-									
-									// High or Low?							
-									// ...and combine results
-									"add " + blend + ".xyz , " + temp + ".xyz , " + temp2 + ".xyz\n";
-							break;*/
+						// darken = min(base, 2*Blend);
+						code += "add " + temp2 + ".xyz , " + blend + ".xyz , " + blend + ".xyz\n" +									
+								"min " + temp2 + ".xyz , " + target + ".xyz , " + temp2 + ".xyz\n" +
+						
+						// (source >= .5) = 1 or 0
+								"sge " + temp + ".xyz , " + baseColor + ".xyz , " + half + "\n" +
+						// temp = 1 or 0
+								"mul " + temp + ".xyz , " + temp2 + ".xyz , " + temp + ".xyz\n" +
+						
+						// lighten = max(base, 2*Blend-1)
+								"add " + temp2 + ".xyz , " + blend + ".xyz , " + blend + ".xyz\n" +	
+								"sub " + temp2 + ".xyz , " + temp2 + ".xyz , " + one + "\n" +
+								"max " + temp2 + ".xyz , " + temp2 + ".xyz , " + target + ".xyz\n" +
+						
+						// (source < .5) = 1 or 0
+						// temp.x = 1 or 0 
+						// no slot avalible =S
+								"slt " + temp2 + ".w , " + baseColor + ".x , " + half + "\n" +									
+								"mul " + temp2 + ".x , " + temp2 + ".x , " + temp2 + ".w\n" +
+						
+								"slt " + temp2 + ".w , " + baseColor + ".y , " + half + "\n" +									
+								"mul " + temp2 + ".y , " + temp2 + ".y , " + temp2 + ".w\n" +
+								
+								"slt " + temp2 + ".w , " + baseColor + ".z , " + half + "\n" +									
+								"mul " + temp2 + ".z , " + temp2 + ".z , " + temp2 + ".w\n" +
+						
+						// High or Low?							
+						// ...and combine results
+								"add " + blend + ".xyz , " + temp + ".xyz , " + temp2 + ".xyz\n";
+						break;*/
 						
 						case LayeredTexture.HARDMIX:
 							code += "sub " + blend + ".xyz , " + one + " , " + blend + ".xyz\n" +
@@ -570,7 +634,7 @@ package away3d.materials.methods
 							{
 								code += "slt " + temp2 + ".w , " + blendLum + " , " + baseLum + "\n" +
 										"mul " + temp2 + ".xyz , " + blend + ".xyz , " + baseLum + ".w\n" +
-										
+									
 										"sge " + temp + ".w , " + blendLum + " , " + baseLum + "\n" +
 										"mul " + temp2 + ".xyz , " + target + ".xyz , " + temp + ".w\n";
 							}
@@ -578,11 +642,11 @@ package away3d.materials.methods
 							{
 								code += "slt " + temp2 + ".w , " + blendLum + " , " + baseLum + "\n" +
 										"mul " + temp2 + ".xyz , " + target + ".xyz , " + baseLum + ".w\n" +
-										
+									
 										"sge " + temp + ".w , " + blendLum + " , " + baseLum + "\n" +
 										"mul " + temp2 + ".xyz , " + blend + ".xyz , " + temp + ".w\n";
 							}
-									
+							
 							code += "mul " + temp2 + ".xyz , " + target + ".xyz , " + temp + ".xyz\n";									
 							break;
 					}
@@ -594,6 +658,13 @@ package away3d.materials.methods
 					if (!layersDic[layer.mask])				
 					{
 						layersDic[layer.mask] = maskReg = regCache.getFreeTextureReg();
+						
+						if (!_firstTexture)
+						{
+							vo.texturesIndex = maskReg.index;
+							_firstTexture = true;
+						}
+						
 						addLayerData(maskReg.index, layer.mask);				
 					}
 					else maskReg = layersDic[layer.mask];
@@ -603,7 +674,7 @@ package away3d.materials.methods
 						_sharedRegisters.uvVarying;
 					
 					code += getSplatSampleCode(vo, temp2, maskReg, uvReg, layer.repeat) + 	
-							"mul " + temp2 + ".x , " + temp2 + ".x , " + alphaReg + comps[i] + "\n";					
+						"mul " + temp2 + ".x , " + temp2 + ".x , " + alphaReg + comps[i] + "\n";					
 				}	
 				else
 				{
@@ -611,12 +682,12 @@ package away3d.materials.methods
 				}	
 				
 				code += "mul " + temp2 + ".x , " + temp2 + ".x , " + blend + ".w\n" +				
-						"sub " + temp2 + ".y , " + one + " , " + temp2 + ".x\n"; // invert alpha
+					"sub " + temp2 + ".y , " + one + " , " + temp2 + ".x\n"; // invert alpha
 				
 				// mix = invIntensity * backPixel + intensity * blendImg
 				code += "mul " + blend + " , " + blend + " , " + temp2 + ".x\n" +
-						"mul " + target + " , " + target + " , " + temp2 + ".y\n" + 						
-						"add " + target + " , " + target + " , " + blend + "\n";
+					"mul " + target + " , " + target + " , " + temp2 + ".y\n" + 						
+					"add " + target + " , " + target + " , " + blend + "\n";
 			}
 			
 			// RemoveTemp
@@ -628,43 +699,57 @@ package away3d.materials.methods
 				return code;
 			
 			code += "mul " + targetReg + ".xyz, " + target + ".xyz, " + targetReg + ".xyz\n" +
-					"mov " + targetReg + ".w, " + target + ".w\n";
+				"mov " + targetReg + ".w, " + target + ".w\n";
 			
 			regCache.removeFragmentTempUsage(target);
-						
+			
 			return code;
 		}
 		
 		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
-		{									
+		{	
+			var i:int;
 			var data : Vector.<Number> = vo.fragmentData;
 			var index : int = vo.fragmentConstantsIndex;
 			
 			for each(var tex:Object in _layersData)
 			{
 				stage3DProxy._context3D.setTextureAt(tex.index, tex.texture.getTextureForStage3D(stage3DProxy));
-			}
+			}								
 			
-			for (var i:int=0;i<_layers.length;i++)			
+			for (i=0;i<_layers.length;i++)			
 			{
 				var offset:int = 0;
 				
-				data[index+(offset+=4)+i] = _layers[i].alpha;
+				data[index+(offset+=4)+i] = _layers[i]._alpha;
 				
 				if (_enabledOffset)				
 				{
-					data[index+(offset+=4)+i] = _layers[i].offsetU;
-					data[index+(offset+=4)+i] = _layers[i].offsetV;
+					data[index+(offset+=4)+i] = _layers[i]._offsetU;
+					data[index+(offset+=4)+i] = _layers[i]._offsetV;
 				}
 				
 				if (_enabledScale)
 				{
-					data[index+(offset+=4)+i] = _layers[i].scaleU;
-					data[index+(offset+=4)+i] = _layers[i].scaleV;				
-				}																		
+					data[index+(offset+=4)+i] = _layers[i]._scaleU;
+					data[index+(offset+=4)+i] = _layers[i]._scaleV;				
+				}								
+			}
+			
+			offset += 4;
+			
+			for (i=0;i<_layers.length;i++)
+			{
+				if (!_layers[i].texture)
+				{										
+					data[index + offset++] = _layers[i]._colorR;
+					data[index + offset++] = _layers[i]._colorG;
+					data[index + offset++] = _layers[i]._colorB;
+					data[index + offset++] = 1;
+				}
 			}
 		}
-				
+		
 		protected function getSplatSampleCode(vo : MethodVO, targetReg : ShaderRegisterElement, inputReg : ShaderRegisterElement, uvReg : ShaderRegisterElement, repeat:Boolean = true) : String
 		{
 			// TODO: not used

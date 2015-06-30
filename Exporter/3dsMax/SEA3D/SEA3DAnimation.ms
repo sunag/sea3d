@@ -8,20 +8,22 @@ global sea_anm_data = undefined, sea_anm_objs = undefined, sea_anm_read = undefi
 
 rollout _SEASE "Sequence Editor"
 (
-	listBox sequenceField pos:[9,9] width:200 height:9
+	listBox sequenceField pos:[9,9] width:210 height:9
 	checkbox _enabled "Enabled" pos:[7,140]	
 	label _start "Start" pos:[8,206] width:84 height:13
 	label _end "End" pos:[116,206] width:84 height:13
 	label _name "Name" pos:[9,160] width:84 height:13
 	editText nameField "" pos:[5,179] width:200 height:22
 	spinner startField "" pos:[7,226] width:90 height:16 range:[-100000,100000,0] type:#integer scale:1
-	spinner endField "" pos:[115,226] width:90 height:16 range:[-100000,100000,0] type:#integer scale:1	
-	button addBtn "Add" pos:[146,300] width:60 height:23
-	button removeBtn "Remove" pos:[80,300] width:60 height:23
-	button upBtn "Up" pos:[9,249] width:60 height:23
-	button downBtn "Down" pos:[9,279] width:60 height:23		
+	spinner endField "" pos:[115,226] width:90 height:16 range:[-100000,100000,0] type:#integer scale:1		
+	button upBtn "Up" pos:[9,248] width:63 height:23
+	button downBtn "Down" pos:[9,274] width:63 height:23		
 	checkbox intrplBtn "Interpolation" pos:[82,275] width:128 height:16 --visible:false
 	checkbox repeatBtn "Repeat" pos:[82,252] width:128 height:16
+	button copyBtn "Copy" pos:[9,310] width:30 height:23
+	button pasteBtn "Paste" pos:[42,310] width:30 height:23
+	button addBtn "Add" pos:[146,310] width:60 height:23
+	button removeBtn "Remove" pos:[80,310] width:60 height:23
 	--button solo "Solo" pos:[168,140] width:40 height:16
 	
 	fn writeAnmData =
@@ -32,10 +34,8 @@ rollout _SEASE "Sequence Editor"
 		)			
 	)
 	
-	fn readAnmData = 
+	fn readValidAnmData = 
 	(
-		sea_anm_data = undefined		
-		
 		local data = getUserProp sea_anm_objs[1] DEF_ANIMATION_CONFIG
 		
 		for i = 2 to sea_anm_objs.count do
@@ -47,7 +47,16 @@ rollout _SEASE "Sequence Editor"
 				data = undefined
 				exit
 			)									
-		)		
+		)
+		
+		data
+	)
+	
+	fn readAnmData = 
+	(
+		sea_anm_data = undefined		
+		
+		local data = readValidAnmData()	
 		
 		if data != undefined then
 		(
@@ -109,9 +118,11 @@ rollout _SEASE "Sequence Editor"
 		startField.enabled = 
 		endField.enabled = 
 		repeatBtn.enabled = 		
-		intrplBtn.enabled =
+		intrplBtn.enabled =		
 		_enabled.enabled = seq != undefined
-						
+		
+		copyBtn.enabled =
+		pasteBtn.enabled =
 		addBtn.enabled = $ != undefined
 		
 		if (seq == undefined) then
@@ -268,6 +279,42 @@ rollout _SEASE "Sequence Editor"
 		readSequences()		
 	)
 	
+	on copyBtn pressed do
+	(
+		local data = readValidAnmData()
+
+		if data != undefined do
+		(
+			local clipboardClass = dotNetClass "System.Windows.Forms.Clipboard"
+			clipboardClass.SetText data		
+		)
+	)
+	
+	on pasteBtn pressed do
+	(
+		local clipboardClass = dotNetClass "System.Windows.Forms.Clipboard"		
+		local data = undefined 
+		
+		if clipboardClass.ContainsText() do
+		(
+			data = clipboardClass.GetText()
+		)
+		
+		if data != undefined do
+		(
+			try
+			(
+				seq = dotNetObject "Poonya.Utils.Hashtable"			
+				seq.ReadBase64 data				
+				sea_anm_data = seq
+				
+				writeAnmData()	
+				readSequences()
+			)
+			catch ()
+		)
+	)
+	
 	on addBtn pressed do
 	(		
 		(getSequences()).Add (newSequence "new-sequence" (animationRange.start.frame as integer) (animationRange.end.frame as integer))
@@ -327,6 +374,6 @@ if seaanmfloater != undefined do
 	closerolloutfloater seaanmfloater 
 )
 
-seaanmfloater = newRolloutFloater "SEA3D Animation" 230 358
+seaanmfloater = newRolloutFloater "SEA3D Animation" 230 368
 
 addRollout _SEASE seaanmfloater rolledUp:false

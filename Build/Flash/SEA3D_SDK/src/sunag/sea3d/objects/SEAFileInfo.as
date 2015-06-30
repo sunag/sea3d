@@ -25,32 +25,16 @@ package sunag.sea3d.objects
 {
 	import sunag.sunag;
 	import sunag.sea3d.SEA;
-	import sunag.utils.ByteArrayUtils;
 
 	use namespace sunag;
 	
-	public class SEAFileInfo extends SEAObject
+	public class SEAFileInfo extends SEAPropertiesBase
 	{
-		public static const TYPE:String = "inf";
-		
-		public var info:Object;
+		public static const TYPE:String = "info";
 		
 		public function SEAFileInfo(name:String, sea:SEA)
 		{
-			super(name, TYPE, sea);
-		}
-		
-		public override function load():void
-		{
-			info = {};
-			
-			var count:int = data.readUnsignedByte();
-			
-			for(var i:int=0;i<count;i++)
-			{
-				var name:String = ByteArrayUtils.readUTFTiny(data);				
-				info[name] = ByteArrayUtils.readUTFTiny(data);
-			}
-		}		
+			super(name, sea, TYPE);
+		}	
 	}
 }

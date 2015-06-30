@@ -29,19 +29,20 @@ package away3d.animators
 	 */
 	public class SkeletonAnimator extends AnimatorBase implements IAnimator
 	{
-		private var _globalMatrices:Vector.<Number>;
-		private var _globalPose:SkeletonPose = new SkeletonPose();
-		private var _globalPoseDirty : Boolean;
-		private var _globalMatricesDirty : Boolean;
-		private var _numJoints:uint;
-		private var _animationStates:Dictionary = new Dictionary();
-		private var _condensedMatrices:Vector.<Number>;
+		arcane var _globalMatrices:Vector.<Number>;
+		arcane var _globalPose:SkeletonPose = new SkeletonPose();
+		arcane var _globalPoseDirty : Boolean;
+		arcane var _globalMatricesDirty : Boolean;
+		arcane var _numJoints:uint;
+		arcane var _animationStates:Dictionary = new Dictionary();
+		arcane var _condensedMatrices:Vector.<Number>;
 		
-		private var _skeleton:Skeleton;
-		private var _forceCPU:Boolean;
-		private var _useCondensedIndices:Boolean;
-		private var _jointsPerVertex:uint;
-		private var _activeSkeletonState:ISkeletonAnimationState;
+		arcane var _skeleton:Skeleton;
+		arcane var _forceCPU:Boolean;
+		arcane var _useCondensedIndices:Boolean;
+		arcane var _jointsPerVertex:uint;
+		arcane var _activeSkeletonState:ISkeletonAnimationState;
+		arcane var _usesGPU:Boolean = true;
 		
 		/**
 		 * returns the calculated global matrices of the current skeleton pose.
@@ -50,6 +51,9 @@ package away3d.animators
 		 */
 		public function get globalMatrices():Vector.<Number>
 		{
+			if (_globalPoseDirty)
+				updateGlobalPose();
+			
 			if (_globalMatricesDirty)
 				updateGlobalMatrices();
 			
@@ -216,11 +220,16 @@ package away3d.animators
 					skinnedGeom.updateAnimatedData(subGeomAnimState.animatedVertexData);
 					return;
 				}
-				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _globalMatrices, _numJoints*3);
+				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _globalMatrices, _numJoints*3);				
 			}
 			
 			skinnedGeom.activateJointIndexBuffer(vertexStreamOffset, stage3DProxy);
 			skinnedGeom.activateJointWeightsBuffer(vertexStreamOffset + 1, stage3DProxy);
+		}
+		
+		public function get isGPUCompatibility():Boolean
+		{
+			return _usesGPU;
 		}
 		
 		/**
@@ -229,7 +238,10 @@ package away3d.animators
 		public function testGPUCompatibility(pass:MaterialPassBase):void
 		{
 			if (!_useCondensedIndices && (_forceCPU || _jointsPerVertex > 4 || pass.numUsedVertexConstants + _numJoints*3 > 128))
+			{
+				_usesGPU = false;
 				_animationSet.cancelGPUCompatibility();
+			}
 		}
 		
 		/**
@@ -267,6 +279,17 @@ package away3d.animators
 				while (srcIndex < len)
 					_condensedMatrices[j++] = _globalMatrices[srcIndex++];
 			} while (++i < numJoints);
+		}
+		
+		public function updatePose():SkeletonPose
+		{
+			// update skeleton pose
+			return _activeSkeletonState.getSkeletonPose(_skeleton);
+		}
+		
+		public function invalidateSkeletonPose():void
+		{
+			return _activeSkeletonState.invalidateSkeletonPose();
 		}
 		
 		public function updateGlobalPose() : void

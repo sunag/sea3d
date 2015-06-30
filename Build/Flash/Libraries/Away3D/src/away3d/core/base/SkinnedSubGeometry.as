@@ -136,8 +136,10 @@ package away3d.core.base
 			clone.updateIndexData(_indices.concat());
 			clone.updateJointIndexData(_jointIndexData.concat());
 			clone.updateJointWeightsData(_jointWeightsData.concat());
-			clone._autoDeriveVertexNormals = _autoDeriveVertexNormals;
+			clone._autoDeriveVertexNormals = _autoDeriveVertexNormals;			
 			clone._autoDeriveVertexTangents = _autoDeriveVertexTangents;
+			clone._vertexNormalsDirty = _vertexNormalsDirty;
+			clone._vertexTangentsDirty = _vertexTangentsDirty;
 			clone._numCondensedJoints = _numCondensedJoints;
 			clone._condensedIndexLookUp = _condensedIndexLookUp;
 			clone._condensedJointIndexData = _condensedJointIndexData;

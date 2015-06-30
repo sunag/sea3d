@@ -32,7 +32,7 @@ package sunag.sea3d.framework
 			return lens.projectionHeight;
 		}
 		
-		override public function clone():Asset			
+		override public function clone(force:Boolean=false):Asset			
 		{
 			var asset:OrthographicCamera = new OrthographicCamera();
 			asset.copyFrom( this );

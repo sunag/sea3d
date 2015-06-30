@@ -10,6 +10,7 @@ package sunag.sea3d.framework
 	public class Light extends Object3D
 	{
 		sea3dgp var light:LightBase;
+		sea3dgp var shd:Boolean = false;
 		
 		public function Light(scope:LightBase, animatorClass:Class=null)
 		{
@@ -22,28 +23,49 @@ package sunag.sea3d.framework
 			
 			super.setScene( scene );
 			
+			updateLight();
+		}
+		
+		override public function set visible(val:Boolean):void
+		{			
+			if (visible == val) return;
+			super.visible = val;
+			updateLight();
+		}
+		
+		protected function updateLight():void
+		{
 			var lights:Array = SEA3DGP.lightPicker.lights;
 			
-			if (scene)
+			if ((scene && visible) && lights.indexOf(light) == -1)
 			{
 				lights.push( light );				
 				SEA3DGP.lightPicker.lights = lights;
 			}
-			else
+			else if ((!scene || !visible) && lights.indexOf(light) != -1)
 			{
-				lights.splice( light, 1 );					
+				lights.splice( lights.indexOf(light), 1 );					
 				SEA3DGP.lightPicker.lights = lights;
+			}
+			
+			if (shd)
+			{
+				updateShadow();
 			}
 		}
 		
 		public function set shadow(val:Boolean):void
 		{			
-			
+			shd = val;
 		}
 		
 		public function get shadow():Boolean
 		{
-			return false;
+			return shd;
+		}
+		
+		protected function updateShadow():void
+		{			
 		}
 		
 		override sea3dgp function copyFrom(asset:Asset):void

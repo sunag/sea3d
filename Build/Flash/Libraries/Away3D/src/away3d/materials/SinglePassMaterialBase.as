@@ -12,6 +12,7 @@
 	import away3d.materials.methods.BasicDiffuseMethod;
 	import away3d.materials.methods.BasicNormalMethod;
 	import away3d.materials.methods.BasicSpecularMethod;
+	import away3d.materials.methods.ColorTransformMethod;
 	import away3d.materials.methods.EffectMethodBase;
 	import away3d.materials.methods.ShadowMapMethodBase;
 	import away3d.materials.passes.SuperShaderPass;
@@ -56,7 +57,8 @@
 		 */
 		override public function set writeDepth(value:Boolean):void
 		{
-			super.writeDepth = _screenPass.writeDepth = value;
+			super.writeDepth = value; 
+			_screenPass.writeDepth = value;
 		}
 		
 		/**
@@ -167,6 +169,16 @@
 			_screenPass.colorTransform = value;
 		}
 
+		public function get colorTransformMethod():ColorTransformMethod
+		{
+			return _screenPass.colorTransformMethod;
+		}
+		
+		public function set colorTransformMethod(value:ColorTransformMethod):void
+		{
+			_screenPass.colorTransformMethod = value;
+		}
+		
 		/**
 		 * The method that provides the ambient lighting contribution. Defaults to BasicAmbientMethod.
 		 */

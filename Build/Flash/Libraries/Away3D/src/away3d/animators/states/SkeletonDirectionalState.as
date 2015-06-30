@@ -24,6 +24,11 @@ package away3d.animators.states
 		private var _left:ISkeletonAnimationState;
 		private var _right:ISkeletonAnimationState;
 		
+		public function invalidateSkeletonPose():void
+		{
+			_skeletonPoseDirty = true;
+		}
+		
 		/**
 		 * Defines the direction in degrees of the aniamtion between the forwards (0), right(90) backwards (180) and left(270) input nodes,
 		 * used to produce the skeleton pose output.

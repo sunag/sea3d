@@ -8,7 +8,7 @@ package away3d.materials.methods
 	import away3d.materials.methods.MethodVO;
 	
 	use namespace arcane;
-
+	
 	public class HemisphereLightMethod extends EffectMethodBase
 	{
 		private var _color:uint;
@@ -20,7 +20,7 @@ package away3d.materials.methods
 		private var _groundColorG:Number;
 		private var _groundColorB:Number;
 		private var _intensity:Number;
-
+		
 		public function HemisphereLightMethod(color:uint = 0x99c4ff, groundColor:uint = 0x0f7fff, intensity:Number = .05)
 		{
 			_intensity = intensity
@@ -28,7 +28,7 @@ package away3d.materials.methods
 			this.color = color;
 			this.groundColor = groundColor;
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 */
@@ -43,7 +43,7 @@ package away3d.materials.methods
 			// const 0
 			vo.fragmentData[vo.fragmentConstantsIndex + 11] = 0;
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 */
@@ -52,7 +52,7 @@ package away3d.materials.methods
 			vo.needsNormals = true;
 			vo.needsView = true;
 		}
-
+		
 		public function get color():uint
 		{
 			return _color;
@@ -78,7 +78,7 @@ package away3d.materials.methods
 			_groundColorG = ((_groundColor >> 8) & 0xff)/0xff;
 			_groundColorB = (_groundColor & 0xff)/0xff;
 		}
-
+		
 		public function get intensity():Number
 		{
 			return _intensity;
@@ -88,7 +88,7 @@ package away3d.materials.methods
 		{
 			_intensity = val;
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 */
@@ -104,7 +104,7 @@ package away3d.materials.methods
 			data[index + 5] = _groundColorG;
 			data[index + 6] = _groundColorB;			
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 */
@@ -117,7 +117,7 @@ package away3d.materials.methods
 			var code:String = "";
 			
 			vo.fragmentConstantsIndex = reg1.index*4;
-						
+			
 			//float dotProduct = dot( surfaceNormal.xyz, lightDir.xyz );
 			code += "dp3 " + temp + ".w, " + _sharedRegisters.normalVarying + ".xyz, " + reg3 + ".xyz \n";			
 			
@@ -125,7 +125,7 @@ package away3d.materials.methods
 			code += "mul " + temp + ".w, " + temp + ".w, " + reg2 + ".w \n";
 			code += "add " + temp + ".w, " + temp + ".w, " + reg2 + ".w \n";					
 			//code += "sat " + temp + ".w, " + temp + ".w \n";
-						
+			
 			//vec3 lighting = mix(gnd, sky, weight)
 			code += "mov " + temp + ".xyz, " + reg2 + ".xyz, \n";
 			code += "sub " + temp + ".xyz, " + reg1 + ".xyz, " + temp + ".xyz \n";

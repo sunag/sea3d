@@ -26,7 +26,7 @@ package sunag.utils
 	import flash.utils.IDataInput;
 	import flash.utils.IDataOutput;
 	
-	import sunag.sea3d.objects.SEAObject;
+	import sunag.sea3d.SEA;	
 	
 	public class DataTable
 	{		
@@ -63,7 +63,7 @@ package sunag.utils
 		
 		public static const COLOR_FLOAT:int = 112;	
 		
-		// Variable Size = 128 at 256
+		// Variable Size = 128 at 255
 		public static const STRING_TINY:int = 128;
 		public static const STRING_SHORT:int = 129;
 		public static const STRING_LONG:int = 130;
@@ -102,12 +102,12 @@ package sunag.utils
 				"bounce.in","bounce.out","bounce.inout"
 			]);
 		
-		public static function readObject(data:IDataInput, objects:Vector.<SEAObject>=null):*
+		public static function readObject(data:IDataInput, sea:SEA=null):*
 		{			
-			return readToken(data.readUnsignedByte(), data, objects);
+			return readToken(data.readUnsignedByte(), data, sea);
 		}
 		
-		public static function readToken(type:int, data:IDataInput, objects:Vector.<SEAObject>=null):*
+		public static function readToken(type:int, data:IDataInput, sea:SEA=null):*
 		{						
 			switch(type)
 			{
@@ -170,7 +170,8 @@ package sunag.utils
 					break;
 				
 				case ASSET:
-					return objects[ data.readUnsignedInt() ].tag;		
+					var asset:uint = data.readUnsignedInt();
+					return asset > 0 ? sea.getSEAObject( asset - 1 ).tag : null;		
 					break;
 			}
 						

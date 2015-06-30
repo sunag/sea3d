@@ -44,21 +44,27 @@ package sunag.sea3d
 	import sunag.sea3d.objects.SEAATF;
 	import sunag.sea3d.objects.SEAATFCube;
 	import sunag.sea3d.objects.SEAAnimation;
+	import sunag.sea3d.objects.SEAAssets;
+	import sunag.sea3d.objects.SEAAssetsURL;
 	import sunag.sea3d.objects.SEAComposite;
+	import sunag.sea3d.objects.SEAContainer;
 	import sunag.sea3d.objects.SEAContainer3D;
 	import sunag.sea3d.objects.SEACubeMap;
 	import sunag.sea3d.objects.SEACubeURL;
 	import sunag.sea3d.objects.SEADirectionalLight;
 	import sunag.sea3d.objects.SEAFileInfo;
 	import sunag.sea3d.objects.SEAGIF;
+	import sunag.sea3d.objects.SEAGLSL;
 	import sunag.sea3d.objects.SEAGeometry;
 	import sunag.sea3d.objects.SEAGeometryDelta;
+	import sunag.sea3d.objects.SEAHemisphereLight;
 	import sunag.sea3d.objects.SEAJPEG;
 	import sunag.sea3d.objects.SEAJPEGXR;
 	import sunag.sea3d.objects.SEAJointObject;
 	import sunag.sea3d.objects.SEAMaterial;
 	import sunag.sea3d.objects.SEAMesh;
 	import sunag.sea3d.objects.SEAMesh2D;
+	import sunag.sea3d.objects.SEAMetadata;
 	import sunag.sea3d.objects.SEAMorph;
 	import sunag.sea3d.objects.SEAMorphAnimation;
 	import sunag.sea3d.objects.SEAObject;
@@ -85,7 +91,7 @@ package sunag.sea3d
 		 * Version of the SEA3D in VVSSBB format
 		 * V = Version | S = Subversion | B = Build  		 
 		 */
-		public static const VERSION:int = 16500;
+		public static const VERSION:int = 17000;
 		
 		public var tag:*;
 		
@@ -173,6 +179,9 @@ package sunag.sea3d
 			_streamSequence.addCallback(readHead);
 			_streamSequence.addCallback(readBody);
 			
+			_typeClass[SEAAssets.TYPE] = SEAAssets;
+			_typeClass[SEAAssetsURL.TYPE] = SEAAssetsURL;
+			_typeClass[SEAContainer.TYPE] = SEAContainer;
 			_typeClass[SEACubeMap.TYPE] = SEACubeMap;
 			_typeClass[SEASingleCube.TYPE] = SEASingleCube;
 			_typeClass[SEAPNG.TYPE] = SEAPNG;
@@ -195,16 +204,19 @@ package sunag.sea3d
 			_typeClass[SEAOrthographicCamera.TYPE] = SEAOrthographicCamera;
 			_typeClass[SEAProperties.TYPE] = SEAProperties;		
 			_typeClass[SEADirectionalLight.TYPE] = SEADirectionalLight;			
-			_typeClass[SEAPointLight.TYPE] = SEAPointLight;			
+			_typeClass[SEAPointLight.TYPE] = SEAPointLight;
+			_typeClass[SEAHemisphereLight.TYPE] = SEAHemisphereLight;			
 			_typeClass[SEAMesh2D.TYPE] = SEAMesh2D;
 			_typeClass[SEAGeometry.TYPE] = SEAGeometry;
 			_typeClass[SEAGeometryDelta.TYPE] = SEAGeometryDelta;
 			_typeClass[SEAContainer3D.TYPE] = SEAContainer3D;
 			_typeClass[SEAJointObject.TYPE] = SEAJointObject;
 			_typeClass[SEAPoonyaScript.TYPE] = SEAPoonyaScript;
+			_typeClass[SEAGLSL.TYPE] = SEAGLSL;
 			_typeClass[SEATextureURL.TYPE] = SEATextureURL;
 			_typeClass[SEACubeURL.TYPE] = SEACubeURL;
 			_typeClass[SEAReference.TYPE] = SEAReference;
+			_typeClass[SEAFileInfo.TYPE] = SEAFileInfo;
 			
 			_typeRead[SEAFileInfo.TYPE] = readFileInfo;
 		}
@@ -521,6 +533,24 @@ package sunag.sea3d
 			var flag:uint = _data.readUnsignedByte();
 			var type:String = _data.readUTFBytes(4);
 			var name:String = flag & 1 ? ByteArrayUtils.readUTFTiny(_data) : "";
+			var compressed:Boolean = (flag & 2) != 0;
+			var metabytes:ByteArray = null;
+			
+			if (flag & 8)
+			{
+				var metalen:int = _data.readUnsignedShort();
+				
+				metabytes = new ByteArray();
+				metabytes.endian = Endian.LITTLE_ENDIAN;
+				
+				metabytes.writeBytes(_data, _data.position, metalen);
+				metabytes.position = 0;		
+				
+				if (compressed && _compressionAlgorithm)
+					metabytes.uncompress(_compressionAlgorithm);
+				
+				_data.position += metalen;
+			}
 			
 			var bytes:ByteArray;
 			
@@ -533,18 +563,18 @@ package sunag.sea3d
 			bytes.writeBytes(_data, position, size);
 			bytes.position = 0;			
 			
+			if (compressed && _compressionAlgorithm)
+				bytes.uncompress(_compressionAlgorithm);
+			
 			var seaObject:SEAObject; 									
 			
 			if (_typeClass[type])
 			{				
 				seaObject = new _typeClass[type](name, this);
-				seaObject.compressed = (flag & 2) != 0;
+				seaObject.compressed = compressed;
 				seaObject.streaming = (flag & 4) != 0;
 				
-				if (seaObject.compressed && _compressionAlgorithm)
-					bytes.uncompress(_compressionAlgorithm);
-				
-				seaObject.data = bytes;
+				seaObject.data = bytes;				
 								
 				if (hasEventListener(SEAEvent.LOAD_OBJECT))
 					dispatchEvent(new SEAEvent(SEAEvent.LOAD_OBJECT, seaObject));
@@ -553,17 +583,23 @@ package sunag.sea3d
 				{
 					seaObject.load();
 					
-					/*
 					// only for developer mode
-					if (bytes.bytesAvailable > 0)
-						trace("Caution! Not all data have been processed of the object: \"" + seaObject.filename + "\"");
-					*/
-				}
+					/*if (bytes.bytesAvailable > 0)
+						trace("Caution! Not all data have been processed of the object: \"" + seaObject.filename + "\"");*/					
+				}								
 			}
 			else
 			{
-				seaObject = new SEAObject(name, type, this)
+				seaObject = new SEAObject(name, type, this);	
+				seaObject.data = bytes;
 				trace("Unknown format \"" + type + "\" of file \"" + name + "\". Add a module referring for this format.");
+			}
+			
+			if (metabytes)
+			{
+				seaObject.metadata = new SEAMetadata(seaObject, this);
+				seaObject.metadata.data = metabytes;
+				seaObject.metadata.load();	
 			}
 			
 			seaObject.index = _position;
@@ -807,12 +843,12 @@ package sunag.sea3d
 		 */		
 		public function getFileInfo():Object
 		{
-			return object["file.inf"];
+			return object["Info.info"];
 		}
 		
 		protected function readFileInfo(sea:SEAFileInfo):void
 		{
-			object[sea.filename] = sea.info;
+			object[sea.filename] = sea.tag;
 		}	
 		
 		/**

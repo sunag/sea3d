@@ -26,8 +26,11 @@ package away3d.materials.methods
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	
+	import away3d.arcane;
 	import away3d.textures.Texture2DBase;
 
+	use namespace arcane;
+	
 	public class LayeredTexture extends EventDispatcher
 	{
 		public static const NORMAL:String = "normal";
@@ -57,17 +60,21 @@ package away3d.materials.methods
 		public static const DARKERCOLOR:String = "darkercolor";
 		public static const DIFERENCE:String = "difference";
 		
-		protected var _blendMode:String = "normal";
-		protected var _scaleU:Number = 1;
-		protected var _scaleV:Number = 1;
-		protected var _offsetU:Number = 0;
-		protected var _offsetV:Number = 0;
-		protected var _alpha:Number = 1;
-		protected var _repeat:Boolean = true;
-		protected var _texture:Texture2DBase;
-		protected var _mask:Texture2DBase;
-		protected var _textureChannel:uint = 0;
-		protected var _maskChannel:uint = 0;
+		arcane var _blendMode:String = "normal";
+		arcane var _scaleU:Number = 1;
+		arcane var _scaleV:Number = 1;
+		arcane var _offsetU:Number = 0;
+		arcane var _offsetV:Number = 0;
+		arcane var _color:uint = 0;
+		arcane var _colorR:Number = 0;
+		arcane var _colorG:Number = 0;
+		arcane var _colorB:Number = 0;
+		arcane var _alpha:Number = 1;
+		arcane var _repeat:Boolean = true;
+		arcane var _texture:Texture2DBase;
+		arcane var _mask:Texture2DBase;
+		arcane var _textureChannel:uint = 0;
+		arcane var _maskChannel:uint = 0;
 		
 		public function LayeredTexture(texture:Texture2DBase=null, mask:Texture2DBase=null)
 		{
@@ -89,6 +96,19 @@ package away3d.materials.methods
 			if (_maskChannel == value) return;
 			_maskChannel = value; 
 			dispatchChange(); 
+		}
+		
+		public function set color(val:uint):void
+		{
+			_color = val;
+			_colorR = ((val >> 16) & 0xff)/0xff;
+			_colorG = ((val >> 8) & 0xff)/0xff;
+			_colorB = (val & 0xff)/0xff;
+		}
+		
+		public function get color():uint
+		{
+			return _color;
 		}
 		
 		public function get maskUVChannel():uint { return _maskChannel; }
@@ -152,6 +172,10 @@ package away3d.materials.methods
 		public function clone():LayeredTexture
 		{
 			var layer:LayeredTexture = new LayeredTexture(_texture, _mask);
+			layer._color = _color;
+			layer._colorR = _colorR;
+			layer._colorG = _colorG;
+			layer._colorB = _colorB;
 			layer._textureChannel = _textureChannel;
 			layer._maskChannel = _maskChannel;
 			layer._blendMode = _blendMode;

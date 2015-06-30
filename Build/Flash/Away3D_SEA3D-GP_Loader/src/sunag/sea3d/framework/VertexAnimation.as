@@ -25,7 +25,7 @@ package sunag.sea3d.framework
 		
 		sea3dgp var numVertex:int = 0;
 		
-		sea3dgp function creatAnimationSet(ref:away3d.core.base.Geometry):VertexAnimationSet
+		sea3dgp function createAnimationSet(ref:away3d.core.base.Geometry):VertexAnimationSet
 		{
 			if (!scope)
 			{

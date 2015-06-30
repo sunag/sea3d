@@ -27,8 +27,8 @@ package sunag.sea3d.objects
 	import flash.geom.Vector3D;
 	import flash.utils.ByteArray;
 	
-	import sunag.sea3d.SEA;
 	import sunag.sunag;
+	import sunag.sea3d.SEA;
 	import sunag.utils.ByteArrayUtils;
 	
 	use namespace sunag;
@@ -37,11 +37,14 @@ package sunag.sea3d.objects
 	{
 		public static const TYPE:String = "m3d";				
 		
-		public var transform:Matrix3D;		
+		public static const REF_SKELETON_ANM:int = 0;
+		
+		public var transform:Matrix3D;	
+		public var reference:Object;
 		
 		public var geometry:SEAGeometryBase;
 		public var material:Vector.<SEAMaterialBase>;
-		public var modifiers:Vector.<SEAModifier>;											
+		public var modifiers:Vector.<SEAModifier>;													
 		
 		public var min:Vector3D;
 		public var max:Vector3D;
@@ -82,13 +85,21 @@ package sunag.sea3d.objects
 			// MODIFIERS
 			if (attrib & 512)
 			{
-				modifiers = new Vector.<SEAModifier>( data.readUnsignedByte() );		
+				modifiers = new Vector.<SEAModifier>( data.readUnsignedByte() );
 				
 				i = 0;
 				while ( i < modifiers.length )				
 					modifiers[i++] = sea.getSEAObject(data.readUnsignedInt()) as SEAModifier;				
 			}
-				
+			
+			// REFERENCES
+			if (attrib & 1024)
+			{
+				reference = {};
+				reference.type = data.readUnsignedByte();
+				reference.ref = sea.getSEAObject(data.readUnsignedInt()) as SEAMesh;					
+			}
+			
 			transform = ByteArrayUtils.readMatrix3D(data);
 			
 			geometry = sea.getSEAObject(data.readUnsignedInt()) as SEAGeometryBase;

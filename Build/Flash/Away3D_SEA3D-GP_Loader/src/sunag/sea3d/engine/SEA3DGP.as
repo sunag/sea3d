@@ -12,6 +12,7 @@ package sunag.sea3d.engine
 	import flash.external.ExternalInterface;
 	import flash.geom.Vector3D;
 	import flash.system.ApplicationDomain;
+	import flash.utils.getDefinitionByName;
 	
 	import away3d.containers.Scene3D;
 	import away3d.containers.View3D;
@@ -23,6 +24,7 @@ package sunag.sea3d.engine
 	import away3d.core.pick.IPicker;
 	import away3d.core.pick.PickingType;
 	import away3d.events.MouseEvent3D;
+	import away3d.events.Stage3DEvent;
 	import away3d.loaders.misc.SingleFileLoader;
 	import away3d.loaders.parsers.Parsers;
 	import away3d.loaders.parsers.ParticleGroupParser;
@@ -30,11 +32,15 @@ package sunag.sea3d.engine
 	import away3d.materials.lightpickers.StaticLightPicker;
 	import away3d.materials.methods.FogMethod;
 	import away3d.primitives.SkyBox;
+	import away3d.textures.CubeReflectionTexture;
+	import away3d.textures.PlanarReflectionTexture;
+	import away3d.textures.TextureProxyBase;
 	
 	import awayphysics.debug.AWPDebugDraw;
 	import awayphysics.dynamics.AWPDynamicsWorld;
 	
 	import sunag.sea3dgp;
+	import sunag.animation.Animation;
 	import sunag.sea3d.core.assets.ABC;
 	import sunag.sea3d.core.assets.Actions;
 	import sunag.sea3d.core.assets.Reference;
@@ -43,8 +49,11 @@ package sunag.sea3d.engine
 	import sunag.sea3d.events.TouchEvent;
 	import sunag.sea3d.framework.ATFTexture;
 	import sunag.sea3d.framework.AnimationStandard;
+	import sunag.sea3d.framework.Box;
 	import sunag.sea3d.framework.Camera3D;
+	import sunag.sea3d.framework.Capsule;
 	import sunag.sea3d.framework.CollisionSensor;
+	import sunag.sea3d.framework.Container3D;
 	import sunag.sea3d.framework.CubeMap;
 	import sunag.sea3d.framework.CubeMapFile;
 	import sunag.sea3d.framework.DirectionalLight;
@@ -52,20 +61,28 @@ package sunag.sea3d.engine
 	import sunag.sea3d.framework.Geometry;
 	import sunag.sea3d.framework.JointObject;
 	import sunag.sea3d.framework.Mesh;
+	import sunag.sea3d.framework.Morph;
 	import sunag.sea3d.framework.Object3D;
 	import sunag.sea3d.framework.OrthographicCamera;
 	import sunag.sea3d.framework.ParticleContainer;
 	import sunag.sea3d.framework.PerspectiveCamera;
 	import sunag.sea3d.framework.Physics;
 	import sunag.sea3d.framework.PointLight;
+	import sunag.sea3d.framework.PointSound;
+	import sunag.sea3d.framework.RTTPlanar;
 	import sunag.sea3d.framework.RigidBody;
 	import sunag.sea3d.framework.Scene3D;
 	import sunag.sea3d.framework.ScreenMode;
 	import sunag.sea3d.framework.Skeleton;
 	import sunag.sea3d.framework.SkeletonAnimation;
+	import sunag.sea3d.framework.SoundFile;
 	import sunag.sea3d.framework.Sparticle;
+	import sunag.sea3d.framework.Sphere;
+	import sunag.sea3d.framework.Sprite3D;
 	import sunag.sea3d.framework.StandardMaterial;
+	import sunag.sea3d.framework.StaticGeometryShape;
 	import sunag.sea3d.framework.TextureFile;
+	import sunag.sea3d.framework.TextureVideo;
 	import sunag.sea3d.input.Input;
 	import sunag.sea3d.input.InputBase;
 	import sunag.sea3d.input.KeyboardInput;
@@ -76,7 +93,10 @@ package sunag.sea3d.engine
 	import sunag.sea3d.objects.SEAATF;
 	import sunag.sea3d.objects.SEAAction;
 	import sunag.sea3d.objects.SEAAnimation;
+	import sunag.sea3d.objects.SEABox;
+	import sunag.sea3d.objects.SEACapsule;
 	import sunag.sea3d.objects.SEACollisionSensor;
+	import sunag.sea3d.objects.SEAContainer3D;
 	import sunag.sea3d.objects.SEACubeMap;
 	import sunag.sea3d.objects.SEACubeURL;
 	import sunag.sea3d.objects.SEADirectionalLight;
@@ -87,18 +107,25 @@ package sunag.sea3d.engine
 	import sunag.sea3d.objects.SEAJPEG;
 	import sunag.sea3d.objects.SEAJPEGXR;
 	import sunag.sea3d.objects.SEAJointObject;
+	import sunag.sea3d.objects.SEAMP3;
 	import sunag.sea3d.objects.SEAMaterial;
 	import sunag.sea3d.objects.SEAMesh;
+	import sunag.sea3d.objects.SEAMesh2D;
+	import sunag.sea3d.objects.SEAMorph;
 	import sunag.sea3d.objects.SEAOrthographicCamera;
 	import sunag.sea3d.objects.SEAPNG;
 	import sunag.sea3d.objects.SEAParticleContainer;
 	import sunag.sea3d.objects.SEAPerspectiveCamera;
-	import sunag.sea3d.objects.SEAPointLight;
+	import sunag.sea3d.objects.SEAPlanarRender;
+	import sunag.sea3d.objects.SEAPointLight;	
 	import sunag.sea3d.objects.SEAReference;
 	import sunag.sea3d.objects.SEARigidBody;
 	import sunag.sea3d.objects.SEASkeleton;
 	import sunag.sea3d.objects.SEASkeletonAnimation;
+	import sunag.sea3d.objects.SEASoundPoint;
 	import sunag.sea3d.objects.SEASparticle;
+	import sunag.sea3d.objects.SEASphere;
+	import sunag.sea3d.objects.SEAStaticGeometryShape;
 	import sunag.sea3d.objects.SEATextureURL;
 	import sunag.sea3d.utils.TimeStep;
 
@@ -106,7 +133,7 @@ package sunag.sea3d.engine
 	
 	public class SEA3DGP
 	{	
-		sea3dgp static const REFERENCE:Object = {};
+		sea3dgp static const REFERENCE:Object = new ProxyReference();
 		sea3dgp static const GLOBAL:Object = {};
 		sea3dgp static const TYPE_CLASS:Object = {};			
 				
@@ -130,6 +157,11 @@ package sunag.sea3d.engine
 		sea3dgp static var renderMode:String;
 		sea3dgp static var world:AWPDynamicsWorld;
 		sea3dgp static var worldDraw:AWPDebugDraw;		
+		sea3dgp static var startling:Array = [];
+		sea3dgp static var animators:Array = [];
+		sea3dgp static var onPreUpdate:Function;
+		sea3dgp static var onPosUpdate:Function;
+		sea3dgp static var onRender:Function;
 		
 		sea3dgp static var envMap:CubeMap;
 		
@@ -137,6 +169,8 @@ package sunag.sea3d.engine
 		sea3dgp static var skyBox:SkyBox;
 		sea3dgp static var lightPicker:StaticLightPicker = new StaticLightPicker([]);	
 		sea3dgp static var shadowLight:DirectionalLight;
+		
+		sea3dgp static var rtt:Vector.<TextureProxyBase> = new Vector.<TextureProxyBase>();
 		
 		sea3dgp static var _overObject:Object3D;	
 		
@@ -151,6 +185,9 @@ package sunag.sea3d.engine
 		sea3dgp static var mouseManager:Mouse3DManager;
 		sea3dgp static var mousePos:flash.geom.Vector3D = new flash.geom.Vector3D();
 		
+		sea3dgp static var playing:Boolean = true;
+		sea3dgp static var firstPlane:Boolean = false;
+		
 		sea3dgp static const envReg:RegExp = /^%\w+%/;
 		sea3dgp static const env:Object = {};
 		
@@ -162,8 +199,10 @@ package sunag.sea3d.engine
 			stage.stageFocusRect = false;
 			stage.showDefaultContextMenu = false;
 			stage.align = StageAlign.TOP_LEFT;
-			stage.scaleMode = StageScaleMode.NO_SCALE;
+			stage.scaleMode = StageScaleMode.NO_SCALE;			
 			stage.addEventListener(MouseEvent.RIGHT_MOUSE_DOWN, function(e:MouseEvent):void { });			
+			
+			TimeStep.FRAME_RATE = stage.frameRate;
 			
 			sea3dgp::config = config ||= new Config();
 			
@@ -173,6 +212,7 @@ package sunag.sea3d.engine
 			proxy.color = stage.color;
 			proxy.antiAlias = config.antiAlias;
 			proxy.mouse3DManager = mouseManager = new Mouse3DManager();
+			proxy.addEventListener(Stage3DEvent.CONTEXT3D_CREATED, onCreated);
 			
 			mouseManager.forceMouseMove = true;
 			
@@ -199,7 +239,7 @@ package sunag.sea3d.engine
 			area.addEventListener(MouseEvent.MOUSE_WHEEL, onMouseEvent, false, 1000, true);
 			area.addEventListener(MouseEvent.MOUSE_OVER, onMouseOver, false, 1000, true);
 			area.addEventListener(MouseEvent.MOUSE_OUT, onMouseOut, false, 1000, true);
-			area.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove, false, 1000, true);	
+			area.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove, false, 1000, true);			
 			
 			container.addChild( content );
 			container.addChild( area );
@@ -228,6 +268,15 @@ package sunag.sea3d.engine
 			TYPE_CLASS[SEACubeMap.TYPE] = CubeMapFile;
 			TYPE_CLASS[SEACubeURL.TYPE] = CubeMapFile;
 			TYPE_CLASS[SEAParticleContainer.TYPE] = ParticleContainer;						
+			TYPE_CLASS[SEABox.TYPE] = Box;
+			TYPE_CLASS[SEACapsule.TYPE] = Capsule;
+			TYPE_CLASS[SEASphere.TYPE] = Sphere;			
+			TYPE_CLASS[SEAStaticGeometryShape.TYPE] = StaticGeometryShape;
+			TYPE_CLASS[SEAMP3.TYPE] = SoundFile;
+			TYPE_CLASS[SEASoundPoint.TYPE] = PointSound;
+			TYPE_CLASS[SEAContainer3D.TYPE] = Container3D;
+			TYPE_CLASS[SEAMesh2D.TYPE] = Sprite3D;
+			TYPE_CLASS[SEAMorph.TYPE] = Morph;
 			
 			TYPE_CLASS[SEASparticle.TYPE] = Sparticle;
 			
@@ -240,12 +289,17 @@ package sunag.sea3d.engine
 			
 			TYPE_CLASS[SEARigidBody.TYPE] = RigidBody;
 			TYPE_CLASS[SEACollisionSensor.TYPE] = CollisionSensor;
-									
+			
+			TYPE_CLASS[SEAPlanarRender.TYPE] = RTTPlanar;
+			
 			//
 			//	PROXY CLASS ( PREVENT NOT-INCLUSION BY THE COMPILER )
 			//
 			
 			sunag.sea3d.math.Vector3D;
+			sunag.sea3d.framework.TextureVideo;
+			sunag.sea3d.framework.TextureSWF;
+			sunag.sea3d.framework.TextureWebcam;	
 			
 			//
 			//	FRAMEWORK
@@ -271,7 +325,7 @@ package sunag.sea3d.engine
 						var CLASS:Class = ApplicationDomain.currentDomain.getDefinition(name) as Class;
 						var NS:String = reserved[ns] + name.substring(ns.length);
 						
-						REFERENCE[NS] = CLASS['PROXY'] || CLASS;																	
+						REFERENCE[NS] = CLASS['PROXY'] || CLASS;																
 					}
 				}
 			}
@@ -298,7 +352,8 @@ package sunag.sea3d.engine
 					AWPDebugDraw.DBG_DrawConstraintLimits | 
 					AWPDebugDraw.DBG_DrawRay | 
 					AWPDebugDraw.DBG_DrawTransform | 
-					AWPDebugDraw.DBG_DrawCollisionShapes;
+					AWPDebugDraw.DBG_DrawCollisionShapes |
+					AWPDebugDraw.DBG_TriangleShapes;
 			}
 			
 			//
@@ -336,15 +391,29 @@ package sunag.sea3d.engine
 			
 			if (config.autoPlay)
 			{
-				stage.addEventListener(flash.events.Event.ENTER_FRAME, onUpdate, false, -1);
+				stage.addEventListener(flash.events.Event.ENTER_FRAME, onFrame, false, -1);
 			}
 			
 			stage.addEventListener(flash.events.Event.RESIZE, onResize);
 		}
 		
+		public static function set frameRate(val:int):void
+		{
+			stage.frameRate = TimeStep.FRAME_RATE = val;
+		}
+		
+		public static function get frameRate():int
+		{
+			return TimeStep.FRAME_RATE;
+		}
+		
 		//
 		//	RENDER
 		//
+		
+		private static function onCreated(e:Stage3DEvent):void
+		{
+		}
 		
 		private static function createView(scene:away3d.containers.Scene3D):View3D
 		{
@@ -475,10 +544,25 @@ package sunag.sea3d.engine
 		}
 		
 		//
-		//	GAME
+		//	STARLING
 		//
 		
+		public static function createStarling(rootClass:Class):Object
+		{
+			var Starling:Class = getDefinitionByName("starling.core::Starling") as Class;
+			
+			var s:* = new Starling(rootClass, stage, proxy.viewPort, proxy.stage3D);
+			s.antiAliasing = SEA3DGP.config.antiAlias;	
+			
+			startling.push(s);
+			
+			return s.stage.getChildAt(0);
+		}
 		
+		//
+		//	GAME
+		//
+				
 		public static function set camera(camera:Camera3D):void
 		{
 			setCamera(0, camera);
@@ -557,7 +641,7 @@ package sunag.sea3d.engine
 		
 		public static function get fog():Boolean
 		{
-			return fog;
+			return fogMtd != null;
 		}
 		
 		public static function set fogColor(color:Number):void
@@ -636,12 +720,44 @@ package sunag.sea3d.engine
 			if (proxy.color == color) 
 				return;
 			
-			proxy.color = color;						
+			proxy.color = color;	
+			
+			for each(var v:View3D in views)
+			{
+				v.backgroundColor = color;
+			}
 		}
 		
 		public static function get environmentColor():Number
 		{
 			return proxy.color;
+		}
+		
+		//
+		//	ANIMATORS
+		//
+		
+		sea3dgp static function addAnimator(anm:Object):void
+		{
+			var index:int = animators.indexOf(anm);
+			
+			if (index == -1)
+			{
+				animators.push(anm);
+				
+				if (anm is Animation)
+				{
+					anm.absoluteTime = TimeStep.time;					
+				}
+			}						
+		}
+		
+		sea3dgp static function removeAnimator(anm:Object):void
+		{
+			var index:int = animators.indexOf(anm);
+			
+			if (index != -1)			
+				animators.splice(index, 1);			
 		}
 		
 		//
@@ -652,17 +768,7 @@ package sunag.sea3d.engine
 		{
 			var game:sunag.sea3d.framework.Scene3D,
 				i:int, physics:Physics;
-			
-			//
-			//	NETWORK-RECEIVE
-			//
-			
-			//
-			//	INPUT
-			//
-			
-			Input.update();						
-			
+
 			//
 			//	MOTION
 			//
@@ -675,34 +781,79 @@ package sunag.sea3d.engine
 			
 			for each(game in scenes)
 			{
-				for each(physics in game.collided)								
+				for each(physics in game.collided)					
 					physics.cls = false;				
+				
+				for each(physics in game.ray)					
+					physics.ray = false;					
 			}
+										
+			var deltaTime:Number = (1 / TimeStep.FRAME_RATE) * TimeStep.timeScale;
 			
-			world.physicsStep(TimeStep.step / 1000);
+			world.physicsStep(deltaTime, 1, deltaTime);
+			
+			var c:Physics;
 			
 			for each(game in scenes)
 			{
-				i = 0;				
+				i = 0;								
+				while ( i < game.physics.length )
+				{
+					physics = game.physics[i++];
+					
+					if (physics.tar)
+						physics.tar.scope.transform = physics.scope.transform;
+				}	
 				
+				i = 0;								
 				while ( i < game.collided.length )
 				{
 					physics = game.collided[i];
 					
 					if (!physics.cls)
 					{
-						var c:Physics = physics.collision;
+						c = physics.collision;
 						
 						physics.collision = null;
 						physics.clsAdded = false;
 						
 						game.collided.splice( i, 1 );
 						
-						physics.dispatchEvent(new CollisionEvent(CollisionEvent.COLLISION_OUT, c));																		
+						if (physics.eDict[CollisionEvent.COLLISION_OUT])
+						{
+							physics.dispatchEvent(new CollisionEvent(CollisionEvent.COLLISION_OUT, c));	
+						}
+						
 						continue;
 					}
+					
 					++i;
-				}			
+				}		
+				
+				i = 0;								
+				while ( i < game.ray.length )
+				{
+					physics = game.ray[i];
+					
+					if (!physics.ray)
+					{
+						c = physics.rayCollision;
+						
+						physics.rayCollision = null;
+						physics.rayAdded = false;
+						
+						game.ray.splice( i, 1 );
+						
+						if (physics.eDict[CollisionEvent.RAY_OUT])
+						{
+							physics.dispatchEvent(new CollisionEvent(CollisionEvent.RAY_OUT, c));	
+						}
+						
+						continue;
+					}
+					
+					++i;
+				}
 			}
 			
 			//
@@ -710,21 +861,26 @@ package sunag.sea3d.engine
 			//
 			
 			for each(game in scenes)
-				game.update();
-			
+				game.update();		
+				
 			//
-			//	NETWORK-SEND
+			//	ANIMATIONS
 			//
-			
-			//
-			//	TIMER
-			//
-			
-			TimeStep.updateTime();						
+				
+			var currentTime:Number = TimeStep.time;
+				
+			for each(var anm:Object in animators)
+			{
+				anm.update(currentTime);
+			}
 		}
 		
 		public static function render(bitmapData:BitmapData=null):void
 		{
+			//
+			//	RTT
+			//
+			
 			if (worldDraw && worldDraw.view)
 			{
 				worldDraw.debugDrawWorld();
@@ -736,7 +892,25 @@ package sunag.sea3d.engine
 			
 			var v:View3D;
 			
-			proxy.clear();			
+			for each(var rttTex:TextureProxyBase in rtt)
+			{
+				if (rttTex is PlanarReflectionTexture)
+					PlanarReflectionTexture(rttTex).render( views[0] );
+				else if (rttTex is CubeReflectionTexture)
+					CubeReflectionTexture(rttTex).render( views[0] );
+			}
+			
+			proxy.clear();
+			
+			var s:Object;
+			
+			if (firstPlane)
+			{
+				for each(s in startling)
+				{
+					s.nextFrame();
+				}
+			}
 			
 			for each(var view:View3D in views)
 			{
@@ -747,14 +921,23 @@ package sunag.sea3d.engine
 				}
 			}
 			
-			proxy.clearDepthBuffer();
+			if (v && frontView.visible)
+			{
+				frontView.x = v.x;
+				frontView.y = v.y;
+				frontView.width = v.width;
+				frontView.height = v.height;
+				frontView.camera = v.camera;
+				frontView.render();	
+			}
 			
-			frontView.x = v.x;
-			frontView.y = v.y;
-			frontView.width = v.width;
-			frontView.height = v.height;
-			frontView.camera = v.camera;
-			frontView.render();			
+			if (!firstPlane)
+			{
+				for each(s in startling)
+				{
+					s.nextFrame();
+				}
+			}
 			
 			if (bitmapData)
 			{
@@ -794,22 +977,30 @@ package sunag.sea3d.engine
 			return overObj ? overNor.clone() : flash.geom.Vector3D.Y_AXIS;
 		}
 		
+		public static function resetMouse():void
+		{
+			overFObj = null;
+			overObj = null;
+			
+			onMouseOut(new MouseEvent(MouseEvent.MOUSE_OUT, false));
+		}
+		
 		//
 		//	VIEW3D
 		//
 						
-		protected static function get isClick():Boolean
+		sea3dgp static function get isClick():Boolean
 		{
 			return Math.abs(mousePos.x - stage.mouseX) < 2 && Math.abs(mousePos.y - stage.mouseY) < 2;
 		}
 		
-		private static function onMouseDown(e:MouseEvent):void
+		sea3dgp static function onMouseDown(e:MouseEvent):void
 		{
 			mousePos = new flash.geom.Vector3D(stage.mouseX, stage.mouseY);
 			onMouseEvent(e);
 		}
 		
-		private static function onMouseClick(e:MouseEvent):void
+		sea3dgp static function onMouseClick(e:MouseEvent):void
 		{
 			if (isClick)
 			{
@@ -817,44 +1008,46 @@ package sunag.sea3d.engine
 			}
 		}
 		
-		private static function onMouseOver(e:MouseEvent):void
-		{
+		sea3dgp static function onMouseOver(e:MouseEvent):void
+		{			
+			area.addEventListener(Event.ENTER_FRAME, onMouseMove, false, 1000, true);
+			
 			onMouseMove(e);
 		}
 		
-		private static function onMouseOut(e:MouseEvent):void
+		sea3dgp static function onMouseOut(e:MouseEvent):void
 		{
-			var overObj:Object3D = overObject;
+			area.removeEventListener(Event.ENTER_FRAME, onMouseMove);
 			
-			if (overObj)
+			if (_overObject)
 			{
-				overObj.dispatchEvent(new TouchEvent(TouchEvent.TOUCH_OUT, overPosition, overNormal, e.delta));
-				
+				_overObject.dispatchEvent(new TouchEvent(TouchEvent.TOUCH_OUT, overPosition, overNormal, e.delta));				
 				_overObject = null
 			}
 		}
 		
-		private static function onMouseMove(e:MouseEvent):void
+		sea3dgp static function onMouseMove(e:Event):void
 		{
 			var overObj:Object3D = overObject;
+			var delta:int = e is MouseEvent ? MouseEvent(e).delta : 0;
 			
 			if (_overObject != overObj)
 			{
 				if (_overObject)
-					_overObject.dispatchEvent(new TouchEvent(TouchEvent.TOUCH_OUT, overPosition, overNormal, e.delta));
+					_overObject.dispatchEvent(new TouchEvent(TouchEvent.TOUCH_OUT, overPosition, overNormal, delta));
 				
 				if (overObj)
-					overObj.dispatchEvent(new TouchEvent(TouchEvent.TOUCH_OVER, overPosition, overNormal, e.delta));
+					overObj.dispatchEvent(new TouchEvent(TouchEvent.TOUCH_OVER, overPosition, overNormal, delta));
 			}
 			else if (_overObject)
 			{
-				_overObject.dispatchEvent(new TouchEvent(TouchEvent.TOUCH_MOVE, overPosition, overNormal, e.delta));
+				_overObject.dispatchEvent(new TouchEvent(TouchEvent.TOUCH_MOVE, overPosition, overNormal, delta));
 			}
 			
 			_overObject = overObj;
 		}
 		
-		private static function onMouseEvent(e:MouseEvent):void
+		sea3dgp static function onMouseEvent(e:MouseEvent):void
 		{
 			var obj3d:Object3D = overObject;
 			
@@ -869,26 +1062,26 @@ package sunag.sea3d.engine
 			}
 		}
 		
-		private static function onMouseOver3D(e:MouseEvent3D):void
+		sea3dgp static function onMouseOver3D(e:MouseEvent3D):void
 		{
 			overObj = e.renderable;
 			overPos = e.scenePosition;
 			overNor = e.sceneNormal;
 		}
 		
-		private static function onMouseOut3D(e:MouseEvent3D):void
+		sea3dgp static function onMouseOut3D(e:MouseEvent3D):void
 		{
 			overObj = null;
 		}
 		
-		private static function onFMouseOver3D(e:MouseEvent3D):void
+		sea3dgp static function onFMouseOver3D(e:MouseEvent3D):void
 		{
 			overFObj = e.renderable;
 			overFPos = e.scenePosition;
 			overFNor = e.sceneNormal;	
 		}
 		
-		private static function onFMouseOut3D(e:MouseEvent3D):void
+		sea3dgp static function onFMouseOut3D(e:MouseEvent3D):void
 		{
 			overFObj = null;
 		}
@@ -897,10 +1090,45 @@ package sunag.sea3d.engine
 		//	INTERNAL
 		//
 		
-		private static function onUpdate(e:flash.events.Event=null):void
+		public static function onFrame(e:flash.events.Event=null):void
 		{
-			update();
+			//
+			//	NETWORK-RECEIVE
+			//
+			
+			//
+			//	INPUT
+			//
+			
+			Input.update();						
+			
+			//
+			//	UPDATE GAME STATE
+			//
+									
+			if (onPreUpdate != null) onPreUpdate();
+		
+			if (playing) update();
+		
+			if (onPosUpdate != null) onPosUpdate();		
+			
+			//
+			//	NETWORK-SEND
+			//
+			
+			//
+			//	RENDER
+			//
+			
 			render();
+			
+			if (onRender != null) onRender();
+			
+			//
+			//	TIMER
+			//
+			
+			TimeStep.updateTime();
 		}
 		
 		private static function onResize(e:flash.events.Event=null):void

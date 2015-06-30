@@ -59,7 +59,8 @@ package sunag.sea3d.objects
 			var i:int = 0;
 			while ( i < count )
 			{				
-				var attrib:int = data.readUnsignedByte(),				
+				var attrib:int = data.readUnsignedByte(),		
+					numParams:int,
 					script:Object = {};
 				
 				script.priority = (attrib & 1) | (attrib & 2);
@@ -68,28 +69,28 @@ package sunag.sea3d.objects
 				{
 					var j:int, name:String;
 					
-					count = data.readUnsignedByte();
+					numParams = data.readUnsignedByte();
 					
 					if (DETAILED)
 					{
 						script.params = [];
 						
-						for(j = 0; j < count; j++)
+						for(j = 0; j < numParams; j++)
 						{
 							name = ByteArrayUtils.readUTFTiny(data);
 							var type:int = data.readUnsignedByte();
 							
-							script.params[j] = new FieldData(name, type, DataTable.readToken(type, data));
+							script.params[j] = new FieldData(name, type, DataTable.readToken(type, data, sea));
 						}
 					}
 					else
 					{
 						script.params = {};
 						
-						for ( j = 0; j < count; j++ )
+						for ( j = 0; j < numParams; j++ )
 						{
 							name = ByteArrayUtils.readUTFTiny(data);		
-							script.params[name] = DataTable.readObject(data);
+							script.params[name] = DataTable.readObject(data, sea);
 						}
 					}					
 				}

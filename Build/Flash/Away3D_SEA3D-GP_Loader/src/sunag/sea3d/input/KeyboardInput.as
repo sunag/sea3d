@@ -2,6 +2,7 @@ package sunag.sea3d.input
 {
 	import flash.display.Stage;
 	import flash.events.KeyboardEvent;
+	import flash.text.TextField;
 	
 	import sunag.sea3dgp;
 
@@ -73,7 +74,10 @@ package sunag.sea3d.input
 		
 		sea3dgp static function onKeyDown(e:KeyboardEvent):void
 		{
-			keyState[e.keyCode] = true;
+			if (stage.focus is TextField)
+				keyState[e.keyCode] = false;
+			else
+				keyState[e.keyCode] = true;
 		}
 		
 		sea3dgp static function onKeyUp(e:KeyboardEvent):void
@@ -84,6 +88,11 @@ package sunag.sea3d.input
 		sea3dgp static function isKeyDown(keyCode:int):Boolean
 		{						
 			return keyState[keyCode];
+		}
+				
+		public static function reset():void
+		{
+			keyState = {};
 		}
 		
 		public static function isDown(keyCode:Number):Boolean

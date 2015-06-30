@@ -38,7 +38,7 @@ package away3d.sea3d.animation
 	public class TextureAnimation extends Animation
 	{
 		protected var _mesh:Mesh;
-		protected var _subMesh:SubMesh;
+		protected var _subMesh:Vector.<SubMesh>;
 		
 		public function TextureAnimation(animationSet:AnimationSet, mesh:Mesh)
 		{
@@ -51,10 +51,22 @@ package away3d.sea3d.animation
 		{
 			if ( (_mesh = value) )	
 			{
-				_subMesh = _mesh.subMeshes[0];
+				_subMesh = new Vector.<SubMesh>();
 				
-				if (_subMesh.material is ITextureMaterial)
-					ITextureMaterial(_subMesh.material).animateUVs = true;
+				for each(var subMesh:SubMesh in _mesh.subMeshes)
+				{
+					if (subMesh.material is ITextureMaterial)
+					{
+						var enabled:Boolean = Boolean(ITextureMaterial(subMesh.material).texture);
+						
+						ITextureMaterial(subMesh.material).animateUVs = enabled;
+						
+						if (enabled)
+						{
+							_subMesh.push(subMesh);
+						}
+					}
+				}
 			}
 		}
 		
@@ -65,23 +77,26 @@ package away3d.sea3d.animation
 		
 		override protected function updateAnimationFrame(frame:AnimationFrame, kind:Object):void		
 		{
-			switch(kind)					
+			for each(var subMesh:SubMesh in _subMesh)
 			{
-				case Animation.OFFSET_U:						
-					_subMesh.offsetU = frame.x;					
-					break;							
-				case Animation.OFFSET_V:
-					_subMesh.offsetV = frame.x;
-					break;					
-				case Animation.SCALE_U:						
-					_subMesh.scaleU = frame.x;		
-					break;
-				case Animation.SCALE_V:						
-					_subMesh.scaleV = frame.x;
-					break;
-				case Animation.ANGLE:					
-					_subMesh.uvRotation = frame.x * MathConsts.DEGREES_TO_RADIANS;
-					break;
+				switch(kind)					
+				{
+					case Animation.OFFSET_U:						
+						subMesh.offsetU = frame.x;					
+						break;							
+					case Animation.OFFSET_V:
+						subMesh.offsetV = frame.x;
+						break;					
+					case Animation.SCALE_U:						
+						subMesh.scaleU = frame.x;		
+						break;
+					case Animation.SCALE_V:						
+						subMesh.scaleV = frame.x;
+						break;
+					case Animation.ANGLE:					
+						subMesh.uvRotation = frame.x * MathConsts.DEGREES_TO_RADIANS;
+						break;
+				}
 			}
 		}				
 	}

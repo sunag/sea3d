@@ -48,6 +48,7 @@ package sunag.sea3d.objects
 		public var animations:Array;	
 		public var scripts:Array;
 		
+		public var visible:Boolean = true;
 		public var isStatic:Boolean = false;
 		public var clazz:SEAClassBase;
 		
@@ -99,6 +100,7 @@ package sunag.sea3d.objects
 			{
 				var objectType:int = data.readUnsignedByte();				
 				isStatic = (objectType & 1) != 0;
+				visible = (objectType & 2) == 0;
 			}						
 		}
 		

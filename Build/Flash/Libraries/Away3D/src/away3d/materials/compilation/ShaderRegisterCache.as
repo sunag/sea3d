@@ -42,13 +42,13 @@ package away3d.materials.compilation
 		 */
 		public function reset():void
 		{
-			_fragmentTempCache = new RegisterPool("ft", 8, false);
-			_vertexTempCache = new RegisterPool("vt", 8, false);
-			_varyingCache = new RegisterPool("v", 8);
-			_textureCache = new RegisterPool("fs", 8);
-			_vertexAttributesCache = new RegisterPool("va", 8);
-			_fragmentConstantsCache = new RegisterPool("fc", 28);
-			_vertexConstantsCache = new RegisterPool("vc", 128);
+			_fragmentTempCache = new RegisterPool("ft", 16, false);//8
+			_vertexTempCache = new RegisterPool("vt", 26, false);//8
+			_varyingCache = new RegisterPool("v", 10);//8
+			_textureCache = new RegisterPool("fs", 16);//8
+			_vertexAttributesCache = new RegisterPool("va", 10);//8
+			_fragmentConstantsCache = new RegisterPool("fc", 64);//28
+			_vertexConstantsCache = new RegisterPool("vc", 250);//128
 			_fragmentOutputRegister = new ShaderRegisterElement("oc", -1);
 			_vertexOutputRegister = new ShaderRegisterElement("op", -1);
 			_numUsedVertexConstants = 0;

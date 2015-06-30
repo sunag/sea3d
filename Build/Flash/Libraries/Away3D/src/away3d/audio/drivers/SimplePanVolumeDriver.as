@@ -117,7 +117,9 @@ package away3d.audio.drivers
 			if (_sound_chan)			
 			{
 				var snd:SoundTransform = _st3D.soundTransform;
-				if (_soundMixer3D) snd.volume *= _soundMixer3D.volume;				
+				if (_soundMixer3D) snd.volume *= _soundMixer3D.volume;
+				if (snd.volume > 1)
+					snd.volume = 1;
 				_sound_chan.soundTransform = snd;
 			}
 		}

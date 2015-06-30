@@ -7,9 +7,11 @@ package sunag.sea3d.framework
 	import away3d.sea3d.animation.Object3DAnimation;
 	
 	import sunag.sea3dgp;
+	import sunag.sea3d.engine.SEA3DGP;
 	import sunag.sea3d.events.Event;
 	import sunag.sea3d.objects.SEAObject;
 	import sunag.sea3d.objects.SEAParticleContainer;
+	import sunag.sea3d.utils.TimeStep;
 
 	use namespace sea3dgp;
 	
@@ -31,6 +33,11 @@ package sunag.sea3d.framework
 		{			
 			part.removeEventListener(Event.COMPLETE, onComplete);
 			particleContainer = part.content;
+		}
+		
+		public function get available():Boolean
+		{
+			return particleAnimator != null;
 		}
 		
 		public function set particle(val:Particle):void
@@ -58,14 +65,16 @@ package sunag.sea3d.framework
 		}
 		
 		public function play(offset:Number=0):void
-		{
+		{								
+			var time:Number = TimeStep.time;
 			particleAnimator.start();
-			particleAnimator.time += offset;
+			particleAnimator.time += offset;			
+			SEA3DGP.addAnimator(particleAnimator);
 		}
 		
 		public function stop():void
 		{		
-			particleAnimator.stop();			
+			SEA3DGP.removeAnimator(particleAnimator);
 		}
 		
 		public function set time(val:Number):void
@@ -75,7 +84,18 @@ package sunag.sea3d.framework
 		
 		public function get time():Number
 		{
+			
 			return particleAnimator.time;
+		}
+		
+		public function set particleTimeScale(val:Number):void
+		{
+			particleAnimator.playbackSpeed = val;
+		}
+		
+		public function get particleTimeScale():Number
+		{
+			return particleAnimator.playbackSpeed;
 		}
 		
 		sea3dgp function set particleContainer(val:ObjectContainer3D):void
@@ -91,11 +111,16 @@ package sunag.sea3d.framework
 			{
 				container.addChild( partContainer );
 				
-				particleAnimator = partContainer.hasOwnProperty('animator') ? partContainer['animator'] : null;
+				particleAnimator = partContainer.hasOwnProperty('animator') ? partContainer['animator'] : null;				
 				
-				if (particleAnimator && playtime > 0)
+				if (particleAnimator)
 				{
-					play( getTimer() - playtime );
+					particleAnimator.autoUpdate = false;
+				
+					if (playtime > 0)
+					{
+						play( getTimer() - playtime );
+					}
 				}
 			}
 			else
@@ -108,7 +133,7 @@ package sunag.sea3d.framework
 		//	LOADER
 		//
 		
-		override public function clone():Asset			
+		override public function clone(force:Boolean=false):Asset			
 		{
 			var asset:ParticleContainer = new ParticleContainer();
 			asset.copyFrom( this );

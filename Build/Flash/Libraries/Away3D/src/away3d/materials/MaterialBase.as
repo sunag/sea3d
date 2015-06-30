@@ -213,6 +213,9 @@ package away3d.materials
 			_repeat = value;
 			for (var i:int = 0; i < _numPasses; ++i)
 				_passes[i].repeat = value;
+			
+			_depthPass.repeat = value;
+			_distancePass.repeat = value;
 		}
 		
 		/**

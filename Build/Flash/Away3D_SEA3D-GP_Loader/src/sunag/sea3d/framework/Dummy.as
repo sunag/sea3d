@@ -68,5 +68,22 @@ package sunag.sea3d.framework
 			dummy.height = dmy.height;
 			dummy.depth = dmy.depth;					
 		}
+		
+		override sea3dgp function copyFrom(asset:Asset):void
+		{
+			super.copyFrom(asset);
+			
+			var d:Dummy = asset as Dummy;
+			dummy.width = d.dummy.width;
+			dummy.height = d.dummy.height;
+			dummy.depth = d.dummy.depth;
+		}
+		
+		override public function clone(force:Boolean=false):Asset
+		{
+			var dummy:Dummy = new Dummy();
+			dummy.copyFrom(this);
+			return dummy;
+		}
 	}
 }

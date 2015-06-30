@@ -1,13 +1,13 @@
 -- SEA3D Exporter
--- Copyright (C) 2013 Sunag Entertainment
+-- Copyright (C) 2015 Sunag Entertainment
 
 --
 -- Global
 --
 
 global 	
-	sea_rawversion = 17001, --VVSSBB
-	sea_version = 17001, --VVSSBB
+	sea_rawversion = 17000, --VVSSBB
+	sea_version = 17000, --VVSSBB
 	
 	seaconfig = undefined, 
 	seaconfig_file = undefined

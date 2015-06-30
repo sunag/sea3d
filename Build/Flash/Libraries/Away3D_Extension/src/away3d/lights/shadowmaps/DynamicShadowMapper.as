@@ -1,7 +1,6 @@
 package away3d.lights.shadowmaps
 {
 	import away3d.arcane;
-	import away3d.lights.DirectionalLight;
 
 	use namespace arcane;
 	

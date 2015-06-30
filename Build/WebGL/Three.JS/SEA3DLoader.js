@@ -468,6 +468,10 @@ THREE.SEA3D.prototype.getLight = function(name) {
 	return this.objects["lht/" + name];
 }
 
+THREE.SEA3D.prototype.getGLSL = function(name) {
+	return this.objects["glsl/" + name];
+}
+
 THREE.SEA3D.prototype.getCamera = function(name) {
 	return this.objects["cam/" + name];
 }
@@ -490,6 +494,10 @@ THREE.SEA3D.prototype.getContainer3D = function(name) {
 
 THREE.SEA3D.prototype.getSprite = function(name) {
 	return this.objects["m2d/" + name];
+}
+
+THREE.SEA3D.prototype.getProperty = function(name) {
+	return this.objects["prop/" + name];
 }
 
 //
@@ -775,13 +783,28 @@ THREE.SEA3D.prototype.updateScene = function () {
 	}
 }
 
-THREE.SEA3D.prototype.addSceneObject = function(sea) {
+THREE.SEA3D.prototype.addSceneObject = function(sea) {	
+	var obj3d = sea.tag;
+	
+	obj3d.props = sea.properties;
+	
+	if (sea.scripts)
+	{	
+		for(var i = 0; i < sea.scripts.length; i++)
+		{
+			var script = sea.scripts[i];
+			
+			if (script.tag.type == 'js')			
+				this.runJS( obj3d, script );			
+		}
+	}	
+	
 	if (sea.parent)			
-		sea.parent.tag.add( sea.tag ); 
+		sea.parent.tag.add( obj3d ); 
 	else if (this.config.container)
-		this.config.container.add( sea.tag );
+		this.config.container.add( obj3d );
 	else
-		this.container.add( sea.tag );
+		this.container.add( obj3d );
 }
 
 THREE.SEA3D.prototype.bufferToTexture = function(raw) {
@@ -1645,6 +1668,78 @@ THREE.SEA3D.prototype.readTextureURL = function(sea) {
 }
 
 //
+//	JavaScript
+//
+
+SEA3D.GLOBAL = {};
+
+SEA3D.PRINT = function() { console.log.apply(console, arguments); }
+SEA3D.WATCH = function() {}
+
+SEA3D.REF = function(ns) { return eval(ns); }
+
+THREE.SEA3D.prototype.runJS = function(obj, script)
+{
+	if (obj.local === undefined) obj.local = {};
+	
+	var global = 
+	{
+		print : SEA3D.PRINT,
+		watch : SEA3D.WATCH,
+		sea3d : this,
+		scene : this.container
+	}
+	
+	try
+	{
+		this.script[script.method]
+		(
+			global,
+			SEA3D.REF, 
+			SEA3D.GLOBAL,
+			obj.local,
+			obj,
+			script.params
+		)
+	}
+	catch(e)
+	{
+		console.error('SEA3D JavaScript: Error running method "' + script.method + '".');
+		console.error(e);
+	}
+}
+
+THREE.SEA3D.prototype.readJavaScript = function(sea) {		
+	try
+	{
+		var custom = 
+'var watch = $GLOBAL["watch"],\n' +
+'sea3d = $GLOBAL["sea3d"],\n' +
+'scene = $GLOBAL["scene"],\n' +
+'print = $GLOBAL["print"];';
+
+		var src = '(' + sea.src.replace(/"%CUSTOM%"/g, custom) + ')';
+		var func = eval(src);
+		
+		this.script = func();
+	}
+	catch(e)
+	{
+		console.error('SEA3D JavaScript: Error running "' + sea.name + '".');		
+		console.error(e);
+	}
+}
+
+//
+//	GLSL
+//
+
+THREE.SEA3D.prototype.readGLSL = function(sea) {	
+	this.glsl = this.glsl || [];
+	this.glsl.push( this.objects["glsl/" + sea.name] = sea.tag = sea.src );
+}
+
+//
 //	Material
 //
 
@@ -1674,6 +1769,7 @@ THREE.SEA3D.prototype.materialTechnique =
 	function(tech, mat) {							
 		mat.map = tech.texture.tag;
 		mat.transparent = tech.texture.transparent;
+		mat.color.setHex(0xFFFFFF);
 	}
 	
 	// SPECULAR_MAP
@@ -1779,6 +1875,25 @@ THREE.SEA3D.prototype.readPointLight = function(sea) {
 		
 	this.addSceneObject( sea );	
 	this.updateTransform(light, sea);
+	
+	this.applyDefaultAnimation( sea, THREE.SEA3D.LightAnimator );	
+	
+	this.updateScene();
+}
+
+//
+//	Hemisphere Light
+//
+
+THREE.SEA3D.prototype.readHemisphereLight = function(sea) {	
+	var light = new THREE.HemisphereLight( sea.color, sea.secondColor, sea.multiplier * this.config.multiplier );
+	light.position.set(0,1,0);
+	light.name = sea.name;
+	
+	this.lights = this.lights || [];
+	this.lights.push( this.objects["lht/" + sea.name] = sea.tag = light );
+		
+	this.addSceneObject( sea );			
 	
 	this.applyDefaultAnimation( sea, THREE.SEA3D.LightAnimator );	
 	
@@ -2127,8 +2242,9 @@ THREE.SEA3D.prototype.loadBytes = function( data ) {
 	this.file.typeRead[SEA3D.Dummy.prototype.type] = this.readDummy;	
 	this.file.typeRead[SEA3D.Line.prototype.type] = this.readLine;	
 	this.file.typeRead[SEA3D.Material.prototype.type] = this.readMaterial;
-	this.file.typeRead[SEA3D.PointLight.prototype.type] = this.readPointLight;
+	this.file.typeRead[SEA3D.PointLight.prototype.type] = this.readPointLight;	
 	this.file.typeRead[SEA3D.DirectionalLight.prototype.type] = this.readDirectionalLight;
+	this.file.typeRead[SEA3D.HemisphereLight.prototype.type] = this.readHemisphereLight;
 	this.file.typeRead[SEA3D.Camera.prototype.type] = this.readCamera;
 	this.file.typeRead[SEA3D.Skeleton.prototype.type] = this.readSkeleton;		
 	this.file.typeRead[SEA3D.SkeletonLocal.prototype.type] = this.readSkeletonLocal;	
@@ -2145,6 +2261,8 @@ THREE.SEA3D.prototype.loadBytes = function( data ) {
 	this.file.typeRead[SEA3D.PNG.prototype.type] = this.readImage;	
 	this.file.typeRead[SEA3D.GIF.prototype.type] = this.readImage;	
 	this.file.typeRead[SEA3D.MP3.prototype.type] = this.readSound;	
+	this.file.typeRead[SEA3D.GLSL.prototype.type] = this.readGLSL;
+	this.file.typeRead[SEA3D.JavaScript.prototype.type] = this.readJavaScript;
 	
 	if (data) this.file.read();	
 }

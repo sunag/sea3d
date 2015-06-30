@@ -19,8 +19,6 @@ package sunag.sea3d.framework
 		public function PerspectiveCamera()
 		{
 			super(new away3d.cameras.Camera3D(lens = new PerspectiveLens()), CameraAnimation);
-			lens.near = 1;
-			lens.far = 6000;
 		}
 		
 		public function set fov(fov:Number):void
@@ -62,7 +60,7 @@ package sunag.sea3d.framework
 			);			
 		}
 		
-		override public function clone():Asset			
+		override public function clone(force:Boolean=false):Asset			
 		{
 			var asset:PerspectiveCamera = new PerspectiveCamera();
 			asset.copyFrom( this );

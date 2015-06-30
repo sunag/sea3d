@@ -33,6 +33,11 @@ package away3d.animators.states
 				_inputs[i] = animator.getAnimationState(_skeletonAnimationNode._inputs[i]) as ISkeletonAnimationState;
 		}
 		
+		public function invalidateSkeletonPose():void
+		{
+			_skeletonPoseDirty = true;
+		}
+		
 		/**
 		 * @inheritDoc
 		 */

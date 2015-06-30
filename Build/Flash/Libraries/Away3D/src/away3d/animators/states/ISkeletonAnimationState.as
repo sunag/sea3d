@@ -8,5 +8,7 @@ package away3d.animators.states
 		 * Returns the output skeleton pose of the animation node.
 		 */
 		function getSkeletonPose(skeleton:Skeleton):SkeletonPose;
+		
+		function invalidateSkeletonPose():void;
 	}
 }

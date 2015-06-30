@@ -12,11 +12,13 @@ package sunag.sea3d.framework
 	import sunag.sea3d.core.assets.ABC;
 	import sunag.sea3d.core.script.Scripter;
 	import sunag.sea3d.core.script.ScripterABC;
+	import sunag.sea3d.engine.SEA3DGP;
 	import sunag.sea3d.events.Object3DEvent;
 	import sunag.sea3d.objects.SEAABC;
 	import sunag.sea3d.objects.SEAAnimation;
 	import sunag.sea3d.objects.SEAObject;
 	import sunag.sea3d.objects.SEAObject3D;
+	import sunag.sea3d.objects.SEAProperties;
 	
 	use namespace sea3dgp;
 	
@@ -34,6 +36,8 @@ package sunag.sea3d.framework
 		sea3dgp var animationStd:sunag.sea3d.framework.AnimationStandard;
 		sea3dgp var animator:sunag.animation.Animation;
 		sea3dgp var animatorClass:Class;
+		
+		public var props:Object;
 		
 		function Object3D(scope:ObjectContainer3D, animatorClass:Class=null)
 		{
@@ -86,13 +90,15 @@ package sunag.sea3d.framework
 		{
 			if (animator)
 			{
-				animator.stop();
+				stopAnimation();
+				
 				animator = null;
 			}
 			
 			if (animatorClass && (animationStd = animation))
 			{
 				animator = new animatorClass(scope, animation.scope);
+				animator.autoUpdate = false;								
 			}
 		}
 		
@@ -112,13 +118,15 @@ package sunag.sea3d.framework
 		}
 		
 		public function playAnimation(name:String, blendSpeed:Number=0, offset:Number=NaN):void
-		{
-			animator.play(name, blendSpeed, offset);
+		{			
+			SEA3DGP.addAnimator(animator);
+			animator.play(name, blendSpeed, offset);			
 		}
 		
 		public function stopAnimation():void
 		{
-			animator.stop();			
+			animator.stop();	
+			SEA3DGP.removeAnimator(animator);
 		}
 		
 		public function set timeScale(scale:Number):void
@@ -367,7 +375,29 @@ package sunag.sea3d.framework
 		{
 			return scopeLocal;
 		}
-						
+				
+		public function get(name:String):Object3D
+		{
+			for each(var obj3d:Object3D in childrens)
+			{
+				if (obj3d._name == name)
+					return obj3d;
+			}
+			
+			return null;
+		}	
+		
+		public function getStartWith(name:String):Object3D
+		{
+			for each(var obj3d:Object3D in childrens)
+			{
+				if (obj3d._name.indexOf(name) == 0)
+					return obj3d;
+			}
+			
+			return null;
+		}
+		
 		public function add(child:Object3D):void
 		{
 			if (child._parent)
@@ -444,8 +474,12 @@ package sunag.sea3d.framework
 			
 			var obj3d:SEAObject3D = sea as SEAObject3D;				
 			
-			if (obj3d.parent) 
-				obj3d.parent.tag.add( this );
+			visible = obj3d.visible;
+			
+			if (obj3d.properties)
+			{
+				props = SEAProperties(obj3d.properties).attribs;				
+			}
 			
 			for each(var anm:Object in obj3d.animations)
 			{
@@ -472,6 +506,9 @@ package sunag.sea3d.framework
 			{
 				loadTag(tag);
 			}
+			
+			if (obj3d.parent) 
+				obj3d.parent.tag.add( this );
 		}
 		
 		sea3dgp function loadTag(tag:Object):Boolean
@@ -493,6 +530,9 @@ package sunag.sea3d.framework
 			
 			var obj3d:Object3D = asset as Object3D;
 						
+			props = obj3d.props;
+			visible = obj3d.visible;
+			
 			animation = obj3d.animation;
 			if (animation) relativeAnimation = obj3d.relativeAnimation;
 			
@@ -516,12 +556,14 @@ package sunag.sea3d.framework
 		override public function dispose():void
 		{						
 			while (childrens.length)
-				remove( childrens[0] );
+				childrens[0].dispose();
 			
 			if (_parent)
 				_parent.remove( this );
 			
 			scope.dispose();
+			
+			animation = null;
 			
 			super.dispose();						
 		}

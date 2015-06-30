@@ -1,13 +1,13 @@
 package away3d.textures
 {
-	import away3d.materials.utils.IVideoPlayer;
-	import away3d.materials.utils.SimpleVideoPlayer;
-	import away3d.tools.utils.TextureUtils;
-	
 	import flash.display.BitmapData;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.geom.Rectangle;
+	
+	import away3d.materials.utils.IVideoPlayer;
+	import away3d.materials.utils.SimpleVideoPlayer;
+	import away3d.tools.utils.TextureUtils;
 	
 	public class VideoTexture extends BitmapTexture
 	{
@@ -153,6 +153,20 @@ package away3d.textures
 				_broadcaster.addEventListener(Event.ENTER_FRAME, autoUpdateHandler, false, 0, true);
 			else
 				_broadcaster.removeEventListener(Event.ENTER_FRAME, autoUpdateHandler);
+		}
+		
+		public function set player(val:IVideoPlayer):void
+		{
+			if (_player == val) return;
+			
+			var playing:Boolean = _player.playing;
+			
+			_player.stop();
+			
+			_player = val;
+			
+			if (playing)
+				_player.play();
 		}
 		
 		public function get player():IVideoPlayer

@@ -15,7 +15,7 @@ package away3d.materials.methods
 	 */
 	public class ColorTransformMethod extends EffectMethodBase
 	{
-		private var _colorTransform:ColorTransform;
+		protected var _colorTransform:ColorTransform;
 		
 		/**
 		 * Creates a new ColorTransformMethod.

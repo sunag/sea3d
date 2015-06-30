@@ -47,6 +47,7 @@ package sunag.sea3d.objects
 		//	ATTRIBUTES
 		public var compressed:Boolean = true;
 		public var streaming:Boolean = true;
+		public var metadata:SEAMetadata;
 		
 		public var tag:*;
 				

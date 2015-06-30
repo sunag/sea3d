@@ -1,6 +1,7 @@
 package sunag.sea3d.framework
 {
 	import away3d.containers.ObjectContainer3D;
+	import away3d.sea3d.animation.Object3DAnimation;
 	
 	import sunag.sea3dgp;
 	import sunag.sea3d.objects.SEAContainer3D;
@@ -12,7 +13,7 @@ package sunag.sea3d.framework
 	{
 		public function Container3D()
 		{
-			super(new ObjectContainer3D(), Animation);
+			super(new ObjectContainer3D(), Object3DAnimation);
 		}
 		
 		override sea3dgp function load(sea:SEAObject):void

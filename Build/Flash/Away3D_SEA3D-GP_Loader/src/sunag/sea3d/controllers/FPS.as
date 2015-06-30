@@ -14,10 +14,12 @@ package sunag.sea3d.controllers
 	
 	public class FPS extends CameraController
 	{
-		protected var _camera:PerspectiveCamera;
-		protected var _sensibility:Number = .3;
+		protected var _camera:PerspectiveCamera;		
 		protected var _referenceX:int;
 		protected var _referenceY:int;
+		
+		public var sensibility:Number = .3;
+		public var speed:Number = 1;
 		
 		public function FPS(camera:PerspectiveCamera)
 		{
@@ -44,25 +46,25 @@ package sunag.sea3d.controllers
 			if ( KeyboardInput.isDown( Keyboard.W ) || KeyboardInput.isDown( Keyboard.UP ) )
 			{
 				y = _camera.scope.y;
-				_camera.scope.moveForward( 9 );
+				_camera.scope.moveForward( 9 * speed );
 				_camera.scope.y = y;
 			}
 			if ( KeyboardInput.isDown( Keyboard.S ) || KeyboardInput.isDown( Keyboard.DOWN ) )
 			{
 				y = _camera.scope.y;
-				_camera.scope.moveForward( -9 );
+				_camera.scope.moveForward( -9 * speed );
 				_camera.scope.y = y;
 			}
 			if ( KeyboardInput.isDown( Keyboard.A ) || KeyboardInput.isDown( Keyboard.LEFT ) )
 			{
 				y = _camera.scope.y;
-				_camera.scope.moveLeft( 7 );
+				_camera.scope.moveLeft( 7 * speed );
 				_camera.scope.y = y;
 			}
 			if ( KeyboardInput.isDown( Keyboard.D ) || KeyboardInput.isDown( Keyboard.RIGHT ) )
 			{
 				y = _camera.scope.y;
-				_camera.scope.moveLeft( -7 );
+				_camera.scope.moveLeft( -7 * speed );
 				_camera.scope.y = y;
 			}
 		}
@@ -73,7 +75,7 @@ package sunag.sea3d.controllers
 				return onViewMouseUp(e);
 			
 			var y:Number = _camera.scope.y;
-			_camera.scope.moveForward( e.delta * 10 );
+			_camera.scope.moveForward( e.delta * 10 * speed );
 			_camera.scope.y = y;
 		}
 		
@@ -101,8 +103,9 @@ package sunag.sea3d.controllers
 				
 			var rot:Vector3D = _camera.scope.rotation;
 			
-			rot.x += -deltaY * _sensibility;
-			rot.y += -deltaX * _sensibility;	
+			rot.z = 0;
+			rot.x += -deltaY * sensibility;
+			rot.y += -deltaX * sensibility;	
 			
 			if (rot.x > 80) rot.x = 80;
 			else if (rot.x < -80) rot.x = -80;

@@ -682,7 +682,7 @@
 				stage3DProxy.clearDepthBuffer();
 			
 			if (!_parentIsStage) {
-				var globalPos:Point = parent.localToGlobal(_localPos);
+				var globalPos:Point = parent ? parent.localToGlobal(_localPos) : new Point;
 				if (_globalPos.x != globalPos.x || _globalPos.y != globalPos.y) {
 					_globalPos = globalPos;
 					_globalPosDirty = true;
@@ -722,8 +722,7 @@
 				if (_shareContext)
 					_renderer.render(_entityCollector, null, _scissorRect);
 				else
-					_renderer.render(_entityCollector);
-				
+					_renderer.render(_entityCollector);	
 			}
 			
 			if (!_shareContext) {

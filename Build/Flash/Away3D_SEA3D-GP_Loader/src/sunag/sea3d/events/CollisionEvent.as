@@ -15,6 +15,8 @@ package sunag.sea3d.events
 		public static const COLLISION_OVER:String = "collisionOver";
 		public static const COLLISION_OUT:String = "collisionOut";
 		public static const RAY:String = "ray";
+		public static const RAY_OVER:String = "rayOver";
+		public static const RAY_OUT:String = "rayOut";
 		
 		sea3dgp var e:AWPEvent;
 		

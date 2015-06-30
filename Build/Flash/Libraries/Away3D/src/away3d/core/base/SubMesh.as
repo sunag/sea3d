@@ -286,7 +286,7 @@ package away3d.core.base
 			return _uvTransform;
 		}
 		
-		private function updateUVTransform():void
+		public function updateUVTransform():void
 		{
 			_uvTransform ||= new Matrix();
 			_uvTransform.identity();

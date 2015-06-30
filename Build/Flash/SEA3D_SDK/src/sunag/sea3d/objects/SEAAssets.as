@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2014 Sunag Entertainment
+* Copyright (c) 2013 Sunag Entertainment
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of
 * this software and associated documentation files (the "Software"), to deal in
@@ -23,18 +23,15 @@
 
 package sunag.sea3d.objects
 {
-	import sunag.sunag;
 	import sunag.sea3d.SEA;
 	
-	use namespace sunag;
-	
-	public class SEAAssets extends SEAObject
+	public class SEAAssets extends SEAAssetsBase
 	{
 		public static const TYPE:String = "sea";
 		
 		public function SEAAssets(name:String, sea:SEA)
 		{
-			super(name, TYPE, sea);
-		}	
+			super(name, TYPE, sea);						
+		}		
 	}
 }

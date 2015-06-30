@@ -12,12 +12,13 @@ package sunag.sea3d.framework
 	
 	public class TextureFile extends Texture
 	{
-		sea3dgp var cache:Boolean = SEA3DGP.config.cacheable;
-		sea3dgp var bitmapTex:AsynBitmapTexture;		
+		sea3dgp var cache:Boolean = SEA3DGP.config.cacheableTexture;
+		sea3dgp var bitmapTex:AsynBitmapTexture;
+		sea3dgp var texData:*;
 		
 		public function TextureFile(url:String=null)
 		{
-			if (url) loadData( url );
+			if (url) loadURL( url );
 		}
 		
 		//
@@ -59,6 +60,8 @@ package sunag.sea3d.framework
 		
 		sea3dgp function loadData(data:*):void
 		{
+			texData = data;
+			
 			if (cache)
 			{
 				bitmapTex = TextureLoader.get(data);
@@ -85,6 +88,28 @@ package sunag.sea3d.framework
 			if ( SEA3DGP.isEnv( url ) ) url = SEA3DGP.parseEnv( url );
 			
 			loadData( url );
+		}
+		
+		public function get url():String
+		{
+			return texData;
+		}
+		
+		override sea3dgp function copyFrom(asset:Asset):void
+		{
+			super.copyFrom(asset);
+			
+			var tex:TextureFile = asset as TextureFile;
+			
+			cacheable = tex.cacheable;
+			if (tex.texData) loadData( tex.texData );			
+		}
+		
+		override public function clone(force:Boolean=false):Asset
+		{
+			var clone:TextureFile = new TextureFile();
+			clone.copyFrom(this);
+			return clone;	
 		}
 	}
 }

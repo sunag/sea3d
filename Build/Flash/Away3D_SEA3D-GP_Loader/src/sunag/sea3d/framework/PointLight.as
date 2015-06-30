@@ -88,7 +88,7 @@ package sunag.sea3d.framework
 		//	LOADER
 		//
 		
-		override public function clone():Asset			
+		override public function clone(force:Boolean=false):Asset			
 		{
 			var asset:sunag.sea3d.framework.PointLight = new sunag.sea3d.framework.PointLight();
 			asset.copyFrom( this );
@@ -121,7 +121,13 @@ package sunag.sea3d.framework
 			pointLight.position = pnt.position;
 			
 			pointLight.color = pnt.color;
-			pointLight.specular = pointLight.diffuse = pnt.intensity;						
+			pointLight.specular = pointLight.diffuse = pnt.intensity;		
+			
+			if (pnt.attenuation)
+			{
+				attenuationStart = pnt.attenuation.start;
+				attenuationEnd = pnt.attenuation.end;
+			}
 		}
 	}
 }

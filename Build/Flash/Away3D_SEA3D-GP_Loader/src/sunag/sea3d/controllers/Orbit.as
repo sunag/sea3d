@@ -11,13 +11,14 @@ package sunag.sea3d.controllers
 
 	public class Orbit extends CameraController
 	{
-		protected var _camera:Camera3D;
-		protected var _sensibility:Number = .3;
+		protected var _camera:Camera3D;		
 		protected var _referenceX:int;
 		protected var _referenceY:int;
 		protected var _center:Vector3D = new Vector3D();
 		protected var _distance:Number = 1500;
 		protected var _height:Number = 800;
+		
+		public var sensibility:Number = .3;
 		
 		use namespace sea3dgp;
 		
@@ -112,8 +113,8 @@ package sunag.sea3d.controllers
 			if (!CameraController.actived || !e.buttonDown)
 				return onViewMouseUp(e);
 			
-			var deltaX:Number = (_referenceX - SEA3DGP.stage.mouseX) * _sensibility,
-				deltaY:Number = (_referenceY - SEA3DGP.stage.mouseY) * _sensibility;
+			var deltaX:Number = (_referenceX - SEA3DGP.stage.mouseX) * sensibility,
+				deltaY:Number = (_referenceY - SEA3DGP.stage.mouseY) * sensibility;
 			
 			_height += deltaY * 10;		
 			

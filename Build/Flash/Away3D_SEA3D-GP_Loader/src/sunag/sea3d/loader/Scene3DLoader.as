@@ -1,8 +1,6 @@
 package sunag.sea3d.loader
 {
 	import flash.utils.Dictionary;
-	import flash.utils.setInterval;
-	import flash.utils.setTimeout;
 	
 	import sunag.sea3dgp;
 	import sunag.events.SEAEvent;
@@ -12,7 +10,10 @@ package sunag.sea3d.loader
 	import sunag.sea3d.framework.Asset;
 	import sunag.sea3d.modules.ActionModuleBase;
 	import sunag.sea3d.modules.ByteCodeModuleBase;
+	import sunag.sea3d.modules.HelperModuleBase;
 	import sunag.sea3d.modules.ParticleModuleBase;
+	import sunag.sea3d.modules.PhysicsModuleBase;
+	import sunag.sea3d.modules.RTTModuleBase;
 	import sunag.sea3d.modules.SoundModuleBase;
 	import sunag.sea3d.objects.SEAObject;
 
@@ -151,10 +152,13 @@ package sunag.sea3d.loader
 			_status = 1;
 			
 			_sea3d = new SEA(_config);
+			_sea3d.addModule(new HelperModuleBase());
+			_sea3d.addModule(new PhysicsModuleBase());
 			_sea3d.addModule(new ByteCodeModuleBase());
 			_sea3d.addModule(new ActionModuleBase());
 			_sea3d.addModule(new SoundModuleBase());
 			_sea3d.addModule(new ParticleModuleBase());
+			_sea3d.addModule(new RTTModuleBase());
 			_sea3d.addEventListener(SEAEvent.STREAMING_PROGRESS, onProgress);
 			_sea3d.addEventListener(SEAEvent.PROGRESS, onProgress);
 			_sea3d.addEventListener(SEAEvent.COMPLETE, onComplete);
@@ -204,9 +208,9 @@ package sunag.sea3d.loader
 			{								
 				var asset:Asset = new SEA3DGP.TYPE_CLASS[sea.type]();
 				asset.load( sea );		
-							
+				
 				if (_status == LOADING)
-				{
+				{	
 					_objects[ sea.filename ] = asset;
 					
 					for each(var callback:Function in _load)

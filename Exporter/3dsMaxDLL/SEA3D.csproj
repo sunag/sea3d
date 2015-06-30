@@ -1,0 +1,121 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{649E8A40-51B9-4D2F-86CA-F9F1FA080EC9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Poonya</RootNamespace>
+    <AssemblyName>SEA3D</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="7zip.Lzma\Common\CRC.cs" />
+    <Compile Include="7zip.Lzma\Compress\Helpers\SevenZipHelper.cs" />
+    <Compile Include="7zip.Lzma\Compress\LZMA\LzmaBase.cs" />
+    <Compile Include="7zip.Lzma\Compress\LZMA\LzmaDecoder.cs" />
+    <Compile Include="7zip.Lzma\Compress\LZMA\LzmaEncoder.cs" />
+    <Compile Include="7zip.Lzma\Compress\LZ\IMatchFinder.cs" />
+    <Compile Include="7zip.Lzma\Compress\LZ\LzBinTree.cs" />
+    <Compile Include="7zip.Lzma\Compress\LZ\LzInWindow.cs" />
+    <Compile Include="7zip.Lzma\Compress\LZ\LzOutWindow.cs" />
+    <Compile Include="7zip.Lzma\Compress\RangeCoder\RangeCoder.cs" />
+    <Compile Include="7zip.Lzma\Compress\RangeCoder\RangeCoderBit.cs" />
+    <Compile Include="7zip.Lzma\Compress\RangeCoder\RangeCoderBitTree.cs" />
+    <Compile Include="7zip.Lzma\ICoder.cs" />
+    <Compile Include="Ionic.Zlib\CRC32.cs" />
+    <Compile Include="Ionic.Zlib\Deflate.cs" />
+    <Compile Include="Ionic.Zlib\DeflateStream.cs" />
+    <Compile Include="Ionic.Zlib\GZipStream.cs" />
+    <Compile Include="Ionic.Zlib\Inflate.cs" />
+    <Compile Include="Ionic.Zlib\InfTree.cs" />
+    <Compile Include="Ionic.Zlib\ParallelDeflateOutputStream.cs" />
+    <Compile Include="Ionic.Zlib\Tree.cs" />
+    <Compile Include="Ionic.Zlib\Zlib.cs" />
+    <Compile Include="Ionic.Zlib\ZlibBaseStream.cs" />
+    <Compile Include="Ionic.Zlib\ZlibCodec.cs" />
+    <Compile Include="Ionic.Zlib\ZlibConstants.cs" />
+    <Compile Include="Ionic.Zlib\ZlibStream.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SEA3D\Objects\SEAAnimationBase.cs" />
+    <Compile Include="SEA3D\Objects\SEAModifier.cs" />
+    <Compile Include="SEA3D\Objects\SEASkeleton.cs" />
+    <Compile Include="SEA3D\Objects\SEADummy.cs" />
+    <Compile Include="SEA3D\Objects\SEACamera.cs" />
+    <Compile Include="SEA3D\Objects\SEADirectionalLight.cs" />
+    <Compile Include="SEA3D\Objects\SEAPointLight.cs" />
+    <Compile Include="SEA3D\Objects\SEALight.cs" />
+    <Compile Include="SEA3D\Objects\SEATextureURL.cs" />
+    <Compile Include="SEA3D\Objects\SEATexture.cs" />
+    <Compile Include="SEA3D\Objects\SEAPNG.cs" />
+    <Compile Include="SEA3D\Objects\Skeleton\JointData.cs" />
+    <Compile Include="SEA3D\Objects\Techniques\ReflectionTech.cs" />
+    <Compile Include="SEA3D\Objects\Techniques\NormalMapTech.cs" />
+    <Compile Include="SEA3D\Objects\Techniques\OpacityMapTech.cs" />
+    <Compile Include="SEA3D\Objects\Techniques\EmissiveMapTech.cs" />
+    <Compile Include="SEA3D\Objects\Techniques\SpecularMapTech.cs" />
+    <Compile Include="SEA3D\Objects\Techniques\DiffuseMapTech.cs" />
+    <Compile Include="SEA3D\Objects\Techniques\TextureTech.cs" />
+    <Compile Include="SEA3D\Objects\Techniques\DefaultTech.cs" />
+    <Compile Include="SEA3D\Objects\Techniques\TechBase.cs" />
+    <Compile Include="SEA3D\Objects\SEAMesh.cs" />
+    <Compile Include="SEA3D\Objects\SEAMaterial.cs" />
+    <Compile Include="SEA3D\Objects\SEAObject3D.cs" />
+    <Compile Include="SEA3D\Objects\SEAData.cs" />
+    <Compile Include="SEA3D\Objects\SEAGeometry.cs" />
+    <Compile Include="SEA3D\Objects\SEAGeometryBase.cs" />
+    <Compile Include="SEA3D\Objects\SEAObject.cs" />
+    <Compile Include="SEA3D\SEA3DWriter.cs" />
+    <Compile Include="Server\Engine\Server.cs" />
+    <Compile Include="Server\Engine\Session.cs" />
+    <Compile Include="Server\Engine\SessionID.cs" />
+    <Compile Include="Server\Engine\SID.cs" />
+    <Compile Include="Server\Manager.cs" />
+    <Compile Include="Utils\ArrayList.cs" />
+    <Compile Include="Utils\Base64.cs" />
+    <Compile Include="Utils\ByteArray.cs" />
+    <Compile Include="Utils\Compression.cs" />
+    <Compile Include="Utils\Crc32.cs" />
+    <Compile Include="Utils\DictSN.cs" />
+    <Compile Include="Utils\Hashmap.cs" />
+    <Compile Include="Utils\Hashtable.cs" />
+    <Compile Include="Utils\Json.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

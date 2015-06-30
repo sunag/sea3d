@@ -52,12 +52,15 @@ package sunag.sea3d.objects
 		public static const AMBIENT_MAP:uint = 15;		
 		public static const ALPHA_MAP:uint = 16;
 		public static const EMISSIVE_MAP:uint = 17;
-		public static const VERTEX_COLOR:uint = 18;		
+		public static const VERTEX_COLOR:uint = 18;
+		public static const WRAP_LIGHTING:uint = 19;	
+		public static const COLOR_REPLACE:uint = 20;
+		public static const REFLECTION_SPHERICAL:uint = 21;
 		
 		public var animations:Array;				
 		
 		public var doubleSided:Boolean;
-		public var smooth:Boolean;		
+		public var repeat:Boolean;		
 		public var depthMask:Boolean;
 		
 		public var alpha:Number = 1;	
@@ -85,7 +88,7 @@ package sunag.sea3d.objects
 			receiveShadows = (attrib & 4) == 0;			
 			receiveFog = (attrib & 8) == 0;		
 			
-			smooth = (attrib & 16) == 0;		
+			repeat = (attrib & 16) == 0;		
 			
 			if (attrib & 32)
 				alpha = data.readFloat();
@@ -263,7 +266,37 @@ package sunag.sea3d.objects
 							{	
 								blendMode:ByteArrayUtils.readBlendMode(data)
 							}
-						break;						
+						break;	
+					case WRAP_LIGHTING:
+						tech = 
+						{
+							color:ByteArrayUtils.readUnsignedInt24(data),
+							strength:data.readFloat()
+						}
+						break;
+					case COLOR_REPLACE:	
+						methodAttrib = data.readUnsignedByte();  
+						
+						tech = 
+							{
+								red:ByteArrayUtils.readUnsignedInt24(data),
+								green:ByteArrayUtils.readUnsignedInt24(data),
+								blue:ByteArrayUtils.readUnsignedInt24(data)
+							}
+						
+						if (methodAttrib & 1)										
+							tech.mask = sea.getSEAObject(data.readUnsignedInt());
+						
+						if (methodAttrib & 2)
+							tech.alpha = data.readFloat();
+						break;
+					case REFLECTION_SPHERICAL:
+						tech =
+						{
+							texture:sea.getSEAObject(data.readUnsignedInt()),
+							alpha:data.readFloat()				
+						}	
+						break;
 					default:						
 						trace("MaterialTechnique not found:", kind.toString(16));
 						data.position = pos += size;

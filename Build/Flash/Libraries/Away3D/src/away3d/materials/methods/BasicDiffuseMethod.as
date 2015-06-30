@@ -13,7 +13,7 @@ package away3d.materials.methods
 	 */
 	public class BasicDiffuseMethod extends LightingMethodBase
 	{
-		private var _useAmbientTexture:Boolean;
+		protected var _useAmbientTexture:Boolean;
 		
 		protected var _useTexture:Boolean;
 		internal var _totalLightColorReg:ShaderRegisterElement;
@@ -21,9 +21,9 @@ package away3d.materials.methods
 		// TODO: are these registers at all necessary to be members?
 		protected var _diffuseInputRegister:ShaderRegisterElement;
 		
-		private var _texture:Texture2DBase;
+		protected var _texture:Texture2DBase;
 		private var _diffuseColor:uint = 0xffffff;
-		private var _diffuseR:Number = 1, _diffuseG:Number = 1, _diffuseB:Number = 1, _diffuseA:Number = 1;
+		protected var _diffuseR:Number = 1, _diffuseG:Number = 1, _diffuseB:Number = 1, _diffuseA:Number = 1;
 		protected var _shadowRegister:ShaderRegisterElement;
 		
 		protected var _textureThreshold : Boolean = false;

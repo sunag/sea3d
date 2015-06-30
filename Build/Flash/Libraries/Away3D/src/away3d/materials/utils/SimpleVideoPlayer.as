@@ -60,7 +60,7 @@ package away3d.materials.utils
 			_ns.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler, false, 0, true);
 			
 			// video
-			_video = new Video();
+			_video = new Video();			
 			_video.attachNetStream(_ns);
 			
 			// container
@@ -99,11 +99,14 @@ package away3d.materials.utils
 			}
 		}
 		
-		public function seek(val:Number):void
+		public function step(val:Number):void
 		{
-			pause();
+			_ns.step(val*30);
+		}
+		
+		public function seek(val:Number):void
+		{			
 			_ns.seek(val);
-			_ns.resume();
 		}
 		
 		public function stop():void
@@ -208,6 +211,17 @@ package away3d.materials.utils
 		//////////////////////////////////////////////////////
 		// get / set functions
 		//////////////////////////////////////////////////////
+		
+		public function clone():IVideoPlayer
+		{
+			var pl:SimpleVideoPlayer = new SimpleVideoPlayer();
+			pl.loop = loop;
+			pl.source = source;
+			pl.width = width;
+			pl.height = height;
+			
+			return pl;
+		}
 		
 		public function get source():String
 		{
