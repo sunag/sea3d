@@ -205,18 +205,20 @@ THREE.SkinnedMesh.prototype.clone = function ( object ) {
 	
 	cloned.animations = [];
 	
-	var refAnimations = this.geometry.animations;
-	var nsIndex = refAnimations[0].name.indexOf("/")+1;
-	
-	for (var i = 0; i < refAnimations.length; i++) {
-		var name = refAnimations[i].name.substring(nsIndex);
-		var data = refAnimations[i];
+	if (this.geometry.animations) {
+		var refAnimations = this.geometry.animations;
+		var nsIndex = refAnimations[0].name.indexOf("/")+1;
 		
-		data.initialized = false;
-		
-		cloned.animations[i] = new THREE.Animation( cloned, data );
-		cloned.animations[i].loop = refAnimations[i].repeat;
-		cloned.animations[i].name = name;
+		for (var i = 0; i < refAnimations.length; i++) {
+			var name = refAnimations[i].name.substring(nsIndex);
+			var data = refAnimations[i];
+			
+			data.initialized = false;
+			
+			cloned.animations[i] = new THREE.Animation( cloned, data );
+			cloned.animations[i].loop = refAnimations[i].repeat;
+			cloned.animations[i].name = name;
+		}
 	}
 	
 	return cloned;
