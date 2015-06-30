@@ -116,7 +116,7 @@ THREE.Mesh.prototype.clone = function ( object ) {
 	if (cloned.animation)
 		cloned.animation = this.animation.clone( cloned );
 	
-	return obj;
+	return cloned;
 }
 
 //
