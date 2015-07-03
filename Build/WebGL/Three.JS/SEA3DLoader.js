@@ -1889,7 +1889,6 @@ THREE.SEA3D.prototype.readPointLight = function(sea) {
 
 THREE.SEA3D.prototype.readHemisphereLight = function(sea) {	
 	var light = new THREE.HemisphereLight( sea.color, sea.secondColor, sea.multiplier * this.config.multiplier );
-	light.position.set(0,1,0);
 	light.name = sea.name;
 	
 	this.lights = this.lights || [];
