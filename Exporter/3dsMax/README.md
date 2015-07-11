@@ -1,12 +1,19 @@
+Installing
+==
+
 1. Open your 3dsMax 9 or higher
 2. Click in MaxScript -> Run Script...
 3. Select SEA3D.ms
-#Use the Setup.ms to install.
 
-SEA3D.ms (Exporter)
-SEA3DAnimation.ms (Animation Editor)
-SEA3DMaterial.ms (Material Editor)
-*Setup.ms (Installer)*
+**Run Setup.ms to install.**
+
+* SEA3D.ms **(Exporter)**
+* SEA3DAnimation.ms **(Animation Editor)**
+* SEA3DMaterial.ms **(Material Editor)**
+* Setup.ms **(Installer)**
+
+Preview
+==
 
 [<img src="http://sunag.github.io/sea3d/Media/SEA3D-3dsMax-Exporter.gif"/>](https://github.com/sunag/sea3d/tree/gh-pages/Exporter/3dsMax)
 
