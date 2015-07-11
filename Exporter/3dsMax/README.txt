@@ -1,5 +1,3 @@
-SEA3D Exporter - (C) Sunag Entertainment - http://www.sunag.com.br/
-
 1. Open your 3dsMax 9 or higher
 2. Click in MaxScript -> Run Script...
 3. Select SEA3D.ms
