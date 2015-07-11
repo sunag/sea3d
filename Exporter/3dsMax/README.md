@@ -13,12 +13,12 @@ Installing
 * Setup.ms **(Installer)**
 
 Preview
-==
+--
 
 [<img src="http://sunag.github.io/sea3d/Media/SEA3D-3dsMax-Exporter.gif"/>](https://github.com/sunag/sea3d/tree/gh-pages/Exporter/3dsMax)
 
 License
-==
+--
 
 The MIT License (MIT)
 
