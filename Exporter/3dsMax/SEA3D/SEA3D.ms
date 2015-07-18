@@ -2,7 +2,7 @@
 -- Copyright (C) 2015 Sunag Entertainment
 
 -- SEA3D - A file format for games
--- https://code.google.com/p/sea3d/
+-- https://github.com/sunag/sea3d
 
 -- developed by Jean Carlo Deconto (Brazil)
 -- never give up without trying...
