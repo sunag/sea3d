@@ -1,7 +1,9 @@
 INCLUDES:
 
-SEA3D - https://github.com/sunag/sea3d/tree/master/SDK/AS3
-Away3D - https://github.com/sunag/sea3d/tree/master/Libraries/Away3D
+SEA3D - SDK
+Away3D
+Away3D_Physics
+Away3D_Extension
 
 The MIT License (MIT)
 
