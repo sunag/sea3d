@@ -2066,22 +2066,22 @@ THREE.SEA3D.prototype.getSkeletonAnimation = function(sea, skl) {
 			for (var t = start; t < end; t++) {	
 				var joint = sea.pose[t][j];
 				
-				var mtx_global = THREE.SEA3D.BUFFER2.makeRotationFromQuaternion(new THREE.Quaternion(joint.qx, joint.qy, joint.qz, joint.qw));
-				mtx_global.setPosition(new THREE.Vector3(joint.x, joint.y, joint.z));						
+				var mtx_local = THREE.SEA3D.BUFFER2.makeRotationFromQuaternion(new THREE.Quaternion(joint.qx, joint.qy, joint.qz, joint.qw));
+				mtx_local.setPosition(new THREE.Vector3(joint.x, joint.y, joint.z));						
 				
 				if (bone.parentIndex > -1)
 				{
 					// to global
 					
 					mtx_inv.elements = skl.joint[bone.parentIndex].inverseBindMatrix;						
-															
+					
 					var mtx_rect = THREE.SEA3D.BUFFER3.getInverse( mtx_inv );
 					
-					mtx_global.multiplyMatrices( mtx_rect, mtx_global );	
+					mtx_local.multiplyMatrices( mtx_rect, mtx_local );	
 					
 					// convert to three.js matrix
 					
-					this.flipMatrix(mtx_global);
+					this.flipMatrix(mtx_local);
 					
 					// To Local
 					
@@ -2091,15 +2091,15 @@ THREE.SEA3D.prototype.getSkeletonAnimation = function(sea, skl) {
 					
 					mtx_rect.getInverse( mtx_rect ); // reverse to normal direction
 					
-					mtx_global.multiplyMatrices( mtx_rect, mtx_global );
+					mtx_local.multiplyMatrices( mtx_rect, mtx_local );
 				}
 				else
 				{
-					this.flipMatrix(mtx_global);
+					this.flipMatrix(mtx_local);
 				}
 				
-				var posQ = THREE.SEA3D.VECBUF0.setFromMatrixPosition(mtx_global);
-				var newQ = THREE.SEA3D.QUABUF0.setFromRotationMatrix(mtx_global);
+				var posQ = THREE.SEA3D.VECBUF0.setFromMatrixPosition(mtx_local);
+				var newQ = THREE.SEA3D.QUABUF0.setFromRotationMatrix(mtx_local);
 				
 				keys.push({
 						time:time,								
