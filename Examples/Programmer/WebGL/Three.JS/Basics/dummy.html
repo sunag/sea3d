@@ -47,115 +47,153 @@
 			<img src="loader.gif" alt="Loading SEA3D File.">
 		</div>
 		
-		<script src="../js/three.min.js"></script>	
-		<script src="../../../../../Build/WebGL/Three.JS/Build/sea3d.min.js"></script>
+		<script src="js/three.min.js"></script>	
+		<!--
+		<script src="../../../../../Build/Three.JS/sea3d.min.js"></script>
+		-->
+		<script src="../../../../../Source/WebGL/SDK/SEA3D.js"></script>
+		<script src="../../../../../Source/WebGL/SDK/SEA3DLZMA.js"></script>
+		<script src="../../../../../Source/WebGL/Three.JS/SEA3DLoader.js"></script>
 		
-		<script src="../js/controls/TrackballControls.js"></script>
+		<script src="js/controls/OrbitControls.js"></script>
 		
-		<script src="../js/postprocessing/EffectComposer.js"></script>
-		<script src="../js/postprocessing/RenderPass.js"></script>
-		<script src="../js/postprocessing/ShaderPass.js"></script>
-		<script src="../js/postprocessing/MaskPass.js"></script> 
-		<script src="../js/shaders/CopyShader.js"></script>
+		<script src="js/postprocessing/EffectComposer.js"></script>
+		<script src="js/postprocessing/RenderPass.js"></script>
+		<script src="js/postprocessing/ShaderPass.js"></script>
+		<script src="js/postprocessing/MaskPass.js"></script> 
+		<script src="js/shaders/CopyShader.js"></script>
 		
-		<script src="../js/shaders/ColorCorrectionShader.js"></script>
-		<script src="../js/shaders/VignetteShader.js"></script>
+		<script src="js/shaders/ColorCorrectionShader.js"></script>
+		<script src="js/shaders/VignetteShader.js"></script>
 		
-		<script>								
+		<script src="js/Detector.js"></script>
+		<script src="js/libs/stats.min.js"></script>
+		
+		<script>
+
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
 			var container, stats;
 
-			var camera, scene, renderer, clock, loader, composer, delta;
+			var camera, scene, renderer, composer, controls, demoAt = -1;
 
-			var windowHalfX = window.innerWidth / 2;
-			var windowHalfY = window.innerHeight / 2;
+			var loader;
+
+			// Initialize Three.JS
 
 			init();
-			animate();
+
+			//
+			// SEA3D Loader
+			//
+
+			loader = new THREE.SEA3D( {
+
+				autoPlay : false, // Manual play animations
+				container : scene // Container to add models
+
+			} );
+
+			loader.onComplete = function( e ) {
+
+				controls = new THREE.OrbitControls( camera );
+
+				document.getElementById( 'loading' ).style.visibility = 'hidden';
+
+				animate();
+
+			};
+
+			loader.load( './assets/dummy.tjs.sea' );
+
+			//
 
 			function init() {
-				
-				container = document.createElement( 'div' );
-				document.body.appendChild( container );
-				
-				//
-				// three.js
-				//
-				
-				clock = new THREE.Clock();
-				
-				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 100000 );
-				camera.position.z = -300;
-				camera.position.y = 300;
-				camera.position.x = 300;				
-				
-				controls = new THREE.TrackballControls(camera, document);
-				controls.rotateSpeed = 2.0;
-				controls.zoomSpeed = 1.2;
-				controls.panSpeed = 0.8;
-				controls.noZoom = false;
-				controls.noPan = false;
-				controls.staticMoving = true;
-				controls.dynamicDampingFactor = 0.1;
-
-				// Scene
 
 				scene = new THREE.Scene();
 
-				// Lights
-				
-				var ambient = new THREE.AmbientLight( 0x666666 );
-				scene.add( ambient );												
-				
-				// Renderer
-				
-				renderer = new THREE.WebGLRenderer();				
-				renderer.physicallyBasedShading = true;
-				
-				renderer.setClearColor( 0x333333, 1 );
-				
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 2000 );
+				camera.position.set( 300, 300, 300 );
+
+				renderer = new THREE.WebGLRenderer();
+				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.setClearColor( 0x333333, 1 );
 				container.appendChild( renderer.domElement );
-				
-				// Stage
-				
+
+				stats = new Stats();
+				stats.domElement.style.position = 'absolute';
+				stats.domElement.style.top = '0px';
+				container.appendChild( stats.domElement );
+
+				// post-processing
+
+				composer = new THREE.EffectComposer( renderer );
+
+				var renderPass = new THREE.RenderPass( scene, camera );
+				var copyPass = new THREE.ShaderPass( THREE.CopyShader );
+				composer.addPass( renderPass );
+
+				var vh = 1.4, vl = 1.2;
+
+				var colorCorrectionPass = new THREE.ShaderPass( THREE.ColorCorrectionShader );
+				colorCorrectionPass.uniforms[ "powRGB" ].value = new THREE.Vector3( vh, vh, vh );
+				colorCorrectionPass.uniforms[ "mulRGB" ].value = new THREE.Vector3( vl, vl, vl );
+				composer.addPass( colorCorrectionPass );
+
+				var vignettePass = new THREE.ShaderPass( THREE.VignetteShader );
+				vignettePass.uniforms[ "darkness" ].value = 1.0;
+				composer.addPass( vignettePass );
+
+				composer.addPass( copyPass );
+				copyPass.renderToScreen = true;
+
+				// extra lights
+
+				scene.add( new THREE.AmbientLight( 0x333333 ) );
+
+				// events
+
 				window.addEventListener( 'resize', onWindowResize, false );
-				
-				//
-				// SEA3D
-				//
-				
-				var time = new Date().getTime();
-				
-				loader = new THREE.SEA3D({
-					container : scene
-				});				
-				
-				loader.onComplete = function( e ) {
-					document.getElementById('loading').style.visibility = 'hidden';					
-					console.log( new Date().getTime() - time );
-				};
-				
-				loader.load( 'dummy.sea' );				
-			}	
-			
+
+			}
+
+
 			function onWindowResize() {
-				windowHalfX = window.innerWidth / 2;
-				windowHalfY = window.innerHeight / 2;
 
 				camera.aspect = window.innerWidth / window.innerHeight;
 				camera.updateProjectionMatrix();
 
 				renderer.setSize( window.innerWidth, window.innerHeight );
+
 			}
 
+			//
+
+			function description(msg) {
+
+				document.getElementById('description').innerHTML = (demoAt + 1) + " - " + msg;
+
+			}
+
+			//
+
+			var clock = new THREE.Clock();
+
 			function animate() {
-				delta = clock.getDelta();
-				
-				controls.update();
-				
-				renderer.render( scene, camera );
+
+				var delta = clock.getDelta();
 
 				requestAnimationFrame( animate );
+
+				//renderer.render( scene, camera );
+				composer.render( delta );
+
+				stats.update();
+
 			}
 
 		</script>

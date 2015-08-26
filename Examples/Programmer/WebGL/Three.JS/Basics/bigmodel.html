@@ -47,154 +47,158 @@
 			<img src="loader.gif" alt="Loading...">
 		</div>
 		
-		<script src="../js/three.min.js"></script>	
-		<script src="../../../../../Build/WebGL/Three.JS/Build/sea3d.min.js"></script>
+		<script src="js/three.min.js"></script>	
+		<!--
+		<script src="../../../../../Build/Three.JS/sea3d.min.js"></script>
+		-->
+		<script src="../../../../../Source/WebGL/SDK/SEA3D.js"></script>
+		<script src="../../../../../Source/WebGL/SDK/SEA3DLZMA.js"></script>
+		<script src="../../../../../Source/WebGL/Three.JS/SEA3DLoader.js"></script>
 		
-		<script src="../js/controls/TrackballControls.js"></script>
+		<script src="js/controls/OrbitControls.js"></script>
 		
-		<script src="../js/postprocessing/EffectComposer.js"></script>
-		<script src="../js/postprocessing/RenderPass.js"></script>
-		<script src="../js/postprocessing/ShaderPass.js"></script>
-		<script src="../js/postprocessing/MaskPass.js"></script> 
-		<script src="../js/shaders/CopyShader.js"></script>
+		<script src="js/postprocessing/EffectComposer.js"></script>
+		<script src="js/postprocessing/RenderPass.js"></script>
+		<script src="js/postprocessing/ShaderPass.js"></script>
+		<script src="js/postprocessing/MaskPass.js"></script> 
+		<script src="js/shaders/CopyShader.js"></script>
 		
-		<script src="../js/shaders/ColorCorrectionShader.js"></script>
-		<script src="../js/shaders/VignetteShader.js"></script>
+		<script src="js/shaders/ColorCorrectionShader.js"></script>
+		<script src="js/shaders/VignetteShader.js"></script>
 		
-		<script>								
+		<script src="js/Detector.js"></script>
+		<script src="js/libs/stats.min.js"></script>
+		
+		<script>
+
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
 			var container, stats;
 
-			var camera, scene, renderer, clock, loader, composer, renderPass, delta;
+			var camera, scene, renderer, composer, controls, demoAt = -1;
 
-			var mouseX = 0, mouseY = 0;
+			var loader;
 
-			var windowHalfX = window.innerWidth / 2;
-			var windowHalfY = window.innerHeight / 2;
+			// Initialize Three.JS
 
 			init();
-			animate();
-			
-			function init() {
-				
-				container = document.createElement( 'div' );
-				document.body.appendChild( container );
-				
-				clock = new THREE.Clock();
-				
-				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 100000 );
-				camera.position.z = -30;
-				camera.position.y = 20;
-				camera.position.x = -10;				
-				
-				controls = new THREE.TrackballControls(camera, document);
-				controls.rotateSpeed = 2.0;
-				controls.zoomSpeed = 1.2;
-				controls.panSpeed = 0.8;
-				controls.noZoom = false;
-				controls.noPan = false;
-				controls.staticMoving = true;
-				controls.dynamicDampingFactor = 0.1;
 
-				// Scene
+			//
+			// SEA3D Loader
+			//
+
+			loader = new THREE.SEA3D( {
+
+				autoPlay : false, // Manual play animations
+				container : scene // Container to add models
+
+			} );
+
+			loader.onComplete = function( e ) {
+
+				// reset global animation time
+				SEA3D.AnimationHandler.setTime( 0 );
+
+				// events
+
+				document.getElementById( 'loading' ).style.visibility = 'hidden';
+
+				animate();
+
+			};
+
+			loader.load( './assets/bigmodel.tjs.sea' );
+
+			//
+
+			function init() {
 
 				scene = new THREE.Scene();
 
-				var ambient = new THREE.AmbientLight( 0x666666 );
-				scene.add( ambient );
-				
-				var lightA = new THREE.PointLight( 0xFFFFFF, 1.3, 10000 );
-				lightA.position.set( 100, 100, 100 );
-				scene.add( lightA );
-				
-				var lightB = new THREE.PointLight( 0xFFFFFF, 1.3, 10000 );
-				lightB.position.set( -100, 100, -100 );
-				scene.add( lightB );
-				
-				var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.5 );
-				hemiLight.color.setHSL( 0.6, 1, 0.6 );
-				hemiLight.groundColor.setHSL( 0.1, 1, 0.1 );
-				hemiLight.position.set( 0, 500, 0 );
-				scene.add( hemiLight );
-				
-				// Renderer
-				
-				renderer = new THREE.WebGLRenderer();								
-				
-				renderer.setClearColor( 0x333333, 1 );
-				
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 2000 );
+				camera.position.set( 1000, - 300, 1000 );
+
+				controls = new THREE.OrbitControls( camera );
+
+				renderer = new THREE.WebGLRenderer();
+				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.setClearColor( 0x333333, 1 );
 				container.appendChild( renderer.domElement );
-				
-				// Renderer Composer
+
+				stats = new Stats();
+				stats.domElement.style.position = 'absolute';
+				stats.domElement.style.top = '0px';
+				container.appendChild( stats.domElement );
+
+				// post-processing
+
 				composer = new THREE.EffectComposer( renderer );
-				
-				renderPass = new THREE.RenderPass( scene, camera );
-				var copyPass = new THREE.ShaderPass( THREE.CopyShader );				
+
+				var renderPass = new THREE.RenderPass( scene, camera );
+				var copyPass = new THREE.ShaderPass( THREE.CopyShader );
 				composer.addPass( renderPass );
-				
+
+				var vh = 1.4, vl = 1.2;
+
+				var colorCorrectionPass = new THREE.ShaderPass( THREE.ColorCorrectionShader );
+				colorCorrectionPass.uniforms[ "powRGB" ].value = new THREE.Vector3( vh, vh, vh );
+				colorCorrectionPass.uniforms[ "mulRGB" ].value = new THREE.Vector3( vl, vl, vl );
+				composer.addPass( colorCorrectionPass );
+
 				var vignettePass = new THREE.ShaderPass( THREE.VignetteShader );
 				vignettePass.uniforms[ "darkness" ].value = 1.0;
 				composer.addPass( vignettePass );
-				
+
 				composer.addPass( copyPass );
-				// set last pass in composer chain to renderToScreen
 				copyPass.renderToScreen = true;
-				
-				// Stage
+
+				// extra lights
+
+				scene.add( new THREE.AmbientLight( 0x333333 ) );
+
+				// events
 
 				window.addEventListener( 'resize', onWindowResize, false );
-				
-				//
-				// SEA3D
-				//
-				
-				var time = new Date().getTime();
-				
-				//
-				//	SEA3D Standard is invertedX
-				//
-				
-				loader = new THREE.SEA3D({
-					container : scene,
-					parser : THREE.SEA3D.AUTO// THREE.SEA3D.AUTO is default
-				});
-				
-				loader.onComplete = function( e ) {									
-					document.getElementById('loading').style.visibility = 'hidden';
-					
-					console.log( 'Total Load Time: ', new Date().getTime() - time );
-				};
-				
-				loader.load( 'bigmodel.sea' );					
-			}	
-			
-			function onWindowResize() {
 
-				windowHalfX = window.innerWidth / 2;
-				windowHalfY = window.innerHeight / 2;
+			}
+
+
+			function onWindowResize() {
 
 				camera.aspect = window.innerWidth / window.innerHeight;
 				camera.updateProjectionMatrix();
 
 				renderer.setSize( window.innerWidth, window.innerHeight );
+
 			}
+
+			//
+
+			function description(msg) {
+
+				document.getElementById('description').innerHTML = (demoAt + 1) + " - " + msg;
+
+			}
+
+			//
+
+			var clock = new THREE.Clock();
 
 			function animate() {
-				delta = clock.getDelta();
-				
-				THREE.AnimationHandler.update( delta );	
-				
-				controls.update();
-				
-				render();
+
+				var delta = clock.getDelta();
 
 				requestAnimationFrame( animate );
-			}
 
-			function render() {				
-				camera.lookAt( scene.position );
-				
-				composer.render(delta);
+				//renderer.render( scene, camera );
+				composer.render( delta );
+
+				stats.update();
+
 			}
 
 		</script>
