@@ -3344,7 +3344,6 @@ function writeObject3D data sea &header animation: =
 	if animation.count > 0 then	
 	(		
 		header += HEADER_ANIMATION
-		
 		writeAnimationList data animation		
 	)
 	
@@ -5714,7 +5713,9 @@ function getDummyAnimationAsset obj frame_rate: =
 	)
 	
 	local asset = newAsset()
-	local data = asset.Data		
+	local data = asset.Data
+	
+	asset.Filename = obj.name + EXT_ANIMATION
 	
 	writeAnimationHead data sequence:(getSequenceData obj)
 	
@@ -6989,8 +6990,7 @@ function getMeshAsset sea =
 (
 	local asset = newAsset()
 	local data = asset.Data
-	local obj = sea.obj		
-	local anm = sea.animation
+	local obj = sea.obj
 	local inst = sea.instanceOf
 	
 	asset.Filename = obj.name + EXT_MESH
@@ -7307,7 +7307,6 @@ function getDummyAsset sea =
 	
 	local type = sea.type
 	local obj = copy sea.obj
-	local anm = sea.animation
 	local objName = sea.obj.name
 	
 	asset.Filename = objName + EXT_DUMMY
@@ -7377,7 +7376,6 @@ function getSound3DAsset sea =
 (
 	local asset = newAsset()
 	local data = asset.Data
-	local anm = sea.animation	
 	
 	asset.Filename = sea.obj.name + EXT_SOUND_POINT
 	
