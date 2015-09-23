@@ -2473,7 +2473,7 @@ function getSEAIndex obj type =
 		local objName = obj.name + type
 		
 		if (finditem seaAssetNames objName) > 0 then	
-		(					
+		(
 			local index = (finditem seaAssetNames objName) - 1
 			
 			-- object3d parent
@@ -2599,7 +2599,7 @@ function appendAsset asset share: type: =
 	else	
 		seaAssetNames[index+1] = asset.Name + type
 		
-	index
+	return index
 )
 
 function appendToken list token value type =
@@ -3298,7 +3298,7 @@ function writeAppendSoundMixer ns =
 		index = appendAsset asset share:false
 	)
 	
-	index
+	return index
 )
 
 function writeObject3D data sea &header animation: =
@@ -7306,11 +7306,11 @@ function getDummyAsset sea =
 	local data = asset.Data
 	
 	local type = sea.type
-	local obj = copy sea.obj	
+	local obj = copy sea.obj
 	local anm = sea.animation
 	local objName = sea.obj.name
 	
-	asset.Filename = obj.name + EXT_DUMMY
+	asset.Filename = objName + EXT_DUMMY
 	
 	-- HEADER
 	local header = 0x0000
