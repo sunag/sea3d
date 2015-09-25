@@ -2286,31 +2286,38 @@ function containsSEA3DTag obj =
 	return false
 )
 
-function realTransform obj useparent: p: t: =
+function realTransform obj useparent: p: t: tp: =
 (
 	local matRelative = obj.transform
 
 	if useparent == unsupplied then 
 		useparent = seauseparent
+
+	if classof t == Matrix3 then 
+	(
+		-- bind matrix
+		matRelative *= inverse (righthand_mat t)
+	)
 	
-	if useparent do
+	if useparent then
 	(
 		if p == unsupplied then 
 			p = realParent obj
 		
 		if p != undefined then
 		(
-			local trans = righthand_mat p.transform
-			matRelative *= inverse trans
+			local trans = p.transform
+			
+			if classof tp == Matrix3 do
+			(
+				-- bind parent matrix
+				trans *= inverse (righthand_mat tp)
+			)
+			
+			matRelative *= inverse (righthand_mat trans)
 		)
 	)
 	
-	if classof t == Matrix3 then 
-	(
-		local trans = righthand_mat t
-		matRelative *= inverse trans
-	)
-		
 	return (righthand_mat matRelative)
 )
 
@@ -3032,15 +3039,15 @@ function writeColor data t =
 	data.WriteByte t.r		
 )
 
-function writePosition data obj useparent: p: t: =
+function writePosition data obj useparent: p: t: tp: =
 (
-	local trans = realTransform obj useparent:useparent p:p t:t
+	local trans = realTransform obj useparent:useparent p:p t:t tp:tp
 	write3D data trans.position
 )
 
-function writeRotation data obj useparent: p: t:t offset: =
+function writeRotation data obj useparent: p: t: tp: offset: =
 (
-	local trans = realTransform obj useparent:useparent p:p t:t
+	local trans = realTransform obj useparent:useparent p:p t:t tp:tp
 	
 	if offset != unsupplied do 
 	(
@@ -3050,9 +3057,9 @@ function writeRotation data obj useparent: p: t:t offset: =
 	writeQuat data trans.rotation
 )
 
-function writeScale data obj useparent: p: t:t =
+function writeScale data obj useparent: p: t: tp: =
 (
-	local trans = realTransform obj useparent:useparent p:p t:t
+	local trans = realTransform obj useparent:useparent p:p t:t tp:tp
 	write3D data trans.scale
 )
 
@@ -3320,7 +3327,7 @@ function writeObject3D data sea &header animation: =
 	
 	if sea.animation != undefined then
 	(
-		append animation ( SEAAnimator sea.animation seaconfig_bindoffset )	
+		append animation ( SEAAnimator sea.animation (seaconfig_bindoffset and parent == undefined) )	
 	)
 	
 	-- WRITER
@@ -5486,24 +5493,24 @@ function getSkeletonAnimationAsset sea =
 	return asset
 )
 
-function processToken data obj token p: t: offsetRotation: =
+function processToken data obj token p: t: tp: offsetRotation: =
 (
 	local key = token[1]
 	
 	if key == ANM_POSITION then (
-		writePosition data obj p:p t:t
+		writePosition data obj p:p t:t tp:tp
 	)
 	else if key == ANM_ROTATION then (
-		writeRotation data obj p:p t:t offset:offsetRotation
+		writeRotation data obj p:p t:t tp:tp offset:offsetRotation
 	)				
 	else if key == ANM_SCALE then (
-		writeScale data obj p:p t:t
+		writeScale data obj p:p t:t tp:tp
 	)		
-				
+	
 	else if key == ANM_FOV then (
 		data.WriteFloat obj.fov
 	)
-				
+	
 	else if key == ANM_COLOR then (
 		writeColor data obj.rgb
 	)
@@ -5545,21 +5552,29 @@ function processToken data obj token p: t: offsetRotation: =
 
 function processAnimation obj data tokenList offsetRotation: loader: type: =
 (
-	local parent = undefined, transform = undefined
+	local parent = undefined, transform = undefined, transform_parent = undefined
 	
 	if type == EXT_SCENE_OBJECT then
 	(				
 		parent = realParent obj
-	
+		
 		if seaconfig_bindoffset then
 		(
-			set time seaconfig_bindframe							
+			if parent == undefined then 
+			(	
+				set time seaconfig_bindframe							
 				
-			transform = obj.transform
-			
-			if offsetRotation != unsupplied do 
+				transform = obj.transform
+				
+				if offsetRotation != unsupplied do 
+				(
+					transform = rotateMatrix transform offsetRotation
+				)
+			)
+			else
 			(
-				transform = rotateMatrix transform offsetRotation
+				--relative for all
+				--transform_parent = obj.transform
 			)
 		)
 	)
@@ -5578,10 +5593,11 @@ function processAnimation obj data tokenList offsetRotation: loader: type: =
 			local token = tokenList[i]
 			data.WriteUInt16 token[1]		
 			data.WriteByte token[2]
+			
 			for t = seaTimeRange[1] to seaTimeRange[2] do
 			(
 				set time t		
-				processToken data obj token p:parent t:transform offsetRotation:offsetRotation
+				processToken data obj token p:parent t:transform tp:transform_parent offsetRotation:offsetRotation
 			)
 		)
 	)
@@ -5601,7 +5617,7 @@ function processAnimation obj data tokenList offsetRotation: loader: type: =
 			set time t		
 			for i=1 to tokenList.count do
 			(
-				processToken data obj tokenList[i] p:parent t:transform offsetRotation:offsetRotation 
+				processToken data obj tokenList[i] p:parent t:transform tp:transform_parent offsetRotation:offsetRotation 
 			)			
 		)
 	)
@@ -5719,7 +5735,7 @@ function getDummyAnimationAsset obj frame_rate: =
 	
 	writeAnimationHead data sequence:(getSequenceData obj)
 	
-	processAnimation obj data tokenList offsetRotation:[-90,0,0] type:EXT_SCENE_OBJECT
+	processAnimation obj data tokenList type:EXT_SCENE_OBJECT
 	
 	closeAnimation()
 	
@@ -8002,9 +8018,9 @@ rollout _SEA "SEA3D"
 	--button uploadButton "Upload" pos:[104,106] 				
 	button exportButton "Export" pos:[159,106] 		
 	
-	hyperLink __url "sea3d.poonya.com/exporter/" address:("http://sea3d.poonya.com/exporter/?p=3dsmax&v="+(sea_rawversion as string)) align:#center
+	hyperLink __url "sea3d.poonya.com/exporter/" address:("http://sea3d.poonya.com/exporter/?p=3dsmax&v="+(sea_rawversion as string)) align:#center visitedColor:(color 255 255 255) 
 	label __copyright "SEA3D 1.7 © Sunag Entertainment 2015" align:#center
-		
+	
 	on compressItem changed s do
 	(
 		if s == 1 then seaconfig_compress = "none"		
