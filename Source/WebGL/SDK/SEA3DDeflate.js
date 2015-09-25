@@ -753,10 +753,8 @@ ctx.RawDeflate.inflate = zip_inflate;
 })(this);
 
 /**
- * 	SEA3D.js - SEA3D SDK ( Deflate )
- * 	Copyright (C) Sunag Entertainment
- *
- * 	https://github.com/sunag/sea3d
+ * 	SEA3D DEFLATE
+ * 	@author Sunag / http://www.sunag.com.br/
  */
 
 SEA3D.File.DeflateUncompress = function( data ) {

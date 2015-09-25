@@ -760,10 +760,8 @@ var LZMA = (function () {
 }());
 
 /**
- * 	SEA3D.js - SEA3D SDK ( LZMA )
- * 	Copyright (C) Sunag Entertainment 
- * 
- * 	https://github.com/sunag/sea3d
+ * 	SEA3D LZMA_C
+ * 	@author Sunag / http://www.sunag.com.br/
  */
  
 SEA3D.File.LZMAUncompress = function(data) {

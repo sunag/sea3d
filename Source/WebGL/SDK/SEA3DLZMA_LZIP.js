@@ -26,10 +26,8 @@ function a(b){throw b}var ba=void 0,j=null,ja=[],qa=typeof process==="object",sa
 };
 
 /**
- * 	SEA3D.js - SEA3D SDK ( LZMA LZIP )
- * 	Copyright (C) 2014 Sunag Entertainment 
- * 
- * 	http://code.google.com/p/sea3d/
+ * 	SEA3D LZMA_LZIP
+ * 	@author Sunag / http://www.sunag.com.br/
  */
  
 SEA3D.File.LZMAUncompress = function(data) {	
