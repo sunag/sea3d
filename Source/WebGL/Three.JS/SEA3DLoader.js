@@ -1695,8 +1695,8 @@ THREE.SEA3D.prototype.runJSM = function( target, script, root ) {
 	if ( target.local == undefined ) target.local = {};
 
 	var include = {
-		print : THREE.SEA3D.SCRIPT.print,
-		watch : THREE.SEA3D.SCRIPT.watch,
+		print : this.domain.print,
+		watch : this.domain.watch,
 		sea3d : this.domain,
 		scene : this.config.container,
 		source : new SEA3D.Script( this.domain, root == true )
