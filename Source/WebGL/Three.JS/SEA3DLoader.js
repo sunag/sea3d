@@ -1880,7 +1880,8 @@ THREE.SEA3D.prototype.materialTechnique =
 	techniques[ SEA3D.Material.LIGHT_MAP ] =
 	function( tech, mat ) {
 
-		mat.lightMap = tech.texture.tag;
+		if (tech.blendMode == "multiply") mat.aoMap = tech.texture.tag;
+		else mat.lightMap = tech.texture.tag;
 
 	}
 
