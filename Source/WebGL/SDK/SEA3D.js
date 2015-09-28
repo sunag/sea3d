@@ -1971,7 +1971,7 @@ SEA3D.Geometry = function( name, data, sea ) {
 		for ( i = 0, len = 0; i < count; i ++ ) {
 
 			this.groups.push( {
-				start : data.readVInt() * 3,
+				start : len,
 				count : len += ( data.readVInt() * 3 ),
 			} );
 
