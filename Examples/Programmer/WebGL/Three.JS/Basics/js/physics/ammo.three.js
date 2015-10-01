@@ -22,35 +22,43 @@ THREE.AMMO = {
 	WANTS_DEACTIVATION : 3,
 	DISABLE_DEACTIVATION : 4,
 	DISABLE_SIMULATION : 5,
+	VERSION : 0.1,
 
-	init : function( broadphase, worldScale ) {
+	init : function( gravity, worldScale, broadphase ) {
 
-		broadphase = broadphase === undefined ? 'BVT' : null;
-		worldScale = worldScale === undefined ? 100 : null;
+		this.gravity = gravity == undefined ? -90.8 : gravity;
+		this.worldScale = worldScale == undefined ? 1 : worldScale;
+		this.broadphase = broadphase == undefined ? 'bvt' : broadphase;
 
 		this.solver = new Ammo.btSequentialImpulseConstraintSolver();
 		this.collisionConfig = new Ammo.btDefaultCollisionConfiguration();
 		this.dispatcher = new Ammo.btCollisionDispatcher( this.collisionConfig );
 
-		switch ( broadphase ) {
+		switch ( this.broadphase ) {
 
-			case 'SAP':
-				this.broadphase = new Ammo.btAxisSweep3( new Ammo.btVector3( - worldScale, - worldScale, - worldScale ), AMMO.V3( worldScale, worldScale, worldScale ), 4096 );
-				break;
-
-			case 'BVT':
+			case 'bvt':
 				this.broadphase = new Ammo.btDbvtBroadphase();
 				break;
+		
+			case 'sap':
+				this.broadphase = new Ammo.btAxisSweep3( 
+					new Ammo.btVector3( - this.worldScale, - this.worldScale, - this.worldScale ), 
+					new Ammo.btVector3( this.worldScale, this.worldScale, this.worldScale ), 
+					4096 
+				);
+				break;
 
-			case 'SIMPLE':
+			case 'simple':
 				this.broadphase = new Ammo.btSimpleBroadphase();
 				break;
 
 		}
 
 		this.world = new Ammo.btDiscreteDynamicsWorld( this.dispatcher, this.broadphase, this.solver, this.collisionConfig );
-		this.world.setGravity( new Ammo.btVector3( 0, - 100, 0 ) );
-
+		this.world.setGravity( new Ammo.btVector3( 0, this.gravity, 0 ) );
+		
+		console.log("THREE.AMMO " + this.VERSION);
+		
 	},
 
 	addRigidBody : function( rb, target, offset ) {
@@ -129,10 +137,10 @@ THREE.AMMO = {
 
 	},
 
-	createTriMesh : function( geometry, index, removeDuplicateVertices ) {
+	createTriangleMesh : function( geometry, index, removeDuplicateVertices ) {
 
-		index = index == undefined ? 0 : index;
-		removeDuplicateVertices = removeDuplicateVertices == undefined ? true : removeDuplicateVertices;
+		index = index == undefined ? -1 : index;
+		removeDuplicateVertices = removeDuplicateVertices == undefined ? false : removeDuplicateVertices;
 
 		var mTriMesh = new Ammo.btTriangleMesh();
 
@@ -140,20 +148,24 @@ THREE.AMMO = {
 		var v1 = new Ammo.btVector3( 0, 0, 0 );
 		var v2 = new Ammo.btVector3( 0, 0, 0 );
 
-		var group = geometry.groups[ index ];
+		var vertex = geometry.getAttribute( 'position' ).array;
+		var indexes = geometry.getIndex().array;
 
-		var vertex = geometry.getAttribute( "position" ).array;
-		var indexes = geometry.getIndex();
-
-		for ( var idx = group.start; idx < group.count; idx += 3 ) {
+		var group = index >= 0 ? geometry.groups[ index ] : undefined,
+			start = group ? group.start : 0,
+			count = group ? group.count : indexes.length;
+		
+		var scale = 1 / this.worldScale;
+		
+		for ( var idx = start; idx < count; idx += 3 ) {
 
 			var vx1 = indexes[ idx ] * 3,
 				vx2 = indexes[ idx + 1 ] * 3,
 				vx3 = indexes[ idx + 2 ] * 3;
 
-			v0.setValue( vertex[ vx1 ], vertex[ vx1 + 1 ], vertex[ vx1 + 2 ] );
-			v1.setValue( vertex[ vx2 + 3 ], vertex[ vx2 + 4 ], vertex[ vx2 + 5 ] );
-			v2.setValue( vertex[ vx3 + 6 ], vertex[ vx3 + 7 ], vertex[ vx3 + 8 ] );
+			v0.setValue( vertex[ vx1 ] * scale, vertex[ vx1 + 1 ] * scale, vertex[ vx1 + 2 ] * scale );
+			v1.setValue( vertex[ vx2 ] * scale, vertex[ vx2 + 1 ] * scale, vertex[ vx2 + 2 ] * scale );
+			v2.setValue( vertex[ vx3 ] * scale, vertex[ vx3 + 1 ] * scale, vertex[ vx3 + 2 ] * scale );
 
 			mTriMesh.addTriangle( v0, v1, v2, removeDuplicateVertices );
 
@@ -163,6 +175,39 @@ THREE.AMMO = {
 
 	},
 
+	createConvexHull : function( geometry, index ) {
+
+		index = index == undefined ? -1 : index;
+
+		var mConvexHull = new Ammo.btConvexHullShape();
+
+		var v0 = new Ammo.btVector3( 0, 0, 0 );
+
+		var vertex = geometry.getAttribute( 'position' ).array;
+		var indexes = geometry.getIndex().array;
+
+		var group = index >= 0 ? geometry.groups[ index ] : undefined,
+			start = group ? group.start : 0,
+			count = group ? group.count : indexes.length;
+		
+		var scale = 1 / this.worldScale;
+		
+		for ( var idx = start; idx < count; idx += 3 ) {
+
+			var vx1 = indexes[ idx ] * 3;
+			
+			var point = new Ammo.btVector3( 
+				vertex[ vx1 ] * scale, vertex[ vx1 + 1 ] * scale, vertex[ vx1 + 2 ] * scale 
+			);
+
+			mConvexHull.addPoint( point );
+
+		}
+
+		return mConvexHull;
+
+	},
+	
 	transformFromObject3D : function( obj3d ) {
 
 		var pos = obj3d.position,
@@ -239,9 +284,9 @@ THREE.AMMO = {
 
 	}(),
 
-	update : function( delta, iteration ) {
+	update : function( delta, iteration, fixedDelta ) {
 
-		this.world.stepSimulation( delta, iteration || 1 );
+		this.world.stepSimulation( delta, iteration || 1, fixedDelta );
 
 		var i, j;
 
