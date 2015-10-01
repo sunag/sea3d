@@ -2454,7 +2454,7 @@ SEA3D.Object3D = function( name, data, sea ) {
 	if ( this.attrib & 32 ) {
 
 		var objectType = data.readUByte();
-		this.isStatic = objectType & 1;
+		this.isStatic = (objectType & 1) != 0;
 
 	}
 
@@ -3795,10 +3795,10 @@ SEA3D.Cylinder = function( name, data, sea ) {
 SEA3D.Cylinder.prototype.type = "cyl";
 
 //
-//	Geometry Shape
+//	Convex Geometry
 //
 
-SEA3D.GeometryShape = function( name, data, sea ) {
+SEA3D.ConvexGeometry = function( name, data, sea ) {
 
 	this.name = name;
 	this.data = data;
@@ -3809,13 +3809,13 @@ SEA3D.GeometryShape = function( name, data, sea ) {
 
 };
 
-SEA3D.GeometryShape.prototype.type = "gs";
+SEA3D.ConvexGeometry.prototype.type = "gs";
 
 //
-//	Static Geometry Shape
+//	Triangle Geometry
 //
 
-SEA3D.StaticGeometryShape = function( name, data, sea ) {
+SEA3D.TriangleGeometry = function( name, data, sea ) {
 
 	this.name = name;
 	this.data = data;
@@ -3826,7 +3826,34 @@ SEA3D.StaticGeometryShape = function( name, data, sea ) {
 
 };
 
-SEA3D.StaticGeometryShape.prototype.type = "sgs";
+SEA3D.TriangleGeometry.prototype.type = "sgs";
+
+//
+//	Compound
+//
+
+SEA3D.Compound = function( name, data, sea ) {
+
+	this.name = name;
+	this.data = data;
+	this.sea = sea;
+
+	this.compounds = [];
+	
+	var count = data.readUByte();
+	
+	for (var i = 0; i < count; i++) {
+	
+		this.compounds.push( {
+			shape : sea.getObject( data.readUInt() ),
+			transform : data.readMatrix()
+		} );
+	
+	}
+
+};
+
+SEA3D.Compound.prototype.type = "cmps";
 
 //
 //	Physics
@@ -4294,8 +4321,9 @@ SEA3D.File = function( data ) {
 	this.addClass( SEA3D.Cone );
 	this.addClass( SEA3D.Capsule );
 	this.addClass( SEA3D.Cylinder );
-	this.addClass( SEA3D.GeometryShape );
-	this.addClass( SEA3D.StaticGeometryShape );
+	this.addClass( SEA3D.ConvexGeometry );
+	this.addClass( SEA3D.TriangleGeometry );
+	this.addClass( SEA3D.Compound );
 	this.addClass( SEA3D.RigidBody );
 	this.addClass( SEA3D.P2PConstraint );
 	this.addClass( SEA3D.HingeConstraint );
