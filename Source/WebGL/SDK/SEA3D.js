@@ -456,7 +456,7 @@ SEA3D.Stream.prototype.readScriptList = function( sea ) {
 
 		if ( attrib & 4 ) {
 
-			var numParams = data.readUByte();
+			var numParams = this.readUByte();
 
 			script.params = {};
 
@@ -537,7 +537,7 @@ SEA3D.Stream.prototype.readToken = function( type, sea ) {
 
 		// Undefined Values
 		case SEA3D.Stream.STRING_TINY:
-			return data.readUTF8();
+			return this.readUTF8();
 			break;
 
 		case SEA3D.Stream.STRING_SHORT:
