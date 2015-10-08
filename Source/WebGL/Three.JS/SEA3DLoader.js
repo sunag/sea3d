@@ -680,6 +680,7 @@ THREE.SEA3D.Animation.prototype.reset = function() {
 
 THREE.SEA3D.MTXBUF = new THREE.Matrix4();
 THREE.SEA3D.VECBUF = new THREE.Vector3();
+THREE.SEA3D.QUABUF = new THREE.Quaternion();
 
 THREE.SEA3D.prototype.setShadowMap = function( light, opacity ) {
 
@@ -869,6 +870,8 @@ THREE.SEA3D.prototype.addSceneObject = function( sea ) {
 		sea.parent.tag.add( obj3d );
 	else if ( this.config.container )
 		this.config.container.add( obj3d );
+
+	obj3d.visible = sea.visible;
 
 };
 
@@ -1126,8 +1129,8 @@ THREE.SEA3D.prototype.readGeometryBuffer = function( sea ) {
 
 	if ( sea.joint ) {
 
-		geo.addAttribute( 'skinIndex', new THREE.Float32Attribute( sea.joint, 4 ) );
-		geo.addAttribute( 'skinWeight', new THREE.Float32Attribute( sea.weight, 4 ) );
+		geo.addAttribute( 'skinIndex', new THREE.Float32Attribute( sea.joint, sea.jointPerVertex ) );
+		geo.addAttribute( 'skinWeight', new THREE.Float32Attribute( sea.weight, sea.jointPerVertex ) );
 
 	}
 
@@ -1261,6 +1264,7 @@ THREE.SEA3D.prototype.readMesh = function( sea ) {
 		var mod = sea.modifiers[ i ];
 
 		switch ( mod.type ) {
+			case SEA3D.Skeleton.prototype.type:
 			case SEA3D.SkeletonLocal.prototype.type:
 				skeleton = mod;
 
@@ -2387,7 +2391,7 @@ THREE.SEA3D.prototype.onHead = function( args ) {
 
 	if ( args.sign != 'TJS' ) {
 
-		throw "Sign '" + args.sign + "' not supported! Use SEA3D Studio to export.";
+		throw "Sign '" + args.sign + "' not supported! Use SEA3D Studio to publish or SEA3DLegacy.js";
 
 	}
 

@@ -82,19 +82,19 @@ THREE.SEA3D.prototype.readCapsule = function( sea ) {
 
 THREE.SEA3D.prototype.readConvexGeometry = function( sea ) {
 
-	if (this.config.convexHull) {
+	if ( this.config.convexHull ) {
 
 		var shape = THREE.AMMO.createConvexHull( sea.geometry.tag, sea.subGeometryIndex );
-	
+
 	}
 	else {
 
 		var triMesh = THREE.AMMO.createTriangleMesh( sea.geometry.tag, sea.subGeometryIndex );
-		
+
 		var shape = new Ammo.btConvexTriangleMeshShape( triMesh, true );
 
 	}
-	
+
 	this.domain.shapes = this.shapes = this.shapes || [];
 	this.shapes.push( this.objects[ "shpe/" + sea.name ] = sea.tag = shape );
 
@@ -122,19 +122,22 @@ THREE.SEA3D.prototype.readTriangleGeometry = function( sea ) {
 THREE.SEA3D.prototype.readCompound = function( sea ) {
 
 	var shape = new Ammo.btCompoundShape();
-	
-	for (var i = 0; i < sea.compounds.length; i++) {
-		var compound = sea.compounds[i];
-		
+
+	for ( var i = 0; i < sea.compounds.length; i ++ ) {
+
+		var compound = sea.compounds[ i ];
+
 		THREE.SEA3D.MTXBUF.elements = compound.transform;
-		
+
 		var transform = THREE.AMMO.transformFromMatrix( THREE.SEA3D.MTXBUF );
-		
-		shape.addChildShape(transform, compound.shape.tag);
+
+		shape.addChildShape( transform, compound.shape.tag );
+
 	}
-	
+
 	this.domain.shapes = this.shapes = this.shapes || [];
 	this.shapes.push( this.objects[ "shpe/" + sea.name ] = sea.tag = shape );
+
 };
 
 //

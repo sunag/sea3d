@@ -2440,6 +2440,7 @@ SEA3D.Object3D = function( name, data, sea ) {
 	this.sea = sea;
 
 	this.isStatic = false;
+	this.visible = true;
 
 	this.attrib = data.readUShort();
 
@@ -2455,6 +2456,7 @@ SEA3D.Object3D = function( name, data, sea ) {
 
 		var objectType = data.readUByte();
 		this.isStatic = (objectType & 1) != 0;
+		this.visible = (objectType & 2) != 0;
 
 	}
 

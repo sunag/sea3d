@@ -54,6 +54,7 @@
 		<script src="../../../../../Source/WebGL/SDK/SEA3D.js"></script>
 		<script src="../../../../../Source/WebGL/SDK/SEA3DLZMA.js"></script>
 		<script src="../../../../../Source/WebGL/Three.JS/SEA3DLoader.js"></script>
+		<script src="../../../../../Source/WebGL/Three.JS/SEA3DLegacy.js"></script>
 		
 		<script src="js/controls/OrbitControls.js"></script>
 		
@@ -113,7 +114,8 @@
 
 				}
 
-				loader.load( './assets/hello-world.tjs.sea' );
+				loader.load( './assets/hello-world.sea' );
+				//loader.load( './assets/hello-world.tjs.sea' );
 			
 			}
 			
@@ -157,7 +159,7 @@
 
 				delta = clock.getDelta();
 
-				SEA3D.AnimationHandler.update( delta );
+				THREE.SEA3D.AnimationHandler.update( delta );
 
 				THREE.AnimationHandler.update( delta );
 
