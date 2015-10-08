@@ -545,7 +545,7 @@ SEA3D.Stream.prototype.readToken = function( type, sea ) {
 			break;
 
 		case SEA3D.Stream.STRING_LONG:
-			return v.readUTF8Long();
+			return this.readUTF8Long();
 			break
 
 		case SEA3D.Stream.ASSET:
