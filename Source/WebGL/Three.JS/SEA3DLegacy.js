@@ -375,13 +375,17 @@ THREE.SEA3D.prototype.updateMatrix = function( obj3d ) {
 
 		// convert to local
 
-		buf2.copy( obj3d.parent.matrixWorld );
+		if ( obj3d.parent ) {
 
-		this.flipMatrixScale( buf2, obj3d.parent instanceof THREE.Bone );
+			buf2.copy( obj3d.parent.matrixWorld );
 
-		buf2.getInverse( buf2 );
+			this.flipMatrixScale( buf2, obj3d.parent instanceof THREE.Bone );
 
-		buf1.multiplyMatrices( buf2, buf1 );
+			buf2.getInverse( buf2 );
+
+			buf1.multiplyMatrices( buf2, buf1 );
+
+		}
 
 		this.applyMatrix( obj3d, buf1 );
 
@@ -617,6 +621,7 @@ THREE.SEA3D.prototype.readGeometryBuffer = function( sea ) {
 
 		this.flipZVec3( sea.vertex );
 		this.flipZVec3( sea.normal );
+
 		this.flipZIndex( sea.indexes );
 
 		if ( sea.jointPerVertex > 4 ) this.compressJoints( sea );

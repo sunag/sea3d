@@ -1106,6 +1106,7 @@ THREE.SEA3D.prototype.readGeometryBuffer = function( sea ) {
 	for ( var i = 0; i < sea.groups.length; i ++ ) {
 
 		var g = sea.groups[ i ];
+
 		geo.addGroup( g.start, g.count, i );
 
 	}

@@ -1965,7 +1965,7 @@ SEA3D.Geometry = function( name, data, sea ) {
 
 	this.groups = [];
 
-	if ( this.attrib & 2 ) {
+	if ( this.attrib & 1024 ) {
 
 		// INDEXES
 		for ( i = 0, len = 0; i < count; i ++ ) {
@@ -1994,7 +1994,7 @@ SEA3D.Geometry = function( name, data, sea ) {
 				count : len,
 			} );
 
-			len += j;
+			j += len;
 
 			bytearray.add( data.readUByteArray( len * stride ) );
 
