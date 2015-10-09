@@ -133,13 +133,13 @@ THREE.SEA3D.prototype.flipMatrix = function( mtx ) {
 
 }();
 
-THREE.SEA3D.prototype.flipMatrixScale = function( mtx, global, parent ) {
+THREE.SEA3D.prototype.flipMatrixScale = function( mtx, global, parent, parentGlobal ) {
 
 	var pos = new THREE.Vector3();
 	var qua = new THREE.Quaternion();
 	var slc = new THREE.Vector3();
 
-	return function( mtx, global, parent ) {
+	return function( mtx, global, parent, parentGlobal ) {
 
 		if ( parent ) mtx.multiplyMatrices( parent, mtx );
 
@@ -160,7 +160,7 @@ THREE.SEA3D.prototype.flipMatrixScale = function( mtx, global, parent ) {
 
 			parent = parent.clone();
 
-			this.flipMatrixScale( parent );
+			this.flipMatrixScale( parent, parentGlobal );
 
 			mtx.multiplyMatrices( parent.getInverse( parent ), mtx );
 
@@ -365,27 +365,14 @@ THREE.SEA3D.prototype.updateMatrix = function( obj3d ) {
 
 	return function( obj3d ) {
 
-		// convert to global
+		buf1.copy( obj3d.matrix );
 
-		buf1.copy( obj3d.matrixWorld );
-
-		// flip matrix
-
-		this.flipMatrixScale( buf1 );
-
-		// convert to local
-
-		if ( obj3d.parent ) {
-
-			buf2.copy( obj3d.parent.matrixWorld );
-
-			this.flipMatrixScale( buf2, obj3d.parent instanceof THREE.Bone );
-
-			buf2.getInverse( buf2 );
-
-			buf1.multiplyMatrices( buf2, buf1 );
-
-		}
+		this.flipMatrixScale( 
+			buf1, 
+			false,  
+			obj3d.parent ? obj3d.parent.matrixWorld : buf2.identity(),
+			obj3d.parent instanceof THREE.Bone
+		);
 
 		this.applyMatrix( obj3d, buf1 );
 

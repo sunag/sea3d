@@ -121,6 +121,14 @@ SEA3D.Stream.prototype = {
 	}
 };
 
+
+
+SEA3D.Stream.prototype.getByte = function( pos ) {
+
+	return this.data.getInt8( pos );
+
+};
+
 SEA3D.Stream.prototype.readBytes = function( len ) {
 
 	var buf = this.buf.slice( this.position, this.position + len );
@@ -4218,7 +4226,7 @@ SEA3D.PNG = function( name, data, sea ) {
 	this.data = data;
 	this.sea = sea;
 
-	this.transparent = data.buffer[ 25 ] == 0x06;
+	this.transparent = data.getByte( 25 )  == 0x06;
 
 };
 
@@ -4234,7 +4242,7 @@ SEA3D.GIF = function( name, data, sea ) {
 	this.data = data;
 	this.sea = sea;
 
-	this.transparent = data.buffer[ 11 ] > 0;
+	this.transparent = data.getByte( 11 ) > 0;
 
 };
 

@@ -688,7 +688,7 @@ THREE.SEA3D.prototype.setShadowMap = function( light, opacity ) {
 	light.shadowMapHeight = 2048;
 
 	light.castShadow = true;
-	light.shadowDarkness = opacity !== undefined ? opacity : 1;
+	light.shadowDarkness = opacity == undefined ? 1 : opacity;
 
 };
 
