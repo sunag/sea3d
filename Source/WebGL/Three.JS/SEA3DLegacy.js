@@ -70,9 +70,9 @@ THREE.SEA3D.prototype.expandJoints = function( sea ) {
 		var seaIndex = i * jpv;
 
 		joint[ tjsIndex ] = sea.joint[ seaIndex ];
-		joint[ tjsIndex + 1 ] = jpv > 1 ? sea.joint[ seaIndex + 1 ] : - 1;
-		joint[ tjsIndex + 2 ] = jpv > 2 ? sea.joint[ seaIndex + 2 ] : - 1;
-		joint[ tjsIndex + 3 ] = jpv > 3 ? sea.joint[ seaIndex + 3 ] : - 1;
+		if ( jpv > 1 ) joint[ tjsIndex + 1 ] = sea.joint[ seaIndex + 1 ];
+		if ( jpv > 2 ) joint[ tjsIndex + 2 ] = sea.joint[ seaIndex + 2 ];
+		if ( jpv > 3 ) joint[ tjsIndex + 3 ] = sea.joint[ seaIndex + 3 ];
 
 		weight[ tjsIndex ] = sea.weight[ seaIndex ];
 		if ( jpv > 1 ) weight[ tjsIndex + 1 ] = sea.weight[ seaIndex + 1 ];
@@ -202,9 +202,9 @@ THREE.SEA3D.prototype.flipMatrixScale = function( local, global, parent, parentG
 			local.multiplyMatrices( parent.getInverse( parent ), local );
 
 		}
-		
+
 		return local;
-		
+
 	};
 
 }();
@@ -217,7 +217,7 @@ THREE.SEA3D.prototype.updateAnimationSet = function( obj3d ) {
 
 	var buf1 = new THREE.Matrix4();
 	var buf2 = new THREE.Matrix4();
-	
+
 	var pos = new THREE.Vector3();
 	var qua = new THREE.Quaternion();
 	var slc = new THREE.Vector3();
@@ -225,7 +225,7 @@ THREE.SEA3D.prototype.updateAnimationSet = function( obj3d ) {
 	var to_pos = new THREE.Vector3();
 	var to_qua = new THREE.Quaternion();
 	var to_slc = new THREE.Vector3();
-	
+
 	return function( obj3d ) {
 
 		var anmSet = obj3d.animation.animationSet;
@@ -265,21 +265,21 @@ THREE.SEA3D.prototype.updateAnimationSet = function( obj3d ) {
 				parent = undefined;
 
 			if ( obj3d.animation.relative ) {
-				
+
 				buf1.identity();
 				parent = this.flipMatrixScale( buf2.copy( obj3d.matrixWorld ) );
-				
+
 			}
-			else { 
-			
-				if ( obj3d.parent ) { 
-				
+			else {
+
+				if ( obj3d.parent ) {
+
 					parent = this.flipMatrixScale( buf2.copy( obj3d.parent.matrixWorld ) );
-					
+
 				}
-				
+
 				this.flipMatrixScale( buf1.copy( obj3d.matrix ), false, parent );
-				
+
 			}
 
 			buf1.decompose( pos, qua, slc );
@@ -328,7 +328,7 @@ THREE.SEA3D.prototype.updateAnimationSet = function( obj3d ) {
 							);
 
 							break;
-							
+
 					}
 
 				}
@@ -419,7 +419,7 @@ THREE.SEA3D.prototype.updateTransform = function( obj3d, sea ) {
 				obj3d.parent ? obj3d.parent.matrixWorld : identity,
 				obj3d.parent instanceof THREE.Bone
 			);
-			
+
 			obj3d.position.setFromMatrixPosition( buf1 );
 			obj3d.scale.setFromMatrixScale( buf1 );
 
