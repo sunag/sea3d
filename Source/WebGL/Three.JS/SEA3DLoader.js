@@ -2088,8 +2088,7 @@ THREE.SEA3D.prototype.getSkeletonAnimation = function( sea, skl ) {
 	if ( sea.tag ) return sea.tag;
 
 	var animations = [],
-		delta = sea.frameRate / 1000,
-		scale = [ 1, 1, 1 ];
+		delta = sea.frameRate / 1000;
 
 	for ( var i = 0; i < sea.sequence.length; i ++ ) {
 
@@ -2126,7 +2125,7 @@ THREE.SEA3D.prototype.getSkeletonAnimation = function( sea, skl ) {
 					time: time,
 					pos: [ raw[ idx ], raw[ idx + 1 ], raw[ idx + 2 ] ],
 					rot: [ raw[ idx + 3 ], raw[ idx + 4 ], raw[ idx + 5 ], raw[ idx + 6 ] ],
-					scl: scale
+					scl: [ 1, 1, 1 ]
 				} );
 
 				time += delta;
@@ -2406,6 +2405,7 @@ THREE.SEA3D.prototype.loadBytes = function( data ) {
 
 	this.file = new SEA3D.File();
 	this.file.scope = this;
+	this.file.config = this.config;
 	this.file.streaming = this.config.streaming;
 	this.file.timeLimit = this.config.timeLimit;
 	this.file.onProgress = this.onLoadProgress;
