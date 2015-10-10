@@ -62,17 +62,23 @@ THREE.SEA3D.ShaderLib = {};
 
 THREE.SEA3D.ShaderLib.replaceCode = function( src, target, replace ) {
 
+	var index;
+
+	while ( ( index = src.indexOf( target ) ) > - 1 ) {
+
+		src = src.substring( 0, index ) + replace + src.substring( index + target.length );
+
+	}
+
+	return src;
+
+};
+
+THREE.SEA3D.ShaderLib.replaceCodeList = function( src, target, replace ) {
+
 	for ( var i = 0; i < target.length; i ++ ) {
 
-		var tar = target[ i ],
-			rep = replace[ i ],
-			index = src.indexOf( tar );
-
-		if ( index > - 1 ) {
-
-			src = src.substring( 0, index ) + rep + src.substring( index + tar.length );
-
-		}
+		src = this.replaceCode( src, target[ i ], replace[ i ] );
 
 	}
 
@@ -82,7 +88,7 @@ THREE.SEA3D.ShaderLib.replaceCode = function( src, target, replace ) {
 
 // TODO: Emissive to Ambient Color Extension
 
-THREE.SEA3D.ShaderLib.fragStdMtl = THREE.SEA3D.ShaderLib.replaceCode( THREE.ShaderLib.phong.fragmentShader, [
+THREE.SEA3D.ShaderLib.fragStdMtl = THREE.SEA3D.ShaderLib.replaceCodeList( THREE.ShaderLib.phong.fragmentShader, [
 	//	Target
 	'outgoingLight += diffuseColor.rgb * ( totalDiffuseLight + totalAmbientLight ) * specular + totalSpecularLight + totalEmissiveLight;', // METAL
 	'outgoingLight += diffuseColor.rgb * ( totalDiffuseLight + totalAmbientLight ) + totalSpecularLight + totalEmissiveLight;',
@@ -91,7 +97,7 @@ THREE.SEA3D.ShaderLib.fragStdMtl = THREE.SEA3D.ShaderLib.replaceCode( THREE.Shad
 	//	Replace To
 	'outgoingLight += diffuseColor.rgb * ( totalDiffuseLight + totalAmbientLight + totalEmissiveLight ) * specular + totalSpecularLight;' + // METAL
 	'\n#ifdef USE_AOMAP\noutgoingLight *= ( texture2D( aoMap, vUv2 ).r - 1.0 ) * aoMapIntensity + 1.0;\n#endif\n',
-	'outgoingLight += diffuseColor.rgb * ( totalDiffuseLight + totalAmbientLight + totalEmissiveLight ) + totalSpecularLight;' + 
+	'outgoingLight += diffuseColor.rgb * ( totalDiffuseLight + totalAmbientLight + totalEmissiveLight ) + totalSpecularLight;' +
 	'\n#ifdef USE_AOMAP\noutgoingLight *= ( texture2D( aoMap, vUv2 ).r - 1.0 ) * aoMapIntensity + 1.0;\n#endif\n',
 	''
 ] );
@@ -109,6 +115,29 @@ THREE.SEA3D.StandardMaterial = function () {
 THREE.SEA3D.StandardMaterial.prototype = Object.create( THREE.MeshPhongMaterial.prototype );
 THREE.SEA3D.StandardMaterial.prototype.constructor = THREE.SEA3D.StandardMaterial;
 
+THREE.SEA3D.StandardMaterial.prototype.lightMapUV = 1;
+
+
+THREE.SEA3D.StandardMaterial.prototype.__defineSetter__( "__webglShader", function( val ) {
+
+	val.fragmentShader = THREE.SEA3D.ShaderLib.fragStdMtl;
+
+	if ( this.lightMapUV == 0 ) {
+
+		val.fragmentShader = THREE.SEA3D.ShaderLib.replaceCode( val.fragmentShader, "texture2D( aoMap, vUv2 )", "texture2D( aoMap, vUv )" );
+
+	}
+
+	this.__webglShader__ = val;
+
+} );
+
+THREE.SEA3D.StandardMaterial.prototype.__defineGetter__( "__webglShader", function() {
+
+	return this.__webglShader__;
+
+} );
+
 THREE.SEA3D.StandardMaterial.prototype.copy = function ( source ) {
 
 	THREE.MeshPhongMaterial.prototype.copy.call( this, source );
@@ -122,19 +151,6 @@ THREE.SEA3D.StandardMaterial.prototype.clone = function() {
 	return new THREE.SEA3D.StandardMaterial().copy( this );
 
 };
-
-THREE.SEA3D.StandardMaterial.prototype.__defineSetter__( "__webglShader", function( val ) {
-
-	val.fragmentShader = THREE.SEA3D.ShaderLib.fragStdMtl;
-	this.__webglShader__ = val;
-
-} )
-
-THREE.SEA3D.StandardMaterial.prototype.__defineGetter__( "__webglShader", function() {
-
-	return this.__webglShader__;
-
-} )
 
 //
 //	Container
@@ -1581,6 +1597,15 @@ THREE.SEA3D.prototype.readTextureURL = function( sea ) {
 
 THREE.SEA3D.SCRIPT = new SEA3D.ScriptManager();
 
+THREE.SEA3D.SCRIPT.dispatchUpdate = function( delta ) {
+
+	this.dispatchEvent( {
+		type : "update",
+		delta : delta
+	} );
+
+};
+
 THREE.SEA3D.Domain = function( id, objects, container, extensions ) {
 
 	SEA3D.Domain.call( this, id );
@@ -1891,6 +1916,8 @@ THREE.SEA3D.prototype.materialTechnique =
 
 		if ( tech.blendMode == "multiply" ) mat.aoMap = tech.texture.tag;
 		else mat.lightMap = tech.texture.tag;
+
+		mat.lightMapUV = tech.channel;
 
 	}
 

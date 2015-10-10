@@ -472,7 +472,7 @@ SEA3D.Stream.prototype.readScriptList = function( sea3d ) {
 
 				var name = this.readUTF8();
 
-				script.params[ name ] = this.readObject( sea );
+				script.params[ name ] = this.readObject( sea3d );
 
 			}
 
@@ -494,7 +494,7 @@ SEA3D.Stream.prototype.readScriptList = function( sea3d ) {
 
 };
 
-SEA3D.Stream.prototype.readObject = function( sea ) {
+SEA3D.Stream.prototype.readObject = function( sea3d ) {
 
 	return this.readToken( this.readUByte(), sea3d );
 
@@ -1978,10 +1978,14 @@ SEA3D.Geometry = function( name, data, sea3d ) {
 		// INDEXES
 		for ( i = 0, len = 0; i < count; i ++ ) {
 
+			j = data.readVInt() * 3;
+
 			this.groups.push( {
 				start : len,
-				count : len += ( data.readVInt() * 3 ),
+				count : j,
 			} );
+
+			len += j;
 
 		}
 
@@ -2018,110 +2022,6 @@ SEA3D.Geometry.prototype = Object.create( SEA3D.GeometryBase.prototype );
 SEA3D.Geometry.prototype.constructor = SEA3D.Geometry;
 
 SEA3D.Geometry.prototype.type = "geo";
-
-//
-//	Geometry 16 Bit
-//
-
-SEA3D.Geometry16 = function( name, data, sea3d ) {
-
-	SEA3D.GeometryBase.call( this, name, data, sea3d );
-
-	var i, len;
-
-	// NORMAL
-	if ( this.attrib & 4 ) {
-
-		this.normal = data.readFloatArray( this.length );
-
-	}
-
-	// TANGENT
-	if ( this.attrib & 8 ) {
-
-		this.tangent = data.readFloatArray( this.length );
-
-	}
-
-	// UV
-	if ( this.attrib & 32 ) {
-
-		this.uv = [];
-		this.uv.length = data.readUByte();
-
-		len = this.numVertex * 2;
-
-		i = 0;
-		while ( i < this.uv.length ) {
-
-			// UV VERTEX DATA
-			this.uv[ i ++ ] = data.readFloatArray( len );
-
-		}
-
-	}
-
-	// JOINT-INDEXES / WEIGHTS
-	if ( this.attrib & 64 ) {
-
-		this.jointPerVertex = data.readUByte();
-
-		var jntLen = this.numVertex * this.jointPerVertex;
-
-		this.joint = data.readUShortArray( jntLen );
-		this.weight = data.readFloatArray( jntLen );
-
-	}
-
-	// VERTEX_COLOR
-	if ( this.attrib & 128 ) {
-
-		var colorAttrib = data.readUByte();
-
-		this.numColor = ( ( ( colorAttrib & 64 ) >> 6 ) | ( ( colorAttrib & 128 ) >> 6 ) ) + 1;
-
-		this.color = [];
-
-		for ( i = 0, len = colorAttrib & 15; i < len; i ++ ) {
-
-			this.color.push( data.readFloatArray( this.numVertex * this.numColor ) );
-
-		}
-
-	}
-
-	// VERTEX
-	this.vertex = data.readFloatArray( this.length );
-
-	// SUB-MESHES
-	var count = data.readUByte();
-
-	this.indexes = new Uint16Array();
-	this.groups = [];
-
-	// INDEXES
-	for ( i = 0, j = 0; i < count; i ++ ) {
-
-		len = data.readVInt() * 3;
-
-		this.groups.push( {
-			start : j,
-			count : len,
-		} );
-
-		len += j;
-
-		this.indexes = this.isBig ? data.readUIntArray( len ) : data.readUShortArray( len );
-
-	}
-
-};
-
-
-SEA3D.Geometry16.prototype = Object.create( SEA3D.GeometryBase.prototype );
-SEA3D.Geometry16.prototype.constructor = SEA3D.Geometry16;
-
-SEA3D.Geometry16.prototype.type = "ge16";
 
 //
 //	Geometry Delta Base
@@ -2463,8 +2363,8 @@ SEA3D.Object3D = function( name, data, sea3d ) {
 	if ( this.attrib & 32 ) {
 
 		var objectType = data.readUByte();
-		this.isStatic = (objectType & 1) != 0;
-		this.visible = (objectType & 2) != 0;
+		this.isStatic = ( objectType & 1 ) != 0;
+		this.visible = ( objectType & 2 ) != 0;
 
 	}
 
@@ -2928,7 +2828,7 @@ SEA3D.Mesh = function( name, data, sea3d ) {
 
 	if ( this.attrib & 1024 ) {
 
-		this.reference = { 
+		this.reference = {
 			type : data.readUByte(),
 			ref : sea3d.getObject( data.readUInt() )
 		};
@@ -3857,16 +3757,16 @@ SEA3D.Compound = function( name, data, sea3d ) {
 	this.sea3d = sea3d;
 
 	this.compounds = [];
-	
+
 	var count = data.readUByte();
-	
-	for (var i = 0; i < count; i++) {
-	
+
+	for ( var i = 0; i < count; i ++ ) {
+
 		this.compounds.push( {
 			shape : sea3d.getObject( data.readUInt() ),
 			transform : data.readMatrix()
 		} );
-	
+
 	}
 
 };
