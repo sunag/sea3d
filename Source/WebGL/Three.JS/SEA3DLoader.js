@@ -387,7 +387,7 @@ THREE.SEA3D.SkinnedMesh.prototype.play = function( name, crossfade, offset ) {
 	if ( ! this.currentAnimation )
 		throw new Error( 'Animation "' + name + '" not found.' );
 
-	if ( this.previousAnimation && this.previousAnimation !== this.currentAnimation && crossfade > 0 ) {
+	if ( this.previousAnimation && this.previousAnimation !== this.currentAnimation ) {
 
 		this.previousAnimation.play( this.previousAnimation.currentTime, this.previousAnimation.weight );
 		this.currentAnimation.play( offset !== undefined ? offset : this.currentAnimation.currentTime, this.currentAnimation.weight );
@@ -601,7 +601,7 @@ THREE.SEA3D.AnimationHandler = {
 
 			mesh.currentAnimation.weight += dt / mesh.crossfade;
 
-			if ( mesh.currentAnimation.weight > 1 ) {
+			if ( mesh.currentAnimation.weight >= 1 ) {
 
 				mesh.previousAnimation.weight = 0;
 				mesh.currentAnimation.weight = 1;
