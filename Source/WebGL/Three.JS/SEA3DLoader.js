@@ -2119,7 +2119,7 @@ THREE.SEA3D.prototype.getSkeletonAnimation = function( sea, skl ) {
 	if ( sea.tag ) return sea.tag;
 
 	var animations = [],
-		delta = sea.frameRate / 1000;
+		delta = (1000 / sea.frameRate) / 1000;
 
 	for ( var i = 0; i < sea.sequence.length; i ++ ) {
 
