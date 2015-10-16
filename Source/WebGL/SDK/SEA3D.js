@@ -121,8 +121,6 @@ SEA3D.Stream.prototype = {
 	}
 };
 
-
-
 SEA3D.Stream.prototype.getByte = function( pos ) {
 
 	return this.data.getInt8( pos );
@@ -172,6 +170,14 @@ SEA3D.Stream.prototype.readUShort = function() {
 };
 
 SEA3D.Stream.prototype.readUInt24 = function() {
+
+	var v = this.data.getUint32( this.position, true ) & 0xFFFFFF;
+	this.position += 3;
+	return v;
+
+};
+
+SEA3D.Stream.prototype.readUInt24F = function() {
 
 	return this.readUShort() | ( this.readUByte() << 16 );
 
@@ -1586,13 +1592,13 @@ SEA3D.AnimationHandler.prototype.update = function( delta ) {
 
 SEA3D.AnimationHandler.prototype.updateState = function() {
 
-	var i, state;
+	var i, l, state;
 
 	this.currentState.node.setTime( this.time - this.currentState.offset );
 
 	if ( this.currentState.weight < 1 && this.crossfade > 0 ) {
 
-		var delta = Math.abs( this.delta ) / ( 1000.0 * this.crossfade );
+		var delta = Math.abs( this.delta ) / ( this.crossfade * 1000 );
 		var weight = 1;
 
 		if ( this.blendMethod === SEA3D.AnimationBlendMethod.EASING ) {
@@ -1601,11 +1607,11 @@ SEA3D.AnimationHandler.prototype.updateState = function() {
 
 		}
 
-		for ( i = 0; i < this.states.length; ++ i ) {
+		for ( i = 0, l = this.states.length; i < l; ++ i ) {
 
 			state = this.states[ i ];
 
-			if ( state !== this.currentState ) {
+			if ( state.weight > 0 && state !== this.currentState ) {
 
 				if ( this.blendMethod === SEA3D.AnimationBlendMethod.LINEAR ) {
 
@@ -4284,7 +4290,7 @@ SEA3D.File.prototype.readHead = function() {
 		return false;
 
 	if ( this.stream.readUTF( 3 ) != "SEA" )
-		console.error( "Invalid SEA3D format." );
+		throw new Error( "Invalid SEA3D format." );
 
 	this.sign = this.stream.readUTF( 3 );
 
@@ -4507,7 +4513,7 @@ SEA3D.File.prototype.readComplete = function() {
 
 	this.stream.position = this.dataPosition;
 
-	if ( this.stream.readUInt24() != 0x5EA3D1 )
+	if ( this.stream.readUInt24F() != 0x5EA3D1 )
 		console.warn( "SEA3D file is corrupted." );
 
 	delete this.state;
