@@ -6,7 +6,7 @@
 --
 
 global 	
-	sea_rawversion = 17000, --VVSSBB
+	sea_rawversion = 17010, --VVSSBB
 	sea_version = 17000, --VVSSBB
 	
 	seaconfig = undefined, 

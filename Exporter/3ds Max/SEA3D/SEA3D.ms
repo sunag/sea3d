@@ -525,6 +525,7 @@ seaModifierList = #(),
 seaError = undefined,
 seaObjectTemp = undefined,
 seauseparent = false,
+seauseboneparent = false,
 seanames = undefined,
 seamats = undefined,
 seamatnames = undefined,
@@ -2298,7 +2299,7 @@ function realTransform obj useparent: p: t: tp: =
 		-- bind matrix
 		matRelative *= inverse (righthand_mat t)
 	)
-	
+
 	if useparent then
 	(
 		if p == unsupplied then 
@@ -2332,7 +2333,9 @@ function containsPosition obj =
 	(
 		set time seaTimeRange[1]		
 		
-		p = realParent obj
+		local p = undefined
+		
+		if seauseparent do p = realParent obj
 			
 		local value = obj.transform
 		
@@ -2347,7 +2350,7 @@ function containsPosition obj =
 			
 			if p != undefined then
 				trans *= inverse p.transform
-						
+			
 			if (containsDifference value.position trans.position) then
 				return true			
 		)
@@ -2366,7 +2369,9 @@ function containsRotation obj =
 	(
 		set time seaTimeRange[1]		
 		
-		p = realParent obj
+		local p = undefined 
+		
+		if seauseparent do p = realParent obj
 			
 		local value = obj.transform
 		
@@ -2400,7 +2405,9 @@ function containsScale obj =
 	(
 		set time seaTimeRange[1]		
 		
-		p = realParent obj
+		local p = undefined 
+		
+		if seauseparent do p = realParent obj
 			
 		local value = obj.transform
 		
@@ -3134,7 +3141,7 @@ function writeBone data obj type parent: bindpos: =
 	if (parent == undefined or parent == unsupplied) and bindpos != unsupplied then			
 		matRelative.position = matRelative.position - bindpos
 	
-	if seauseparent and (parent != undefined and parent != unsupplied) do
+	if seauseboneparent and (parent != undefined and parent != unsupplied) do
 	(
 		matRelative.position *= matRelative.scale
 		
@@ -3331,7 +3338,7 @@ function writeObject3D data sea &header animation: =
 	)
 	
 	-- WRITER
-	if parent != undefined then
+	if seauseparent and parent != undefined then
 	(
 		header += HEADER_PARENT
 		
@@ -4303,7 +4310,7 @@ fn compileObject n =
 					
 					local matRelative = boneList[1].transform
 
-					if seauseparent and boneParentList[1] != undefined do
+					if seauseboneparent and boneParentList[1] != undefined do
 						matRelative *= inverse boneParentList[1].transform
 					
 					bindpos = matRelative.position
@@ -5502,10 +5509,10 @@ function processToken data obj token p: t: tp: offsetRotation: =
 	)
 	else if key == ANM_ROTATION then (
 		writeRotation data obj p:p t:t tp:tp offset:offsetRotation
-	)				
+	)
 	else if key == ANM_SCALE then (
 		writeScale data obj p:p t:t tp:tp
-	)		
+	)
 	
 	else if key == ANM_FOV then (
 		data.WriteFloat obj.fov
@@ -5578,6 +5585,8 @@ function processAnimation obj data tokenList offsetRotation: loader: type: =
 			)
 		)
 	)
+	
+	if seauseparent == false do parent = undefined
 	
 	if loader == unsupplied then 
 		loader = "block"
@@ -7977,7 +7986,8 @@ fn exportSEA3D =
 
 	seasingleuv = seaconfig_renderall and (seaconfig_bakeoutput == BAKE_COMPLETE_MAP or seaconfig_bakeoutput == BAKE_DIFFUSE_MAP)	
 	seauseparent = seaconfig_parent and seaconfig_snapshot == false
-
+	seauseboneparent = true
+	
 	seaUnits[1] = units.DisplayType
 	seaUnits[2] = units.MetricType
 	
@@ -8080,7 +8090,7 @@ rollout _SEAServer "Server"
 
 rollout _SEAGlobal "Global"
 (
-	radiobuttons extMethod "Export Method:" labels:#
+	radiobuttons extMethod "Export Method" labels:#
 	(
 		"Scene Hierarchy", 
 		"Global Transform",
@@ -8095,15 +8105,9 @@ rollout _SEAGlobal "Global"
 	
 	on _SEAGlobal open do
 	(
-		if seaconfig_parent == false then
-		(
-			if seaconfig_snapshot then extMethod.state = 3
-			else extMethod.state = 2
-		)
-		else
-		(
-			extMethod.state = 1
-		)
+		if seaconfig_parent then extMethod.state = 1
+		else if seaconfig_snapshot then extMethod.state = 3
+		else extMethod.state = 2
 	)
 )
 
