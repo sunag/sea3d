@@ -3,7 +3,7 @@
 SEA3D
 ==
 
-An open-source cross-platform file format for games.
+Open-source format and tools for game developers.
 
 **List of Features**
 
