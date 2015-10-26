@@ -1,4 +1,4 @@
-[<img src="http://sunag.github.io/sea3d/Media/SEA3D-Top-BlackGL.jpg"/>](http://sea3d.poonya.com/)
+[<img src="http://sunag.github.io/sea3d/Media/SEA3D-Studio.jpg"/>](http://sea3d.poonya.com/)
 
 SEA3D
 ==
