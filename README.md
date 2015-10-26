@@ -39,9 +39,9 @@ SEA3D Studio 1.1.7 Viva!
 --
 Free cross-platform 3D IDE for games.
 
-[<img src="http://sunag.github.io/sea3d/Media/SEA3D-Studio.jpg"/>](http://sea3d.poonya.com/)
-
 [![SEA3D Studio](http://img.youtube.com/vi/lQ-VIni5Q68/0.jpg)](http://www.youtube.com/watch?v=lQ-VIni5Q68)
+
+[<img src="http://sunag.github.io/sea3d/Media/SEA3D-Studio.jpg"/>](http://sea3d.poonya.com/studio/)
 
 **Join now** http://sea3d.poonya.com/studio/
 
