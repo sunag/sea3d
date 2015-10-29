@@ -690,7 +690,7 @@ THREE.SEA3D.AnimationHandler = {
 
 		if ( index !== - 1 ) {
 
-			THREE.SEA3D.AnimationHandler.crossfade.splice( THREE.SEA3D.AnimationHandler.updates.indexOf( func ), 1 );
+			THREE.SEA3D.AnimationHandler.updates.splice( THREE.SEA3D.AnimationHandler.updates.indexOf( func ), 1 );
 
 		}
 
