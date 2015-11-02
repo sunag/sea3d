@@ -2094,7 +2094,7 @@ THREE.SEA3D.prototype.readCamera = function( sea ) {
 	var camera = new THREE.SEA3D.Camera( sea.fov );
 	camera.name = sea.name;
 
-	this.domain.cameras = this.cameras = this.camera || [];
+	this.domain.cameras = this.cameras = this.cameras || [];
 	this.cameras.push( this.objects[ "cam/" + sea.name ] = sea.tag = camera );
 
 	this.addSceneObject( sea );
