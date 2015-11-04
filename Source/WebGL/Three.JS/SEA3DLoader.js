@@ -22,6 +22,7 @@ THREE.SEA3D = function( config ) {
 	if ( this.config.timeLimit == undefined ) this.config.timeLimit = 10;
 	if ( this.config.streaming == undefined ) this.config.streaming = true;
 	if ( this.config.lights == undefined ) this.config.lights = true;
+	if ( this.config.useVertexTexture == undefined ) this.config.useVertexTexture = true;
 
 };
 
@@ -1396,7 +1397,7 @@ THREE.SEA3D.prototype.readMesh = function( sea ) {
 
 	if ( skeleton ) {
 
-		mesh = new THREE.SEA3D.SkinnedMesh( geo, mat, false );
+		mesh = new THREE.SEA3D.SkinnedMesh( geo, mat, this.config.useVertexTexture );
 
 		if ( skeletonAnimation ) {
 
