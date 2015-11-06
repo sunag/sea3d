@@ -1,3 +1,5 @@
+'use strict';
+
 // ------------------------------------------------------------
 
 THREE.NodeMaterial = function( vertex, fragment ) {
@@ -442,6 +444,8 @@ THREE.NodePhong.prototype = Object.create( THREE.Node.prototype );
 THREE.NodePhong.prototype.constructor = THREE.NodePhong;
 
 THREE.NodePhong.prototype.generate = function( material, shader ) {
+	
+	var code;
 	
 	material.shadows = material.shadows !== undefined ? material.shadows : true;
 	
@@ -1129,7 +1133,7 @@ THREE.NodeOperator.prototype.generate = function( material, shader, output ) {
 	var a = this.a.build( material, shader, output );
 	var b = this.b.build( material, shader, output );
 	
-	return this.format( '(' + a + this.op + b + ')', this.getType(), output);
+	return '(' + a + this.op + b + ')';
 
 };
 
