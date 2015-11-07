@@ -51,9 +51,9 @@ THREE.NodeMaterial.Shortcuts = function( proto, prop, list ) {
 
 THREE.NodeMaterial.prototype.updateAnimation = function( delta ) {
 	
-	for(var i = 0; i < this.requestAnimation.length; ++i) {
+	for(var i = 0; i < this.requestUpdate.length; ++i) {
 
-		this.requestAnimation[i].updateAnimation( delta );
+		this.requestUpdate[i].updateAnimation( delta );
 	
 	}
 	
@@ -90,7 +90,7 @@ THREE.NodeMaterial.prototype.build = function() {
 	
 	this.uniformList = [];
 	
-	this.requestAnimation = [];
+	this.requestUpdate = [];
 	
 	this.needsUv = false;
 	this.needsUv2 = false;
@@ -344,9 +344,9 @@ THREE.Node.prototype.build = function( material, shader, output, uuid ) {
 		throw new Error( 'Shader ' + shader + ' is not compatible with this node.' );
 	}
 	
-	if (this.allow.requestAnimation && !data.requestAnimation) {
-		material.requestAnimation.push( this );
-		data.requestAnimation = true;
+	if (this.allow.requestUpdate && !data.requestUpdate) {
+		material.requestUpdate.push( this );
+		data.requestUpdate = true;
 	}
 	
 	var code = this.generate( material, shader, output, uuid );
@@ -1094,7 +1094,7 @@ THREE.NodeTime = function( value ) {
 	
 	THREE.NodeFloat.call( this, value );
 	
-	this.allow.requestAnimation = true;
+	this.allow.requestUpdate = true;
 	
 };
 
