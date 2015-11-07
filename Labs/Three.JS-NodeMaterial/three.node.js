@@ -16,7 +16,7 @@ THREE.NodeMaterial.prototype.constructor = THREE.NodeMaterial;
 
 THREE.NodeMaterial.Type = {
 	t : 'sampler2D',
-	i : 'int',
+	iv1 : 'int',
 	fv1 : 'float',
 	c : 'vec3',
 	v2 : 'vec2',
@@ -49,6 +49,16 @@ THREE.NodeMaterial.Shortcuts = function( proto, prop, list ) {
 
 };
 
+THREE.NodeMaterial.prototype.updateAnimation = function( delta ) {
+	
+	for(var i = 0; i < this.requestAnimation.length; ++i) {
+
+		this.requestAnimation[i].updateAnimation( delta );
+	
+	}
+	
+};
+
 THREE.NodeMaterial.prototype.build = function() {
 	
 	var vertex, fragment;
@@ -79,6 +89,8 @@ THREE.NodeMaterial.prototype.build = function() {
 	this.fragmentTemps = [];
 	
 	this.uniformList = [];
+	
+	this.requestAnimation = [];
 	
 	this.needsUv = false;
 	this.needsUv2 = false;
@@ -326,7 +338,16 @@ THREE.Node = function( type ) {
 
 THREE.Node.prototype.build = function( material, shader, output, uuid ) {
 
-	this.validShader( shader );
+	var data = material.getNodeData( uuid );
+	
+	if (this.allow[shader] === false) {
+		throw new Error( 'Shader ' + shader + ' is not compatible with this node.' );
+	}
+	
+	if (this.allow.requestAnimation && !data.requestAnimation) {
+		material.requestAnimation.push( this );
+		data.requestAnimation = true;
+	}
 	
 	var code = this.generate( material, shader, output, uuid );
 	
@@ -340,21 +361,21 @@ THREE.Node.prototype.getType = function() {
 	
 };
 
-THREE.Node.prototype.toVector = function(vec) {
+THREE.Node.prototype.getFormat = function(str) {
 	
-	return vec.replace('c','v3').replace(/fv1|f/, 'v1');
+	return str.replace('c','v3').replace(/fv1|iv1/, 'v1');
 	
 };
 
-THREE.Node.prototype.count = function(vec) {
+THREE.Node.prototype.getFormatLength = function(str) {
 	
-	return parseInt( this.toVector(vec).substr(1) );
+	return parseInt( this.getFormat(str).substr(1) );
 
 };
 
 THREE.Node.prototype.format = function(code, from, to) {
 	
-	var format = this.toVector(from + '=' + to);
+	var format = this.getFormat(from + '=' + to);
 	
 	switch ( format ) {
 		case 'v1=v2': return 'vec2(' + code + ',0)';
@@ -376,14 +397,6 @@ THREE.Node.prototype.format = function(code, from, to) {
 	
 	return code;
 
-};
-
-THREE.Node.prototype.validShader = function( shader ) {
-	
-	if (this.allow[shader] === false) {
-		throw new Error( 'Shader ' + shader + ' is not compatible with this node.' );
-	}
-	
 };
 
 // ------------------------------------------------------------
@@ -526,9 +539,9 @@ THREE.NodePhong.prototype.generate = function( material, shader ) {
 		
 		var color = this.color.build( material, shader, 'v4' );
 		var specular = this.specular.build( material, shader, 'c' );
-		var shininess = this.shininess.build( material, shader, 'f' );
+		var shininess = this.shininess.build( material, shader, 'fv1' );
 		
-		var alpha = this.alpha ? this.alpha.build( material, shader, 'f' ) : undefined;
+		var alpha = this.alpha ? this.alpha.build( material, shader, 'fv1' ) : undefined;
 		
 		var env = this.env.input ? this.env.input.build( material, shader, 'c' ) : undefined;
 		
@@ -917,7 +930,7 @@ THREE.NodeCube.prototype.generate = function( material, shader, output ) {
 		return this.format( 'perturbNormal2Arb(-vViewPosition,normal,' +
 			this.value.build( material, shader, 'v3' ) + ',' +
 			this.value.uv.build( material, shader, 'v2' ) + ',' +
-			this.scale.build( material, shader, 'f' ) + ')', this.type, output );
+			this.scale.build( material, shader, 'fv1' ) + ')', this.type, output );
 	}
 
 };
@@ -1015,7 +1028,7 @@ THREE.NodeNormalMap.prototype.generate = function( material, shader, output ) {
 		return this.format( 'perturbNormal2Arb(-vViewPosition,normal,' +
 			this.value.build( material, shader, 'v3' ) + ',' +
 			this.value.uv.build( material, shader, 'v2' ) + ',' +
-			this.scale.build( material, shader, 'f' ) + ')', this.type, output );
+			this.scale.build( material, shader, 'fv1' ) + ')', this.type, output );
 	}
 
 };
@@ -1054,6 +1067,45 @@ Object.defineProperties( THREE.NodeFloat.prototype, {
 		set: function ( val ) { this.value[0] = val; }
 	}
 });
+
+//--
+
+THREE.NodeInt = function( value ) {
+	
+	THREE.NodeInput.call( this, 'fv1' );
+	
+	this.value = [ Math.floor(value || 0) ];
+	
+};
+
+THREE.NodeInt.prototype = Object.create( THREE.NodeInput.prototype );
+THREE.NodeInt.prototype.constructor = THREE.NodeInt;
+
+Object.defineProperties( THREE.NodeInt.prototype, {
+	number: {
+		get: function () { return this.value[0]; },
+		set: function ( val ) { this.value[0] = Math.floor(val); }
+	}
+});
+
+//--
+
+THREE.NodeTime = function( value ) {
+	
+	THREE.NodeFloat.call( this, value );
+	
+	this.allow.requestAnimation = true;
+	
+};
+
+THREE.NodeTime.prototype = Object.create( THREE.NodeFloat.prototype );
+THREE.NodeTime.prototype.constructor = THREE.NodeTime;
+
+THREE.NodeTime.prototype.updateAnimation = function( delta ) {
+	
+	this.number += delta;
+	
+};
 
 //--
 
@@ -1105,7 +1157,7 @@ THREE.NodeMaterial.Shortcuts( THREE.NodeVector4.prototype, 'value', [ 'x', 'y', 
 
 THREE.NodeOperator = function( a, b, op ) {
 	
-	THREE.Node.call( this, 'op' );
+	THREE.NodeTemp.call( this );
 	
 	this.op = op || '+';
 	
@@ -1115,12 +1167,12 @@ THREE.NodeOperator = function( a, b, op ) {
 };
 
 THREE.NodeOperator.prototype = Object.create( THREE.Node.prototype );
-THREE.NodeOperator.prototype.constructor = THREE.NodeOperator;
+THREE.NodeOperator.prototype.constructor = THREE.NodeTemp;
 
 THREE.NodeOperator.prototype.getType = function() {
 	
 	// use the greater length vector
-	if (this.count( this.b.getType() ) > this.count( this.a.getType() )) {
+	if (this.getFormatLength( this.b.getType() ) > this.getFormatLength( this.a.getType() )) {
 		return this.b.getType();
 	}
 	
@@ -1139,9 +1191,70 @@ THREE.NodeOperator.prototype.generate = function( material, shader, output ) {
 
 //-------------------------
 
+THREE.NodeMathx = function( value, method ) {
+	
+	THREE.NodeTemp.call( this, 'fv1' );
+	
+	this.value = value;
+	this.method = method || THREE.NodeMathx.FRACT;
+	
+};
+
+THREE.NodeMathx.prototype = Object.create( THREE.Node.prototype );
+THREE.NodeMathx.prototype.constructor = THREE.NodeMathx;
+
+THREE.NodeMathx.FRACT = 'fract';
+THREE.NodeMathx.SIN = 'sin';
+THREE.NodeMathx.COS = 'cos';
+
+THREE.NodeMathx.prototype.generate = function( material, shader, output ) {
+	
+	var value = this.value.build( material, shader, this.type );
+	
+	return this.format( this.method + '(' + value + ')', this.type, output );
+
+};
+
+//-------------------------
+
+THREE.NodeSwitch = function( value, component ) {
+	
+	THREE.Node.call( this, 'fv1' );
+	
+	this.value = value;
+	this.component = component || 'x';
+	
+};
+
+THREE.NodeSwitch.prototype = Object.create( THREE.Node.prototype );
+THREE.NodeSwitch.prototype.constructor = THREE.NodeSwitch;
+
+THREE.NodeSwitch.elements = ['x','y','z','w'];
+
+THREE.NodeSwitch.prototype.generate = function( material, shader, output ) {
+	
+	var type = this.value.getType();
+	var inputLength = this.getFormatLength(type);
+		
+	var value = this.value.build( material, shader, type );
+	var outputLength = THREE.NodeSwitch.elements.indexOf( this.component ) + 1;
+	
+	if (inputLength > 1) {
+	
+		if (inputLength < outputLength) outputLength = inputLength;
+		
+		value = value + '.' + THREE.NodeSwitch.elements[outputLength-1];
+	}
+	
+	return this.format( value, this.type, output );
+
+};
+
+//-------------------------
+
 THREE.NodeEnvironment = function( input, op ) {
 	
-	THREE.NodeInput.call( this, 'op' );
+	THREE.NodeInput.call( this );
 	
 	this.op = op || '+';
 	
