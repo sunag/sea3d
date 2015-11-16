@@ -16,6 +16,8 @@ THREE.NodeMaterial.prototype.constructor = THREE.NodeMaterial;
 
 THREE.NodeMaterial.Type = {
 	t : 'sampler2D',
+	tc : 'samplerCube',
+	bv1 : 'bool',
 	iv1 : 'int',
 	fv1 : 'float',
 	c : 'vec3',
@@ -66,20 +68,6 @@ THREE.NodeMaterial.prototype.build = function() {
 	this.defines = {};
 	this.uniforms = {}; 
 	
-	this.variables = {
-		vUv : { type : 'v2' },
-		vUv2 : { type : 'v2' },
-		uv : { type : 'v2' },
-		uv2 : { type : 'v2' },
-		vNormal : { type : 'v3' },
-		normal : { type : 'v3' },
-		transformed : { type : 'v3' },
-		reflectVec : { type : 'v3' },
-		reflectCoord : { type : 'v3' },
-		refractVec : { type : 'v3' },
-		refractCoord : { type : 'v3' }
-	};
-	
 	this.nodeData = {};	
 	
 	this.vertexUniform = [];
@@ -90,22 +78,27 @@ THREE.NodeMaterial.prototype.build = function() {
 	
 	this.uniformList = [];
 	
+	this.includes = [];
+	
 	this.requestUpdate = [];
 	
 	this.needsUv = false;
 	this.needsUv2 = false;
-	this.needsNormal = false;
-	this.needsTangent = false;
 	this.needsColor = false;
 	this.needsLight = false;
 	this.needsDerivatives = false;
+	this.needsPosition = false;
 	this.needsTransparent = false;
+	this.needsWorldPosition = false;
 	
 	this.vertexPars = '';
 	this.fragmentPars = '';
 	
 	this.vertexCode = '';
 	this.fragmentCode = '';
+	
+	this.vertexNode = '';
+	this.fragmentNode = '';
 	
 	vertex = this.vertex.generate( this, 'vertex', 'v4' );
 	fragment = this.fragment.generate( this, 'fragment', 'v4' );
@@ -137,6 +130,33 @@ THREE.NodeMaterial.prototype.build = function() {
 		
 	}
 	
+	if (this.needsPosition) {
+
+		this.addVertexPars( 'varying vec3 vPosition;' );
+		this.addFragmentPars( 'varying vec3 vPosition;' );
+		
+		this.addVertexCode( 'vPosition = transformed;' );
+		
+	}
+	
+	if (this.needsWorldPosition) {
+
+		this.addVertexPars( 'varying vec3 vWorldPosition2;' );
+		this.addFragmentPars( 'varying vec3 vWorldPosition2;' );
+		
+		this.addVertexCode( 'vWorldPosition2 = worldPosition.xyz;' );
+		
+	}
+	
+	if (this.needsTransformedNormal) {
+
+		this.addVertexPars( 'varying vec3 vTransformedNormal;' );
+		this.addFragmentPars( 'varying vec3 vTransformedNormal;' );
+		
+		this.addVertexCode( 'vTransformedNormal = transformedNormal;' );
+		
+	}
+	
 	this.derivatives = this.needsDerivatives;
 	this.lights = this.needsLight;
 	this.transparent = this.needsTransparent;
@@ -144,16 +164,18 @@ THREE.NodeMaterial.prototype.build = function() {
 	this.vertexShader = [
 		this.vertexPars,
 		this.getCodePars( this.vertexUniform, 'uniform' ),
+		this.getIncludes('vertex'),
 		'void main(){',
 		this.getCodePars( this.vertexTemps ),
-		this.vertexCode,
 		vertex,
+		this.vertexCode,
 		'}'
 	].join( "\n" );
 	
 	this.fragmentShader = [
 		this.fragmentPars,
 		this.getCodePars( this.fragmentUniform, 'uniform' ),
+		this.getIncludes('fragment'),
 		'void main(){',
 		this.getCodePars( this.fragmentTemps ),
 		this.fragmentCode,
@@ -205,7 +227,7 @@ THREE.NodeMaterial.prototype.getVertexTemp = function( uuid, type ) {
 	if (!this.vertexTemps[ uuid ]) {
 		
 		var index = this.vertexTemps.length,
-			name = 'nVt' + index;
+			name = 'nVt' + index,
 			data = { name : name, type : type };
 		
 		this.vertexTemps.push( data );
@@ -217,12 +239,37 @@ THREE.NodeMaterial.prototype.getVertexTemp = function( uuid, type ) {
 	
 };
 
+THREE.NodeMaterial.prototype.getIncludes = function( shader ) {
+	
+	function sortByPosition(a, b){
+		return b.deps - a.deps;
+	}
+	
+	return function( shader ) {
+		
+		var incs = this.includes[shader];
+		
+		if (!incs) return '';
+		
+		var code = '';
+		var incs = incs.sort(sortByPosition);
+		
+		for(var i = 0; i < incs.length; i++) {
+			
+			code += THREE.NodeLib.nodes[incs[i].name].src + '\n';
+		
+		}
+		
+		return code;
+	}
+}();
+
 THREE.NodeMaterial.prototype.getFragmentTemp = function( uuid, type ) {
 	
 	if (!this.fragmentTemps[ uuid ]) {
 		
 		var index = this.fragmentTemps.length,
-			name = 'nVt' + index;
+			name = 'nVt' + index,
 			data = { name : name, type : type };
 		
 		this.fragmentTemps.push( data );
@@ -258,6 +305,38 @@ THREE.NodeMaterial.prototype.addFragmentCode = function( code ) {
 
 };
 
+THREE.NodeMaterial.prototype.addVertexNode = function( code ) {
+
+	this.vertexNode += code + '\n';
+
+};
+
+THREE.NodeMaterial.prototype.clearVertexNode = function() {
+
+	var code = this.fragmentNode;
+	
+	this.fragmentNode = '';
+	
+	return code;
+
+};
+
+THREE.NodeMaterial.prototype.addFragmentNode = function( code ) {
+
+	this.fragmentNode += code + '\n';
+
+};
+
+THREE.NodeMaterial.prototype.clearFragmentNode = function() {
+
+	var code = this.fragmentNode;
+	
+	this.fragmentNode = '';
+	
+	return code;
+
+};
+
 THREE.NodeMaterial.prototype.getCodePars = function( pars, prefix ) {
 
 	prefix = prefix || '';
@@ -266,11 +345,17 @@ THREE.NodeMaterial.prototype.getCodePars = function( pars, prefix ) {
 	
 	for (var i = 0, l = pars.length; i < l; ++i) {
 		
-		var type = THREE.NodeMaterial.Type[ pars[i].type ];
+		var parsType = pars[i].type;
+		var parsName = pars[i].name;
+		var parsValue = pars[i].value;
 		
-		if (type == undefined) throw "node pars " + pars[i].type + " not found."
+		if (parsType == 't' && parsValue instanceof THREE.CubeTexture) parsType = 'tc';
 		
-		code += prefix + ' ' + type + ' ' + pars[i].name + ';\n';
+		var type = THREE.NodeMaterial.Type[ parsType ];
+		
+		if (type == undefined) throw new Error( "Node pars " + parsType + " not found." );
+		
+		code += prefix + ' ' + type + ' ' + parsName + ';\n';
 	}
 
 	return code;
@@ -309,6 +394,29 @@ THREE.NodeMaterial.prototype.getNodeData = function( uuid ) {
 
 };
 
+THREE.NodeMaterial.prototype.include = function( shader, func ) {
+	
+	var includes = this.includes[shader] = this.includes[shader] || [];
+	
+	if (includes[func] === undefined) {
+		
+		var node = THREE.NodeLib.nodes[func];
+		
+		this.needsDerivatives = node.needsDerivatives || this.needsDerivatives;
+		
+		if (!node) throw new Error("Library " + func + " not found!");
+		
+		includes[func] = { 
+			name : func,
+			deps : 1
+		};
+			
+		includes.push(includes[func]);
+	}
+	else ++includes[func].deps;
+
+};
+
 // ------------------------------------------------------------
 
 THREE.NodePhongMaterial = function() {
@@ -323,7 +431,7 @@ THREE.NodePhongMaterial.prototype = Object.create( THREE.NodeMaterial.prototype 
 THREE.NodePhongMaterial.prototype.constructor = THREE.NodePhongMaterial;
 
 THREE.NodeMaterial.Shortcuts( THREE.NodePhongMaterial.prototype, 'phong', 
-[ 'color',  'alpha', 'specular', 'shininess', 'normal', 'emissive', 'ambient', 'shadow', 'light', 'transform', 'env' ] );
+[ 'color',  'alpha', 'specular', 'shininess', 'normal', 'normalScale', 'emissive', 'ambient', 'shadow', 'light', 'environment', 'reflectivity', 'transform' ] );
 
 // ------------------------------------------------------------
 
@@ -336,9 +444,54 @@ THREE.Node = function( type ) {
 	
 };
 
+THREE.Node.prototype.verify = function( material ) {
+	
+	this.build( material, 'verify', 'v4' );
+	
+	material.clearVertexNode();
+	material.clearFragmentNode();
+
+};
+
+THREE.Node.prototype.verifyAndBuildCode = function( material, shader, output, uuid ) {
+
+	this.verify( material );
+	
+	return this.buildCode( material, shader, output, uuid );
+	
+};
+
+THREE.Node.prototype.buildCode = function( material, shader, output, uuid ) {
+	
+	var data = { result : this.build( material, shader, output, uuid ) };
+	
+	if (shader == 'vertex') data.code = material.clearVertexNode();
+	else data.code = material.clearFragmentNode();
+	
+	return data;
+
+};
+
+THREE.Node.prototype.verifyNodeDeps = function( data, output ) {
+	
+	data.deps = (data.deps || 0) + 1;
+	
+	var outputLen = this.getFormatLength( this.getFormat(output) );
+	
+	if (outputLen > data.outputMax || this.getType()) {
+		
+		data.outputMax = outputLen;
+		data.output = output;
+		
+	}
+
+};
+
 THREE.Node.prototype.build = function( material, shader, output, uuid ) {
 
-	var data = material.getNodeData( uuid );
+	var data = material.getNodeData( uuid || this.uuid );
+	
+	if (shader == 'verify') this.verifyNodeDeps( data, output );
 	
 	if (this.allow[shader] === false) {
 		throw new Error( 'Shader ' + shader + ' is not compatible with this node.' );
@@ -349,9 +502,7 @@ THREE.Node.prototype.build = function( material, shader, output, uuid ) {
 		data.requestUpdate = true;
 	}
 	
-	var code = this.generate( material, shader, output, uuid );
-	
-	return code;
+	return this.generate( material, shader, output, uuid );
 	
 };
 
@@ -373,22 +524,35 @@ THREE.Node.prototype.getFormatLength = function(str) {
 
 };
 
+THREE.Node.prototype.getFormatByLength = function(len) {
+	
+	if (len == 1) return 'fv1';
+	return 'v' + len;
+
+};
+
+THREE.Node.prototype.getFormatConstructor = function(len) {
+	
+	return THREE.Node.formatConstructor[len-1];
+
+};
+
 THREE.Node.prototype.format = function(code, from, to) {
 	
 	var format = this.getFormat(from + '=' + to);
 	
 	switch ( format ) {
-		case 'v1=v2': return 'vec2(' + code + ',0)';
-		case 'v1=v3': return 'vec3(' + code + ',0,0)';
-		case 'v1=v4': return 'vec4(' + code + ',0,0,0)';
+		case 'v1=v2': return 'vec2(' + code + ')';
+		case 'v1=v3': return 'vec3(' + code + ')';
+		case 'v1=v4': return 'vec4(' + code + ')';
 		
 		case 'v2=v1': return code + '.x';
-		case 'v2=v3': return 'vec3(' + code + ',0)';
-		case 'v2=v4': return 'vec4(' + code + ',0,0)';
+		case 'v2=v3': return 'vec3(' + code + ',0.)';
+		case 'v2=v4': return 'vec4(' + code + ',0.,0.)';
 		
 		case 'v3=v1': return code + '.x';
 		case 'v3=v2': return code + '.xy';
-		case 'v3=v4': return 'vec4(' + code + ',0)';
+		case 'v3=v4': return 'vec4(' + code + ',0.)';
 		
 		case 'v4=v1': return code + '.x';
 		case 'v4=v2': return code + '.xy';
@@ -398,6 +562,8 @@ THREE.Node.prototype.format = function(code, from, to) {
 	return code;
 
 };
+
+THREE.Node.formatConstructor = ['', 'vec2', 'vec3', 'vec4'];
 
 // ------------------------------------------------------------
 
@@ -449,7 +615,6 @@ THREE.NodePhong = function() {
 	this.color = new THREE.NodeColor( 0xEEEEEE );
 	this.specular = new THREE.NodeColor( 0x111111 );
 	this.shininess = new THREE.NodeFloat( 30 );
-	this.env = new THREE.NodeEnvironment();
 	
 };
 
@@ -460,15 +625,13 @@ THREE.NodePhong.prototype.generate = function( material, shader ) {
 	
 	var code;
 	
-	material.shadows = material.shadows !== undefined ? material.shadows : true;
-	
 	material.define( 'PHONG' );
 	
 	material.needsLight = true;
 	
 	if (shader == 'vertex') {
 		
-		var transform = this.transform ? this.transform.build( material, shader, 'v3' ) : undefined;
+		var transform = this.transform ? this.transform.verifyAndBuildCode( material, shader, 'v3' ) : undefined;
 		
 		material.mergeUniform( THREE.UniformsUtils.merge( [
 
@@ -518,7 +681,11 @@ THREE.NodePhong.prototype.generate = function( material, shader ) {
 			THREE.ShaderChunk[ "begin_vertex" ]
 		];
 		
-		if ( transform ) output.push( "transformed = " + transform + ";" );
+		if ( transform ) {
+			output.push( transform.code );
+			output.push( "transformed = " + transform.result + ";" );
+			console.log( transform );
+		}
 		
 		output.push(
 			THREE.ShaderChunk[ "morphtarget_vertex" ],
@@ -534,27 +701,49 @@ THREE.NodePhong.prototype.generate = function( material, shader ) {
 		);
 		
 		code = output.join( "\n" );
+		
 	}
 	else {
 		
-		var color = this.color.build( material, shader, 'v4' );
-		var specular = this.specular.build( material, shader, 'c' );
-		var shininess = this.shininess.build( material, shader, 'fv1' );
+		// trown and verify all nodes to reuse generate codes
+	
+		this.color.verify( material );
+		this.specular.verify( material );
+		this.shininess.verify( material );
 		
-		var alpha = this.alpha ? this.alpha.build( material, shader, 'fv1' ) : undefined;
+		if (this.alpha) this.alpha.verify( material );
 		
-		var env = this.env.input ? this.env.input.build( material, shader, 'c' ) : undefined;
+		if (this.environment) this.environment.verify( material );
+		if (this.environment && this.reflectivity) this.reflectivity.verify( material );
 		
-		var shadow = this.shadow ? this.shadow.build( material, shader, 'c' ) : undefined;
-		var light = this.light ? this.light.build( material, shader, 'c' ) : undefined;
-		var emissive = this.emissive ? this.emissive.build( material, shader, 'c' ) : undefined;
-		var ambient = this.ambient ? this.ambient.build( material, shader, 'c' ) : undefined;
+		if (this.shadow) this.shadow.verify( material );
+		if (this.light) this.light.verify( material );
+		if (this.emissive) this.emissive.verify( material );
+		if (this.ambient) this.ambient.verify( material );
 		
-		var normal = this.normal ? this.normal.build( material, shader, 'v3' ) : undefined;
+		if (this.normal) this.normal.verify( material );
+		if (this.normal && this.normalScale) this.normalScale.verify( material );
+		
+		// build code
+		
+		var color = this.color.buildCode( material, shader, 'v4' );
+		var specular = this.specular.buildCode( material, shader, 'c' );
+		var shininess = this.shininess.buildCode( material, shader, 'fv1' );
+		
+		var alpha = this.alpha ? this.alpha.buildCode( material, shader, 'fv1' ) : undefined;
+		
+		var environment = this.environment ? this.environment.buildCode( material, shader, 'c' ) : undefined;
+		var reflectivity = this.environment && this.reflectivity ? this.reflectivity.buildCode( material, shader, 'fv1' ) : undefined;
+		
+		var shadow = this.shadow ? this.shadow.buildCode( material, shader, 'c' ) : undefined;
+		var light = this.light ? this.light.buildCode( material, shader, 'c' ) : undefined;
+		var emissive = this.emissive ? this.emissive.buildCode( material, shader, 'c' ) : undefined;
+		var ambient = this.ambient ? this.ambient.buildCode( material, shader, 'c' ) : undefined;
+		
+		var normal = this.normal ? this.normal.buildCode( material, shader, 'v3' ) : undefined;
+		var normalScale = this.normal && this.normalScale ? this.normalScale.buildCode( material, shader, 'fv1' ) : undefined;
 		
 		material.needsTransparent = alpha != undefined;
-		
-		var containsShadow = shadow || material.shadows;
 		
 		material.addFragmentPars( [
 			THREE.ShaderChunk[ "common" ],
@@ -566,75 +755,114 @@ THREE.NodePhong.prototype.generate = function( material, shader ) {
 		].join( "\n" ) );
 		
 		var output = [
+			THREE.ShaderChunk[ "normal_phong_fragment" ],
 			"vec3 outgoingLight = vec3( 0.0 );",
-			"vec4 diffuseColor = " + color + ";",
+			color.code,
+			"vec4 diffuseColor = " + color.result + ";",
 			"vec3 totalAmbientLight = ambientLightColor;",
-			"vec3 specular = " + specular + ";",
-			"float shininess = " + shininess + ";"
+			specular.code,
+			"vec3 specular = " + specular.result + ";",
+			shininess.code,
+			"float shininess = max(0.0001," + shininess.result + ");"
 		];
+		
+		if (alpha) {
+		
+			output.push( 
+				alpha.code,
+				'if ( ' + alpha.result + ' <= 0.0 ) discard;'
+			);
+			
+		}
 		
 		output.push( "vec3 shadowMask = vec3( 1.0 );" );
 		
 		output.push(
 			THREE.ShaderChunk[ "logdepthbuf_fragment" ],
-			THREE.ShaderChunk[ "alphatest_fragment" ]
+			"float specularStrength = 1.0;"
 		);
 		
-		output.push(
-			"float specularStrength = 1.0;",
-			THREE.ShaderChunk[ "normal_phong_fragment" ]
-		);
-		
-		if (normal) output.push("normal = " + normal + ";");
+		if (normal) {
+			
+			material.include( shader, 'perturbNormal2Arb' );
+			
+			output.push(normal.code);
+			
+			if (normalScale) output.push(normalScale.code);
+			
+			output.push(
+				'normal = perturbNormal2Arb(-vViewPosition,normal,' +
+				normal.result + ',' +
+				new THREE.NodeUV().build( material, shader, 'v2' ) + ',' +
+				(normalScale ? normalScale.result : '1.0') + ');'
+			);
+
+		}
 		
 		output.push( 
 			THREE.ShaderChunk[ "hemilight_fragment" ],
 			THREE.ShaderChunk[ "lights_phong_fragment" ] 
 		);
 		
-		if (light) output.push( "totalDiffuseLight += " + light + ";" );
+		if (light) {
+			output.push( light.code );
+			output.push( "totalDiffuseLight += " + light.result + ";" );
+		}
 		
-		if (ambient) output.push( "totalAmbientLight += " + ambient + ";" );
+		if (ambient) { 
+			output.push( ambient.code );
+			output.push( "totalAmbientLight += " + ambient.result + ";" );
+		}
 		
 		output.push( THREE.ShaderChunk[ "shadowmap_fragment" ] );
 		
-		if (shadow) output.push( "shadowMask *= " + shadow + ";" );
+		if (shadow) {
+			output.push( shadow.code );
+			output.push( "shadowMask *= " + shadow.result + ";" );
+		}
 		
-		if (containsShadow) {
+		output.push(
+			"totalDiffuseLight *= shadowMask;",
+			"totalSpecularLight *= shadowMask;"
+		);
 		
-			output.push(
-				"totalDiffuseLight *= shadowMask;",
-				"totalSpecularLight *= shadowMask;"
-			);
+		output.push("outgoingLight += diffuseColor.rgb * ( totalDiffuseLight + totalAmbientLight ) + totalSpecularLight;");
+		
+		if (emissive) {
+			output.push( emissive.code );
+			output.push( "outgoingLight += " + emissive.result + ";" );
+		}
+		
+		output.push( THREE.ShaderChunk[ "envmap_fragment" ] );
+		
+		if (environment) {
+			output.push( environment.code );
+			
+			if (reflectivity) {
+				
+				output.push( reflectivity.code );
+				
+				output.push( "outgoingLight = mix(" + 'outgoingLight' + "," + environment.result + "," + reflectivity.result + ");" );
+				
+			}
+			else {
+			
+				output.push( "outgoingLight = " + environment.result + ";" );
+			}
 			
 		}
 		
 		output.push(
-			"#ifdef METAL",
-
-			"outgoingLight += diffuseColor.rgb * ( totalDiffuseLight + totalAmbientLight ) * specular + totalSpecularLight;",
-
-			"#else",
-
-			"outgoingLight += diffuseColor.rgb * ( totalDiffuseLight + totalAmbientLight ) + totalSpecularLight;",
-
-			"#endif"
-		);
-		
-		if (emissive) output.push( "outgoingLight += " + emissive + ";" );
-		
-		output.push( THREE.ShaderChunk[ "envmap_fragment" ] );
-		
-		if (this.env.input) output.push( "outgoingLight " + this.env.op + this.env.input + ";" );
-		
-		output.push(
-		
 			THREE.ShaderChunk[ "linear_to_gamma_fragment" ],
-
-			THREE.ShaderChunk[ "fog_fragment" ],
-
-			"gl_FragColor = vec4( outgoingLight, " + (alpha ? alpha : 1 ) + " );"
+			THREE.ShaderChunk[ "fog_fragment" ]
 		);
+		
+		if (alpha) {
+			output.push( "gl_FragColor = vec4( outgoingLight, " + alpha.result + " );" );
+		}
+		else {
+			output.push( "gl_FragColor = vec4( outgoingLight, 1.0 );" );
+		}
 		
 		code = output.join( "\n" );
 	
@@ -730,10 +958,21 @@ THREE.NodeTemp.prototype.constructor = THREE.NodeTemp;
 
 THREE.NodeTemp.prototype.build = function( material, shader, output, uuid ) {
 	
-	THREE.Node.prototype.build.call( this, material, shader, uuid );
+	var data = material.getNodeData( uuid || this.uuid );
+	
+	if (shader == 'verify') {
+		if (data.deps || 0 > 0) {
+			this.verifyNodeDeps( data, output );
+			return '';
+		}
+		return THREE.Node.prototype.build.call( this, material, shader, output, uuid );
+	}
+	else if (data.deps == 1) {
+		return THREE.Node.prototype.build.call( this, material, shader, output, uuid );
+	}
 	
 	var name = this.getTemp( material, shader, uuid );
-	var type = this.getType();
+	var type = data.output || this.getType();
 	
 	if (name) {
 	
@@ -741,12 +980,15 @@ THREE.NodeTemp.prototype.build = function( material, shader, output, uuid ) {
 		
 	}
 	else {
-			
-		name = THREE.NodeTemp.prototype.generate.call( this, material, shader );
+		
+		name = THREE.NodeTemp.prototype.generate.call( this, material, shader, output, uuid, data.output );
 		
 		var code = this.generate( material, shader, type, uuid );
-	
-		return this.format( '(' + name + '=' + code + ')', type, output );
+		
+		if (shader == 'vertex') material.addVertexNode(name + '=' + code + ';');
+		else material.addFragmentNode(name + '=' + code + ';');
+		
+		return this.format( name, type, output );
 	
 	}
 	
@@ -761,12 +1003,12 @@ THREE.NodeTemp.prototype.getTemp = function( material, shader, uuid ) {
 
 };
 
-THREE.NodeTemp.prototype.generate = function( material, shader, output, uuid ) {
+THREE.NodeTemp.prototype.generate = function( material, shader, output, uuid, type ) {
 	
 	uuid = uuid || this.uuid;
 	
-	if (shader == 'vertex') return material.getVertexTemp( uuid, this.getType() ).name;
-	else return material.getFragmentTemp( uuid, this.getType() ).name;
+	if (shader == 'vertex') return material.getVertexTemp( uuid, type || this.getType() ).name;
+	else return material.getFragmentTemp( uuid, type || this.getType() ).name;
 
 };
 
@@ -797,164 +1039,108 @@ THREE.NodeUV.prototype.generate = function( material, shader, output ) {
 
 //--------------------------------------------------------
 
-THREE.NodeTexture = function( value, uv ) {
+THREE.NodeTexture = function( value, coords ) {
 	
 	THREE.NodeInput.call( this, 'v4' );
 	
 	this.value = value;
-	this.uv = uv || new THREE.NodeUV();
+	this.coords = coords || new THREE.NodeUV();
 	
 };
 
 THREE.NodeTexture.prototype = Object.create( THREE.NodeInput.prototype );
 THREE.NodeTexture.prototype.constructor = THREE.NodeTexture;
 
+THREE.NodeTexture.prototype.getTemp = THREE.NodeTemp.prototype.getTemp;
+
+THREE.NodeTexture.prototype.build = function( material, shader, output, uuid ) {
+	
+	return THREE.NodeTemp.prototype.build.call( this, material, shader, output, uuid );
+	
+};
+
 THREE.NodeTexture.prototype.generate = function( material, shader, output ) {
 
 	var tex = THREE.NodeInput.prototype.generate.call( this, material, shader, output, this.value.uuid, 't' );
-	var uv = this.uv.build( material, shader, 'v2' );
+	var coords = this.coords.build( material, shader, 'v2' );
 	
 	//inputToLinear xyz
 
-	return this.format( 'texture2D(' + tex + ',' + uv + ')', this.type, output );
+	return this.format( 'texture2D(' + tex + ',' + coords + ')', this.type, output );
 
 };
 
 //--------------------------------------------------------
 
-THREE.NodeReflectUVW = function() {
+THREE.NodeReflect = function() {
 	
-	THREE.NodeReference.call( this, 'v3', 'reflectCoord' );
+	THREE.NodeTemp.call( this, 'v3' );
 	
-};
-
-THREE.NodeReflectUVW.prototype = Object.create( THREE.NodeReference.prototype );
-THREE.NodeReflectUVW.prototype.constructor = THREE.NodeReflectUVW;
-
-THREE.NodeReflectUVW.prototype.generate = function( material, shader, output ) {
-	
-	var code = 'vec3 reflectVec = reflect( cameraToVertex, worldNormal );\n' +
-		'vec3 reflectCoord = vec3( flipEnvMap * reflectVec.x, reflectVec.yz );\n';
-	
-	return THREE.NodeReference.prototype.generate.call( this, material, shader, output );
-
-};
-
-//--------------------------------------------------------
-
-THREE.NodeRefractVector = function() {
-	
-	THREE.Node.call( this, 'refractCoord' );
+	this.allow.vertex = false;
 	
 };
 
-THREE.NodeRefractVector.prototype = Object.create( THREE.Node.prototype );
-THREE.NodeRefractVector.prototype.constructor = THREE.NodeRefractVector;
+THREE.NodeReflect.prototype = Object.create( THREE.NodeTemp.prototype );
+THREE.NodeReflect.prototype.constructor = THREE.NodeReflect;
 
-THREE.NodeReflectUVW.prototype.generate = function( material, shader, output ) {
+THREE.NodeReflect.prototype.generate = function( material, shader, output ) {
 	
-	var code = 'vec3 vt0 = refract( cameraToVertex, worldNormal, refractionRatio );\n' +
-		'vec3 refractCoord = vec3( flipEnvMap * refractVec.x, refractVec.yz );\n';
+	var data = material.getNodeData( this.uuid );
 	
-	return THREE.NodeReference.prototype.generate.call( this, material, shader, output );
-
-};
-
-//--------------------------------------------------------
-
-THREE.NodeRefractUVW = function() {
+	material.needsWorldPosition = true;
 	
-	THREE.NodeReference.call( this, 'v3', 'refractCoord' );
-	
-};
-
-THREE.NodeRefractUVW.prototype = Object.create( THREE.NodeReference.prototype );
-THREE.NodeRefractUVW.prototype.constructor = THREE.NodeRefractUVW;
-
-THREE.NodeReflectUVW.prototype.generate = function( material, shader, output ) {
-	
-	var code = 'vec3 refractVec = refract( cameraToVertex, worldNormal, refractionRatio );\n' +
-		'vec3 refractCoord = vec3( flipEnvMap * refractVec.x, refractVec.yz );\n';
-	
-	return THREE.NodeReference.prototype.generate.call( this, material, shader, output );
+	if (shader != 'vertex') {
+		
+		material.addFragmentNode( [
+			'vec3 cameraToVertex = normalize( vWorldPosition2.xyz - cameraPosition );',
+			'vec3 worldNormal = inverseTransformDirection( normal, viewMatrix );',
+			'vec3 vReflect = reflect( cameraToVertex, worldNormal );'
+		].join( "\n" ) );
+		
+		return this.format( 'vReflect', this.type, output );
+		
+	}
 
 };
 
 //---------------------------------------
 
 
-THREE.NodeCube = function( value, offset ) {
+THREE.NodeCubeTexture = function( value, coords ) {
 	
-	THREE.NodeInput.call( this, 'tc' );
+	THREE.NodeInput.call( this, 'v4' );
 	
 	this.allow.vertex = false;
 	
 	this.value = value;
-	this.offset = offset;
+	this.coords = coords || new THREE.NodeReflect();
 	
 };
 
-THREE.NodeCube.prototype = Object.create( THREE.NodeInput.prototype );
-THREE.NodeCube.prototype.constructor = THREE.NodeTexture;
+THREE.NodeCubeTexture.prototype = Object.create( THREE.NodeInput.prototype );
+THREE.NodeCubeTexture.prototype.constructor = THREE.NodeCubeTexture;
 
-THREE.NodeCube.prototype.generate = function( material, shader, output ) {
-	
-	var data = material.getNodeData( this.uuid );
-	
-	if (shader == 'fragment') {
-	
-		if (!data.initied) {
-		
-			material.addFragmentPars( [
-				"vec3 cameraToVertex = normalize( vWorldPosition - cameraPosition );",
-				
-				// Transforming Normal Vectors with the Inverse Transformation
-				"vec3 worldNormal = inverseTransformDirection( normal, viewMatrix );",
-				
-				'#ifdef DOUBLE_SIDED',
-				
-					'float flipNormal = ( float( gl_FrontFacing ) * 2.0 - 1.0 );',
-					
-				'#else',
-				
-					'float flipNormal = 1.0;',
-					
-				'#endif'
-				
-			].join( "\n" ) );
-			
-			data.initied = true;
-			
-		}
-		
-		return this.format( 'perturbNormal2Arb(-vViewPosition,normal,' +
-			this.value.build( material, shader, 'v3' ) + ',' +
-			this.value.uv.build( material, shader, 'v2' ) + ',' +
-			this.scale.build( material, shader, 'fv1' ) + ')', this.type, output );
-	}
+THREE.NodeCubeTexture.prototype.generate = function( material, shader, output ) {
 
-};
-
-THREE.NodeCube.prototype.generate = function( material, shader, output ) {
-
-	var tex = THREE.Node.prototype.generate.call( this, material, shader, output, this.value.uuid, 't' );
+	var cubetex = THREE.NodeInput.prototype.generate.call( this, material, shader, output, this.value.uuid, 't' );
+	var coords = this.coords.build( material, shader, 'v3' );
 	
-	return this.format( 'textureCube(' + tex + ',' + uv + ')', 'v4', output );
+	return this.format('textureCube(' + cubetex + ', ' + coords + ')', this.type, output );
 
 };
 
 //-----------------------------------------------
 
-THREE.NodeNormal = function() {
+THREE.NodeViewNormal = function() {
 	
 	THREE.NodeReference.call( this, 'v3' );
 	
 };
 
-THREE.NodeNormal.prototype = Object.create( THREE.NodeReference.prototype );
-THREE.NodeNormal.prototype.constructor = THREE.NodeNormal;
+THREE.NodeViewNormal.prototype = Object.create( THREE.NodeReference.prototype );
+THREE.NodeViewNormal.prototype.constructor = THREE.NodeViewNormal;
 
-THREE.NodeNormal.prototype.generate = function( material, shader, output ) {
+THREE.NodeViewNormal.prototype.generate = function( material, shader, output ) {
 	
 	if (shader == 'vertex') this.name = 'normal';
 	else this.name = 'vNormal';
@@ -965,71 +1151,280 @@ THREE.NodeNormal.prototype.generate = function( material, shader, output ) {
 
 //-----------------------------------------------
 
-THREE.NodeTransform = function( value, scale ) {
+THREE.NodeCameraPosition = function() {
 	
-	THREE.NodeReference.call( this, 'v3', 'transformed' );
+	THREE.NodeReference.call( this, 'v3', 'cameraPosition' );
 	
-	this.allow.fragment = false;
+	this.allow.vertex = false;
 	
 };
 
-THREE.NodeTransform.prototype = Object.create( THREE.NodeReference.prototype );
-THREE.NodeTransform.prototype.constructor = THREE.NodeTransform;
+THREE.NodeCameraPosition.prototype = Object.create( THREE.NodeReference.prototype );
+THREE.NodeCameraPosition.prototype.constructor = THREE.NodeCameraPosition;
+
+//-----------------------------------------------
+
+THREE.NodeTransformedPosition = function() {
+	
+	THREE.NodeReference.call( this, 'v3' );
+	
+};
+
+THREE.NodeTransformedPosition.prototype = Object.create( THREE.NodeReference.prototype );
+THREE.NodeTransformedPosition.prototype.constructor = THREE.NodeTransformedPosition;
+
+THREE.NodeTransformedPosition.prototype.generate = function( material, shader, output ) {
+	
+	material.needsPosition = true;
+	
+	if (shader == 'vertex') this.name = 'transformed';
+	else this.name = 'vPosition';
+	
+	return THREE.NodeReference.prototype.generate.call( this, material, shader, output );
+
+};
+
+//-----------------------------------------------
+
+THREE.NodeViewPosition = function() {
+	
+	THREE.NodeReference.call( this, 'v3' );
+	
+};
+
+THREE.NodeViewPosition.prototype = Object.create( THREE.NodeReference.prototype );
+THREE.NodeViewPosition.prototype.constructor = THREE.NodeViewPosition;
+
+THREE.NodeViewPosition.prototype.generate = function( material, shader, output ) {
+	
+	if (shader == 'vertex') this.name = 'vec3(0)';
+	else this.name = 'vViewPosition';
+	
+	return THREE.NodeReference.prototype.generate.call( this, material, shader, output );
+
+};
+
+//-----------------------------------------------
+
+THREE.NodeTransformedNormal = function() {
+	
+	THREE.NodeReference.call( this, 'v3' );
+	
+};
+
+THREE.NodeTransformedNormal.prototype = Object.create( THREE.NodeReference.prototype );
+THREE.NodeTransformedNormal.prototype.constructor = THREE.NodeTransformedNormal;
+
+THREE.NodeTransformedNormal.prototype.generate = function( material, shader, output ) {
+	
+	material.needsTransformedNormal = true;
+	
+	if (shader == 'vertex') this.name = 'normal';
+	else this.name = 'vTransformedNormal';
+	
+	return THREE.NodeReference.prototype.generate.call( this, material, shader, output );
+
+};
+
+//-----------------------------------------------
+
+THREE.NodePI = function() {
+	
+	THREE.NodeReference.call( this, 'fv1', 'PI' );
+	
+};
+
+THREE.NodePI.prototype = Object.create( THREE.NodeReference.prototype );
+THREE.NodePI.prototype.constructor = THREE.NodePI;
+
+//-----------------------------------------------
+
+THREE.NodePI2 = function() {
+	
+	THREE.NodeReference.call( this, 'fv1', 'PI2' );
+	
+};
+
+THREE.NodePI2.prototype = Object.create( THREE.NodeReference.prototype );
+THREE.NodePI2.prototype.constructor = THREE.NodePI2;
 
 //--------------------------------------------------------
-
+/*
 THREE.NodeNormalMap = function( value, scale ) {
 	
-	THREE.Node.call( this, 'v3' );
+	THREE.NodeTemp.call( this, 'v3' );
 	
 	this.allow.vertex = false;
 	
 	this.value = value;
 	this.scale = scale || new THREE.NodeFloat(1);
+	this.uv = new THREE.NodeUV();
 	
 };
 
-THREE.NodeNormalMap.prototype = Object.create( THREE.Node.prototype );
+THREE.NodeNormalMap.prototype = Object.create( THREE.NodeTemp.prototype );
 THREE.NodeNormalMap.prototype.constructor = THREE.NodeNormalMap;
 
 THREE.NodeNormalMap.prototype.generate = function( material, shader, output ) {
 	
-	var data = material.getNodeData( this.uuid );
+	if (shader != 'vertex') {
 	
-	if (shader == 'fragment') {
+		material.include( shader, 'perturbNormal2Arb' );
 	
-		if (!data.initied) {
-		
-			material.needsDerivatives = true;
-			
-			// Per-Pixel Tangent Space Normal Mapping
-			// http://hacksoflife.blogspot.ch/2009/11/per-pixel-tangent-space-normal-mapping.html
-			
-			material.addFragmentPars( [
-				"vec3 perturbNormal2Arb( vec3 eye_pos, vec3 surf_norm, vec3 map, vec2 mUv, float scale ) {",
-					"vec3 q0 = dFdx( eye_pos.xyz );",
-					"vec3 q1 = dFdy( eye_pos.xyz );",
-					"vec2 st0 = dFdx( mUv.st );",
-					"vec2 st1 = dFdy( mUv.st );",
-					"vec3 S = normalize( q0 * st1.t - q1 * st0.t );",
-					"vec3 T = normalize( -q0 * st1.s + q1 * st0.s );",
-					"vec3 N = normalize( surf_norm );",
-					"vec3 mapN = map * 2.0 - 1.0;",
-					"mapN.xy = scale * mapN.xy;",
-					"mat3 tsn = mat3( S, T, N );",
-					"return normalize( tsn * mapN );",
-				"}"
-			].join( "\n" ) );
-			
-			data.initied = true;
-			
-		}
-		
 		return this.format( 'perturbNormal2Arb(-vViewPosition,normal,' +
 			this.value.build( material, shader, 'v3' ) + ',' +
-			this.value.uv.build( material, shader, 'v2' ) + ',' +
+			this.uv.build( material, shader, 'v2' ) + ',' +
 			this.scale.build( material, shader, 'fv1' ) + ')', this.type, output );
 	}
+
+};
+*/
+//--------------------------------------------------------
+
+THREE.NodeFunction = function( src, needsDerivatives ) {
+	
+	var rDeclaration = /^([a-z_0-9]+)\s([a-z_0-9]+)\s?\((.*)\)/i;
+	var rParams = /[a-z_0-9]+/ig;
+	
+	var match = src.match( rDeclaration );
+	
+	this.output = match[1];
+	this.name = match[2];
+	
+	this.src = src;
+	this.needsDerivatives = needsDerivatives !== undefined ? needsDerivatives : false;
+	
+	this.params = [];
+	
+	var params = match[3].match( rParams );
+	
+	for(var i = 0; i < params.length; i+=2) {
+	
+		var name = params[i];
+		var type = params[i+1]
+		
+		this.params.push({
+			name : name,
+			type : type
+		});
+	}
+	
+	THREE.Node.call( this, 'v3' );
+	
+};
+
+THREE.NodeFunction.prototype = Object.create( THREE.Node.prototype );
+THREE.NodeFunction.prototype.constructor = THREE.NodeFunction;
+
+//--------------------------------------------------------
+
+THREE.NodeLib = {
+	nodes:{},
+	add:function(node) {
+		this.nodes[node.name] = node;
+	},
+	remove:function(node) {
+		delete this.nodes[node.name];
+	}
+};
+
+//--------------------------------------------------------
+
+//
+//	NormalMap
+//
+			
+THREE.NodeLib.add(new THREE.NodeFunction([
+// Per-Pixel Tangent Space Normal Mapping
+// http://hacksoflife.blogspot.ch/2009/11/per-pixel-tangent-space-normal-mapping.html
+"vec3 perturbNormal2Arb( vec3 eye_pos, vec3 surf_norm, vec3 map, vec2 mUv, float scale ) {",
+	"vec3 q0 = dFdx( eye_pos );",
+	"vec3 q1 = dFdy( eye_pos );",
+	"vec2 st0 = dFdx( mUv.st );",
+	"vec2 st1 = dFdy( mUv.st );",
+	"vec3 S = normalize( q0 * st1.t - q1 * st0.t );",
+	"vec3 T = normalize( -q0 * st1.s + q1 * st0.s );",
+	"vec3 N = normalize( surf_norm );",
+	"vec3 mapN = map * 2.0 - 1.0;",
+	"mapN.xy = scale * mapN.xy;",
+	"mat3 tsn = mat3( S, T, N );",
+	"return normalize( tsn * mapN );",
+"}"
+].join( "\n" ), true));
+
+//
+//	Saturation
+//
+
+THREE.NodeLib.add(new THREE.NodeFunction([
+// Algorithm from Chapter 16 of OpenGL Shading Language
+"vec3 saturation_rgb(vec3 rgb, float adjustment) {",
+	"const vec3 W = vec3(0.2125, 0.7154, 0.0721);",
+	"vec3 intensity = vec3(dot(rgb, W));",
+	"return mix(intensity, rgb, adjustment);",
+"}"
+].join( "\n" )));
+
+//
+//	Luminance
+//
+
+THREE.NodeLib.add(new THREE.NodeFunction([
+// Algorithm from Chapter 10 of Graphics Shaders.
+"float luminance_rgb(vec3 rgb) {",
+	"const vec3 W = vec3(0.2125, 0.7154, 0.0721);",
+	"return dot(rgb, W);",
+"}"
+].join( "\n" )));
+
+//--------------------------------------------------------
+
+THREE.NodeDepth = function( value, near, far ) {
+	
+	THREE.Node.call( this, 'fv1' );
+	
+	this.allow.vertex = false;
+	
+	this.near = near || new THREE.NodeFloat(1);
+	this.far = far || new THREE.NodeFloat(500);
+	
+};
+
+THREE.NodeDepth.prototype = Object.create( THREE.Node.prototype );
+THREE.NodeDepth.prototype.constructor = THREE.NodeDepth;
+
+THREE.NodeDepth.prototype.generate = function( material, shader, output ) {
+	
+	var data = material.getNodeData( this.uuid );
+	
+	if (!data.initied) {
+		
+		material.addFragmentPars( [
+			"float depthcolor( float mNear, float mFar ) {",
+			
+				"#ifdef USE_LOGDEPTHBUF_EXT",
+				
+				"float depth = gl_FragDepthEXT / gl_FragCoord.w;",
+				
+				"#else",
+				
+				"float depth = gl_FragCoord.z / gl_FragCoord.w;",
+				
+				"#endif",
+				
+				"return 1.0 - smoothstep( mNear, mFar, depth );",
+				
+			"}"
+		].join( "\n" ) );
+		
+		data.initied = true;
+		
+	}
+	
+	var near = this.near.build( material, shader, 'fv1' )
+	var far = this.far.build( material, shader, 'fv1' )
+	
+	return this.format( 'depthcolor(' + near + ',' + far + ')', this.type, output );
 
 };
 
@@ -1090,7 +1485,7 @@ Object.defineProperties( THREE.NodeInt.prototype, {
 
 //--
 
-THREE.NodeTime = function( value ) {
+THREE.NodeTimer = function( value ) {
 	
 	THREE.NodeFloat.call( this, value );
 	
@@ -1098,10 +1493,10 @@ THREE.NodeTime = function( value ) {
 	
 };
 
-THREE.NodeTime.prototype = Object.create( THREE.NodeFloat.prototype );
-THREE.NodeTime.prototype.constructor = THREE.NodeTime;
+THREE.NodeTimer.prototype = Object.create( THREE.NodeFloat.prototype );
+THREE.NodeTimer.prototype.constructor = THREE.NodeTimer;
 
-THREE.NodeTime.prototype.updateAnimation = function( delta ) {
+THREE.NodeTimer.prototype.updateAnimation = function( delta ) {
 	
 	this.number += delta;
 	
@@ -1166,8 +1561,8 @@ THREE.NodeOperator = function( a, b, op ) {
 	
 };
 
-THREE.NodeOperator.prototype = Object.create( THREE.Node.prototype );
-THREE.NodeOperator.prototype.constructor = THREE.NodeTemp;
+THREE.NodeOperator.prototype = Object.create( THREE.NodeTemp.prototype );
+THREE.NodeOperator.prototype.constructor = THREE.NodeOperator;
 
 THREE.NodeOperator.prototype.getType = function() {
 	
@@ -1185,44 +1580,243 @@ THREE.NodeOperator.prototype.generate = function( material, shader, output ) {
 	var a = this.a.build( material, shader, output );
 	var b = this.b.build( material, shader, output );
 	
+	var data = material.getNodeData( this.uuid );
+	
 	return '(' + a + this.op + b + ')';
 
 };
 
 //-------------------------
 
-THREE.NodeMathx = function( value, method ) {
+THREE.NodeMath1 = function( a, method ) {
 	
-	THREE.NodeTemp.call( this, 'fv1' );
+	THREE.NodeTemp.call( this );
 	
-	this.value = value;
-	this.method = method || THREE.NodeMathx.FRACT;
+	this.a = a;
+	
+	this.method = method || THREE.NodeMath1.SINE;
 	
 };
 
-THREE.NodeMathx.prototype = Object.create( THREE.Node.prototype );
-THREE.NodeMathx.prototype.constructor = THREE.NodeMathx;
+THREE.NodeMath1.prototype = Object.create( THREE.Node.prototype );
+THREE.NodeMath1.prototype.constructor = THREE.NodeMath1;
 
-THREE.NodeMathx.FRACT = 'fract';
-THREE.NodeMathx.SIN = 'sin';
-THREE.NodeMathx.COS = 'cos';
+THREE.NodeMath1.RADIANS = 'radians';
+THREE.NodeMath1.DEGREES = 'degrees';
+THREE.NodeMath1.EXPONENTIAL = 'exp';
+THREE.NodeMath1.EXPONENTIAL2 = 'exp2';
+THREE.NodeMath1.LOGARITHM = 'log';
+THREE.NodeMath1.LOGARITHM2 = 'log2';
+THREE.NodeMath1.INVERSE_SQUARE = 'inversesqrt';
+THREE.NodeMath1.FLOOR = 'floor';
+THREE.NodeMath1.CEILING = 'ceil';
+THREE.NodeMath1.NORMALIZE = 'normalize';
+THREE.NodeMath1.FRACTIONAL = 'fract';
+THREE.NodeMath1.SINE = 'sin';
+THREE.NodeMath1.COSINE = 'cos';
+THREE.NodeMath1.TANGENT = 'tan';
+THREE.NodeMath1.ARCSINE = 'asin';
+THREE.NodeMath1.ARCCOSINE = 'acos';
+THREE.NodeMath1.ARCTANGENT = 'atan';
+THREE.NodeMath1.ABSOLUTE = 'abc';
+THREE.NodeMath1.SIGN = 'sign';
+THREE.NodeMath1.LENGTH = 'length';
 
-THREE.NodeMathx.prototype.generate = function( material, shader, output ) {
+THREE.NodeMath1.prototype.getType = function() {
 	
-	var value = this.value.build( material, shader, this.type );
+	switch(this.method) {
+		case THREE.NodeMath1.DISTANCE:
+			return 'fv1';
+			break;
+	}
 	
-	return this.format( this.method + '(' + value + ')', this.type, output );
+	return this.a.getType();
+	
+};
+
+THREE.NodeMath1.prototype.generate = function( material, shader, output ) {
+	
+	var type = this.getType();
+	
+	var a = this.a.build( material, shader, type );
+	
+	return this.format( this.method + '(' + a + ')', type, output );
 
 };
 
 //-------------------------
 
-THREE.NodeSwitch = function( value, component ) {
+THREE.NodeMath2 = function( a, b, method ) {
+	
+	THREE.NodeTemp.call( this );
+	
+	this.a = a;
+	this.b = b;
+	
+	this.method = method || THREE.NodeMath2.MIN;
+	
+};
+
+THREE.NodeMath2.prototype = Object.create( THREE.Node.prototype );
+THREE.NodeMath2.prototype.constructor = THREE.NodeMath2;
+
+THREE.NodeMath2.MIN = 'min';
+THREE.NodeMath2.MAX = 'max';
+THREE.NodeMath2.MODULO = 'mod';
+THREE.NodeMath2.STEP = 'step';
+THREE.NodeMath2.REFLECT = 'reflect';
+THREE.NodeMath2.DISTANCE = 'distance';
+THREE.NodeMath2.DOT = 'dot';
+THREE.NodeMath2.CROSS = 'cross';
+THREE.NodeMath2.EXPONENTIATION = 'pow';
+
+THREE.NodeMath2.prototype.getInputType = function() {
+	
+	// use the greater length vector
+	if (this.getFormatLength( this.b.getType() ) > this.getFormatLength( this.a.getType() )) {
+		return this.b.getType();
+	}
+	
+	return this.a.getType();
+	
+};
+
+THREE.NodeMath2.prototype.getType = function() {
+	
+	switch(this.method) {
+		case THREE.NodeMath2.DISTANCE:
+		case THREE.NodeMath2.DOT:
+			return 'fv1';
+			break;
+		
+		case THREE.NodeMath2.CROSS:
+			return 'v3';
+			break;
+	}
+	
+	return this.getInputType();
+};
+
+THREE.NodeMath2.prototype.generate = function( material, shader, output ) {
+	
+	var type = this.getInputType();
+	
+	var a, b, 
+		al = this.getFormatLength( this.a.getType() ),
+		bl = this.getFormatLength( this.b.getType() );
+	
+	// optimzer
+	
+	switch(this.method) {
+		case THREE.NodeMath2.STEP:
+			a = this.a.build( material, shader, al == 1 ? 'fv1' : type );
+			b = this.b.build( material, shader, type );
+			break;
+			
+		case THREE.NodeMath2.MIN:
+		case THREE.NodeMath2.MAX:
+		case THREE.NodeMath2.MODULO:
+			a = this.a.build( material, shader, type );
+			b = this.b.build( material, shader, bl == 1 ? 'fv1' : type );
+			break;
+			
+		default:
+			a = this.a.build( material, shader, type );
+			b = this.b.build( material, shader, type );
+			break;
+	
+	}
+	
+	return this.format( this.method + '(' + a + ',' + b + ')', this.getType(), output );
+
+};
+
+//-------------------------
+
+THREE.NodeMath3 = function( a, b, c, method ) {
+	
+	THREE.NodeTemp.call( this );
+	
+	this.a = a;
+	this.b = b;
+	this.c = c;
+	
+	this.method = method || THREE.NodeMath3.MIX;
+	
+};
+
+THREE.NodeMath3.prototype = Object.create( THREE.Node.prototype );
+THREE.NodeMath3.prototype.constructor = THREE.NodeMath3;
+
+THREE.NodeMath3.MIX = 'mix';
+THREE.NodeMath2.REFRACT = 'refract';
+THREE.NodeMath2.SMOOTHSTEP = 'smoothstep';
+THREE.NodeMath2.FACEFORWARD = 'faceforward';
+
+THREE.NodeMath3.prototype.getType = function() {
+	
+	var a = this.getFormatLength( this.a.getType() );
+	var b = this.getFormatLength( this.b.getType() );
+	var c = this.getFormatLength( this.c.getType() );
+	
+	if (a > b) {
+		if (a > c) return this.a.getType();
+		return this.c.getType();
+	} 
+	else {
+		if (b > c) return this.b.getType();
+	
+		return this.c.getType();
+	}
+	
+};
+
+THREE.NodeMath3.prototype.generate = function( material, shader, output ) {
+	
+	var type = this.getType();
+	
+	var a, b, c,
+		al = this.getFormatLength( this.a.getType() ),
+		bl = this.getFormatLength( this.b.getType() ),
+		cl = this.getFormatLength( this.b.getType() )
+	
+	// optimzer
+	
+	switch(this.method) {
+		case THREE.NodeMath2.REFRACT:
+			a = this.a.build( material, shader, type );
+			b = this.b.build( material, shader, type );
+			c = this.c.build( material, shader, 'fv1' );
+			break;
+		
+		case THREE.NodeMath2.MIX:
+		case THREE.NodeMath2.SMOOTHSTEP:
+			a = this.a.build( material, shader, type );
+			b = this.b.build( material, shader, type );
+			c = this.c.build( material, shader, cl == 1 ? 'fv1' : type );
+			break;
+			
+		default:
+			a = this.a.build( material, shader, type );
+			b = this.b.build( material, shader, type );
+			c = this.c.build( material, shader, type );
+			break;
+	
+	}
+	
+	return this.format( this.method + '(' + a + ',' + b + ',' + c + ')', type, output );
+
+};
+
+//-------------------------
+
+THREE.NodeSwitch = function( a, component ) {
 	
 	THREE.Node.call( this, 'fv1' );
 	
-	this.value = value;
 	this.component = component || 'x';
+	
+	this.a = a;
 	
 };
 
@@ -1233,42 +1827,82 @@ THREE.NodeSwitch.elements = ['x','y','z','w'];
 
 THREE.NodeSwitch.prototype.generate = function( material, shader, output ) {
 	
-	var type = this.value.getType();
+	var type = this.a.getType();
 	var inputLength = this.getFormatLength(type);
 		
-	var value = this.value.build( material, shader, type );
+	var a = this.a.build( material, shader, type );
+	
 	var outputLength = THREE.NodeSwitch.elements.indexOf( this.component ) + 1;
 	
 	if (inputLength > 1) {
 	
 		if (inputLength < outputLength) outputLength = inputLength;
 		
-		value = value + '.' + THREE.NodeSwitch.elements[outputLength-1];
+		a = a + '.' + THREE.NodeSwitch.elements[outputLength-1];
 	}
 	
-	return this.format( value, this.type, output );
+	return this.format( a, this.type, output );
 
 };
 
 //-------------------------
 
-THREE.NodeEnvironment = function( input, op ) {
+THREE.NodeJoin = function( x, y, w, z ) {
 	
-	THREE.NodeInput.call( this );
+	THREE.Node.call( this, 'fv1' );
 	
-	this.op = op || '+';
-	
-	this.input = input;
+	this.x = x;
+	this.y = y;
+	this.z = z;
+	this.w = w;
 	
 };
 
-THREE.NodeEnvironment.prototype = Object.create( THREE.NodeInput.prototype );
-THREE.NodeEnvironment.prototype.constructor = THREE.NodeEnvironment;
+THREE.NodeJoin.prototype = Object.create( THREE.Node.prototype );
+THREE.NodeJoin.prototype.constructor = THREE.NodeJoin;
 
-THREE.NodeEnvironment.prototype.generate = function( material, shader, output ) {
+THREE.NodeJoin.inputs = ['x','y','z','w'];
+
+THREE.NodeJoin.prototype.getNumElements = function() {
 	
-	material.define( 'USE_ENVMAP' );
+	var inputs = THREE.NodeJoin.inputs;
+	var i = inputs.length;
 	
-	return this.input.generate( material, shader, output );
+	while (i--) {
+		if ( this[ inputs[i] ] !== undefined ) {
+			++i;
+			break;
+		}
+	}
+	
+	return Math.max(i, 2);
+	
+};
+
+THREE.NodeJoin.prototype.getType = function() {
+	
+	return this.getFormatByLength( this.getNumElements() );
+	
+};
+
+THREE.NodeJoin.prototype.generate = function( material, shader, output ) {
+	
+	var type = this.getType();
+	var length = this.getNumElements();
+	
+	var inputs = THREE.NodeJoin.inputs;
+	var outputs = [];
+	
+	for(var i = 0; i < length; i++) {
+	
+		var elm = this[inputs[i]];
+		
+		outputs.push( elm ? elm.build( material, shader, 'fv1' ) : '0.' );
+	
+	}
+	
+	var code = this.getFormatConstructor(length) + '(' + outputs.join(',') + ')';
+	
+	return this.format( code, type, output );
 
 };

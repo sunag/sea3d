@@ -82,7 +82,7 @@
 				var albedo2 = new THREE.NodeOperator( t, t2,'*');
 				
 				var tt = new THREE.NodeOperator( 
-					new THREE.NodeNormal(), 
+					new THREE.NodeTransformedNormal(), 
 					t,
 					'*'
 				);
@@ -98,7 +98,7 @@
 				
 				// displace example
 				nodemat.transform = new THREE.NodeOperator( 
-					new THREE.NodeTransform(), 
+					new THREE.NodeTransformedPosition(), 
 					ttscale,
 					'+'
 				);
@@ -108,7 +108,7 @@
 				//nodemat.ambient = albedo2;
 				//nodemat.alpha = new THREE.NodeTexture( imgTexture );
 				//nodemat.shadow = new THREE.NodeColor( 0 );
-				nodemat.normal = new THREE.NodeNormalMap( new THREE.NodeTexture( nMap ) );
+				nodemat.normal = new THREE.NodeTexture( nMap );
 				//nodemat.env.input = new THREE.NodeTexture( imgTexture );
 				//nodemat.alpha.number = .3
 				nodemat.build();
