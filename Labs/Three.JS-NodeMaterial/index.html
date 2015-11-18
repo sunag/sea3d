@@ -16,8 +16,53 @@
 	<body>
 
 		<script src="three.js"></script>
-		<script src="three.node.js"></script>
+		
+		<!-- NodeMaterial Base -->
+		<script src="node/NodeMaterial.js"></script>
+		<script src="node/NodeGL.js"></script>
+		<script src="node/NodeFunction.js"></script>
+		<script src="node/NodeInput.js"></script>
+		<script src="node/NodeTemp.js"></script>
+		<script src="node/NodeReference.js"></script>
+		<script src="node/NodeLib.js"></script>
+		
+		<!-- Phong -->
+		
+		<script src="node/NodePhong.js"></script>
+		<script src="node/NodePhongMaterial.js"></script>
+		
+		<!-- Functions -->
+		<script src="node/NodeOperator.js"></script>
+		<script src="node/NodeMath1.js"></script>
+		<script src="node/NodeMath2.js"></script>
+		<script src="node/NodeMath3.js"></script>
+		<script src="node/NodeSwitch.js"></script>
+		<script src="node/NodeJoin.js"></script>
+		
+		<!-- Natives -->
+		<script src="node/NodeDepth.js"></script>
+		<script src="node/NodeConst.js"></script>
+		<script src="node/NodeUV.js"></script>
+		<script src="node/NodeReflect.js"></script>
+		<script src="node/NodeTransformedPosition.js"></script>
+		<script src="node/NodeTransformedNormal.js"></script>
+		<script src="node/NodeViewPosition.js"></script>
+		<script src="node/NodeViewNormal.js"></script>
+		<script src="node/NodeCameraPosition.js"></script>
+		<script src="node/NodeProjectPosition.js"></script>
+		
+		<!-- Inputs -->
+		<script src="node/NodeFloat.js"></script>
+		<script src="node/NodeVector2.js"></script>
+		<script src="node/NodeVector3.js"></script>
+		<script src="node/NodeVector4.js"></script>
+		<script src="node/NodeColor.js"></script>
+		<script src="node/NodeTimer.js"></script>
 
+		<!-- Textures -->
+		<script src="node/NodeTexture.js"></script>
+		<script src="node/NodeCubeTexture.js"></script>
+		
 		<script src="Detector.js"></script>
 		<script src="stats.min.js"></script>
 
@@ -132,6 +177,7 @@
 				
 				nodemat = new THREE.NodePhongMaterial();
 				nodemat.color = albedo2;
+				nodemat.alpha = albedo2;
 				nodemat.build();
 				
 				materials.push( nodemat );
