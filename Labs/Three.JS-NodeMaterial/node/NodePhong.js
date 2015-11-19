@@ -20,6 +20,7 @@ THREE.NodePhong.prototype.generate = function( material, shader ) {
 	var code;
 	
 	material.define( 'PHONG' );
+	material.define( 'ALPHATEST', '0.0' );
 	
 	material.needsLight = true;
 	
@@ -31,13 +32,7 @@ THREE.NodePhong.prototype.generate = function( material, shader ) {
 
 			THREE.UniformsLib[ "fog" ],
 			THREE.UniformsLib[ "lights" ],
-			THREE.UniformsLib[ "shadowmap" ],
-			{
-				"envMap" : { type: "t", value: null },
-				"flipEnvMap" : { type: "f", value: - 1 },
-				"reflectivity" : { type: "f", value: 1.0 },
-				"refractionRatio" : { type: "f", value: 0.98 }
-			}
+			THREE.UniformsLib[ "shadowmap" ]
 
 		] ) );
 		
@@ -46,7 +41,7 @@ THREE.NodePhong.prototype.generate = function( material, shader ) {
 
 			"#ifndef FLAT_SHADED",
 
-				"varying vec3 vNormal;",
+			"	varying vec3 vNormal;",
 
 			"#endif",
 
@@ -58,21 +53,21 @@ THREE.NodePhong.prototype.generate = function( material, shader ) {
 			THREE.ShaderChunk[ "logdepthbuf_pars_vertex" ]
 
 		].join( "\n" ) );
-
+		
 		var output = [
-			THREE.ShaderChunk[ "beginnormal_vertex" ],
-			THREE.ShaderChunk[ "morphnormal_vertex" ],
-			THREE.ShaderChunk[ "skinbase_vertex" ],
-			THREE.ShaderChunk[ "skinnormal_vertex" ],
-			THREE.ShaderChunk[ "defaultnormal_vertex" ],
+				THREE.ShaderChunk[ "beginnormal_vertex" ],
+				THREE.ShaderChunk[ "morphnormal_vertex" ],
+				THREE.ShaderChunk[ "skinbase_vertex" ],
+				THREE.ShaderChunk[ "skinnormal_vertex" ],
+				THREE.ShaderChunk[ "defaultnormal_vertex" ],
 
 			"#ifndef FLAT_SHADED", // Normal computed with derivatives when FLAT_SHADED
 
-				"vNormal = normalize( transformedNormal );",
+			"	vNormal = normalize( transformedNormal );",
 
 			"#endif",
 
-			THREE.ShaderChunk[ "begin_vertex" ]
+				THREE.ShaderChunk[ "begin_vertex" ]
 		];
 		
 		if ( transform ) {
@@ -81,16 +76,16 @@ THREE.NodePhong.prototype.generate = function( material, shader ) {
 		}
 		
 		output.push(
-			THREE.ShaderChunk[ "morphtarget_vertex" ],
-			THREE.ShaderChunk[ "skinning_vertex" ],
-			THREE.ShaderChunk[ "project_vertex" ],
-			THREE.ShaderChunk[ "logdepthbuf_vertex" ],
+				THREE.ShaderChunk[ "morphtarget_vertex" ],
+				THREE.ShaderChunk[ "skinning_vertex" ],
+				THREE.ShaderChunk[ "project_vertex" ],
+				THREE.ShaderChunk[ "logdepthbuf_vertex" ],
 
-			"vViewPosition = - mvPosition.xyz;",
+			"	vViewPosition = - mvPosition.xyz;",
 
-			THREE.ShaderChunk[ "worldpos_vertex" ],
-			THREE.ShaderChunk[ "lights_phong_vertex" ],
-			THREE.ShaderChunk[ "shadowmap_vertex" ]
+				THREE.ShaderChunk[ "worldpos_vertex" ],
+				THREE.ShaderChunk[ "lights_phong_vertex" ],
+				THREE.ShaderChunk[ "shadowmap_vertex" ]
 		);
 		
 		code = output.join( "\n" );
@@ -98,24 +93,24 @@ THREE.NodePhong.prototype.generate = function( material, shader ) {
 	}
 	else {
 		
-		// trown and verify all nodes to reuse generate codes
-	
+		// verify all nodes to reuse generate codes
+		
 		this.color.verify( material );
 		this.specular.verify( material );
 		this.shininess.verify( material );
 		
 		if (this.alpha) this.alpha.verify( material );
 		
-		if (this.environment) this.environment.verify( material );
-		if (this.environment && this.reflectivity) this.reflectivity.verify( material );
-		
-		if (this.shadow) this.shadow.verify( material );
-		if (this.light) this.light.verify( material );
-		if (this.emissive) this.emissive.verify( material );
+		if (this.ao) this.ao.verify( material );
 		if (this.ambient) this.ambient.verify( material );
+		if (this.shadow) this.shadow.verify( material );
+		if (this.emissive) this.emissive.verify( material );
 		
 		if (this.normal) this.normal.verify( material );
 		if (this.normal && this.normalScale) this.normalScale.verify( material );
+		
+		if (this.environment) this.environment.verify( material );
+		if (this.environment && this.reflectivity) this.reflectivity.verify( material );
 		
 		// build code
 		
@@ -125,55 +120,56 @@ THREE.NodePhong.prototype.generate = function( material, shader ) {
 		
 		var alpha = this.alpha ? this.alpha.buildCode( material, shader, 'fv1' ) : undefined;
 		
-		var environment = this.environment ? this.environment.buildCode( material, shader, 'c' ) : undefined;
-		var reflectivity = this.environment && this.reflectivity ? this.reflectivity.buildCode( material, shader, 'fv1' ) : undefined;
-		
-		var shadow = this.shadow ? this.shadow.buildCode( material, shader, 'c' ) : undefined;
-		var light = this.light ? this.light.buildCode( material, shader, 'c' ) : undefined;
-		var emissive = this.emissive ? this.emissive.buildCode( material, shader, 'c' ) : undefined;
+		var ao = this.ao ? this.ao.buildCode( material, shader, 'c' ) : undefined;
 		var ambient = this.ambient ? this.ambient.buildCode( material, shader, 'c' ) : undefined;
+		var shadow = this.shadow ? this.shadow.buildCode( material, shader, 'c' ) : undefined;
+		var emissive = this.emissive ? this.emissive.buildCode( material, shader, 'c' ) : undefined;
 		
 		var normal = this.normal ? this.normal.buildCode( material, shader, 'v3' ) : undefined;
 		var normalScale = this.normal && this.normalScale ? this.normalScale.buildCode( material, shader, 'fv1' ) : undefined;
+		
+		var environment = this.environment ? this.environment.buildCode( material, shader, 'c' ) : undefined;
+		var reflectivity = this.environment && this.reflectivity ? this.reflectivity.buildCode( material, shader, 'fv1' ) : undefined;
 		
 		material.needsTransparent = alpha != undefined;
 		
 		material.addFragmentPars( [
 			THREE.ShaderChunk[ "common" ],
 			THREE.ShaderChunk[ "fog_pars_fragment" ],
+			THREE.ShaderChunk[ "bsdfs" ],
+			THREE.ShaderChunk[ "lights_pars" ],
 			THREE.ShaderChunk[ "lights_phong_pars_fragment" ],
 			THREE.ShaderChunk[ "shadowmap_pars_fragment" ],
-			THREE.ShaderChunk[ "bumpmap_pars_fragment" ],
 			THREE.ShaderChunk[ "logdepthbuf_pars_fragment" ]
 		].join( "\n" ) );
-		
+	
 		var output = [
-			THREE.ShaderChunk[ "normal_phong_fragment" ],
-			"vec3 outgoingLight = vec3( 0.0 );",
-			color.code,
-			"vec4 diffuseColor = " + color.result + ";",
-			"vec3 totalAmbientLight = ambientLightColor;",
+				// prevent undeclared normal
+				THREE.ShaderChunk[ "normal_fragment" ],
+			
+				color.code,
+			"	vec4 diffuseColor = " + color.result + ";",
+			"	ReflectedLight reflectedLight = ReflectedLight( vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ) );",
+			
+				THREE.ShaderChunk[ "logdepthbuf_fragment" ],
+				
 			specular.code,
-			"vec3 specular = " + specular.result + ";",
+			"	vec3 specular = " + specular.result + ";",
+			
 			shininess.code,
-			"float shininess = max(0.0001," + shininess.result + ");"
-		];
+			"	float shininess = max(0.0001," + shininess.result + ");",
+			
+			"	float specularStrength = 1.0;" // Ignored in NodeMaterial ( replace to specular )
+		];	
 		
 		if (alpha) {
-		
+			
 			output.push( 
 				alpha.code,
-				'if ( ' + alpha.result + ' <= 0.0 ) discard;'
+				'if ( ' + alpha.result + ' <= ALPHATEST ) discard;'
 			);
-			
+		
 		}
-		
-		output.push( "vec3 shadowMask = vec3( 1.0 );" );
-		
-		output.push(
-			THREE.ShaderChunk[ "logdepthbuf_fragment" ],
-			"float specularStrength = 1.0;"
-		);
 		
 		if (normal) {
 			
@@ -191,42 +187,37 @@ THREE.NodePhong.prototype.generate = function( material, shader ) {
 			);
 
 		}
-		
-		output.push( 
-			THREE.ShaderChunk[ "hemilight_fragment" ],
-			THREE.ShaderChunk[ "lights_phong_fragment" ] 
+
+		output.push(
+			THREE.ShaderChunk[ "shadowmap_fragment" ],
+			
+			// accumulation
+			THREE.ShaderChunk[ "lights_phong_fragment" ],
+			THREE.ShaderChunk[ "lights_template" ]
 		);
 		
-		if (light) {
-			output.push( light.code );
-			output.push( "totalDiffuseLight += " + light.result + ";" );
+		if (ao) { 
+			output.push( ao.code );
+			output.push( "reflectedLight.indirectDiffuse *= " + ao.result + ";" );
 		}
 		
 		if (ambient) { 
 			output.push( ambient.code );
-			output.push( "totalAmbientLight += " + ambient.result + ";" );
+			output.push( "reflectedLight.indirectDiffuse += " + ambient.result + ";" );
 		}
-		
-		output.push( THREE.ShaderChunk[ "shadowmap_fragment" ] );
 		
 		if (shadow) {
 			output.push( shadow.code );
-			output.push( "shadowMask *= " + shadow.result + ";" );
+			output.push( "reflectedLight.directDiffuse *= " + shadow.result + ";" );
+			output.push( "reflectedLight.directSpecular *= " + shadow.result + ";" );
 		}
 		
-		output.push(
-			"totalDiffuseLight *= shadowMask;",
-			"totalSpecularLight *= shadowMask;"
-		);
-		
-		output.push("outgoingLight += diffuseColor.rgb * ( totalDiffuseLight + totalAmbientLight ) + totalSpecularLight;");
-		
-		if (emissive) {
+		if (emissive) { 
 			output.push( emissive.code );
-			output.push( "outgoingLight += " + emissive.result + ";" );
+			output.push( "reflectedLight.directDiffuse += " + emissive.result + ";" );
 		}
 		
-		output.push( THREE.ShaderChunk[ "envmap_fragment" ] );
+		output.push("vec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + reflectedLight.directSpecular + reflectedLight.indirectSpecular;");
 		
 		if (environment) {
 			output.push( environment.code );
@@ -242,7 +233,6 @@ THREE.NodePhong.prototype.generate = function( material, shader ) {
 			
 				output.push( "outgoingLight = " + environment.result + ";" );
 			}
-			
 		}
 		
 		output.push(

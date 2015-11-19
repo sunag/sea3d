@@ -9,6 +9,11 @@ THREE.NodeConst = function(name) {
 };
 
 THREE.NodeConst.PI = 'PI';
+THREE.NodeConst.PI2 = 'PI2';
+THREE.NodeConst.RECIPROCAL_PI = 'RECIPROCAL_PI';
+THREE.NodeConst.RECIPROCAL_PI2 = 'RECIPROCAL_PI2';
+THREE.NodeConst.LOG2 = 'LOG2';
+THREE.NodeConst.EPSILON = 'EPSILON';
 
 THREE.NodeConst.prototype = Object.create( THREE.NodeReference.prototype );
 THREE.NodeConst.prototype.constructor = THREE.NodeConst;

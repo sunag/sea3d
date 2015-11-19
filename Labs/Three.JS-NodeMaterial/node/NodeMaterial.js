@@ -141,11 +141,9 @@ THREE.NodeMaterial.prototype.build = function() {
 	
 	if (this.needsWorldPosition) {
 
-		this.addVertexPars( 'varying vec3 vWorldPosition2;' );
-		this.addFragmentPars( 'varying vec3 vWorldPosition2;' );
-		
-		this.addVertexCode( 'vWorldPosition2 = worldPosition.xyz;' );
-		
+		// force the use of "varying vec3 vWorldPosition"
+		this.define( 'USE_ENVMAP' );
+
 	}
 	
 	if (this.needsTransformedNormal) {
@@ -157,7 +155,7 @@ THREE.NodeMaterial.prototype.build = function() {
 		
 	}
 	
-	this.derivatives = this.needsDerivatives;
+	this.extensions.derivatives = this.needsDerivatives;
 	this.lights = this.needsLight;
 	this.transparent = this.needsTransparent;
 	
@@ -189,9 +187,9 @@ THREE.NodeMaterial.prototype.build = function() {
 	return this;
 };
 
-THREE.NodeMaterial.prototype.define = function(name) {
+THREE.NodeMaterial.prototype.define = function(name, value) {
 
-	this.defines[name] = 1;
+	this.defines[name] = value == undefined ? 1 : value;
 
 };
 

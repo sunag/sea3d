@@ -22,7 +22,7 @@ THREE.NodeReflect.prototype.generate = function( material, shader, output ) {
 	if (shader != 'vertex') {
 		
 		material.addFragmentNode( [
-			'vec3 cameraToVertex = normalize( vWorldPosition2.xyz - cameraPosition );',
+			'vec3 cameraToVertex = normalize( vWorldPosition.xyz - cameraPosition );',
 			'vec3 worldNormal = inverseTransformDirection( normal, viewMatrix );',
 			'vec3 vReflect = reflect( cameraToVertex, worldNormal );'
 		].join( "\n" ) );
