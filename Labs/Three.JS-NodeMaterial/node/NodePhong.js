@@ -4,7 +4,7 @@
 
 THREE.NodePhong = function() {
 	
-	THREE.NodeGL.call( this, 'phong' );
+	THREE.NodeGL.call( this );
 	
 	this.color = new THREE.NodeColor( 0xEEEEEE );
 	this.specular = new THREE.NodeColor( 0x111111 );
@@ -107,10 +107,10 @@ THREE.NodePhong.prototype.generate = function( material, shader ) {
 		if (this.emissive) this.emissive.verify( material );
 		
 		if (this.normal) this.normal.verify( material );
-		if (this.normal && this.normalScale) this.normalScale.verify( material );
+		if (this.normalScale && this.normal) this.normalScale.verify( material );
 		
 		if (this.environment) this.environment.verify( material );
-		if (this.environment && this.reflectivity) this.reflectivity.verify( material );
+		if (this.reflectivity && this.environment) this.reflectivity.verify( material );
 		
 		// build code
 		
@@ -126,10 +126,10 @@ THREE.NodePhong.prototype.generate = function( material, shader ) {
 		var emissive = this.emissive ? this.emissive.buildCode( material, shader, 'c' ) : undefined;
 		
 		var normal = this.normal ? this.normal.buildCode( material, shader, 'v3' ) : undefined;
-		var normalScale = this.normal && this.normalScale ? this.normalScale.buildCode( material, shader, 'fv1' ) : undefined;
+		var normalScale = this.normalScale && this.normal ? this.normalScale.buildCode( material, shader, 'fv1' ) : undefined;
 		
 		var environment = this.environment ? this.environment.buildCode( material, shader, 'c' ) : undefined;
-		var reflectivity = this.environment && this.reflectivity ? this.reflectivity.buildCode( material, shader, 'fv1' ) : undefined;
+		var reflectivity = this.reflectivity && this.environment ? this.reflectivity.buildCode( material, shader, 'fv1' ) : undefined;
 		
 		material.needsTransparent = alpha != undefined;
 		
