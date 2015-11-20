@@ -233,18 +233,12 @@ THREE.NodeStandard.prototype.build = function( builder ) {
 		
 		if (environment) {
 			output.push( environment.code );
-			
-			if (reflectivity) {
-				
-				output.push( reflectivity.code );
-				
-				output.push( "outgoingLight = mix(" + 'outgoingLight' + "," + environment.result + "," + reflectivity.result + ");" );
-				
-			}
-			else {
-			
-				output.push( "Material_RE_IndirectSpecularLight(" + environment.result + ", geometry, material, reflectedLight );" );
-			}
+			output.push( "Material_RE_IndirectSpecularLight(" + environment.result + ", geometry, material, reflectedLight );" );
+		}
+		
+		if (reflectivity) {	
+			output.push( reflectivity.code );
+			output.push( "reflectedLight.indirectSpecular *= " + reflectivity.result + ";" );
 		}
 		
 		output.push("vec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + reflectedLight.directSpecular + reflectedLight.indirectSpecular;");
