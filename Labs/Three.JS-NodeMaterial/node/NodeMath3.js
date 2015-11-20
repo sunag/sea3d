@@ -40,35 +40,37 @@ THREE.NodeMath3.prototype.getType = function() {
 	
 };
 
-THREE.NodeMath3.prototype.generate = function( material, shader, output ) {
+THREE.NodeMath3.prototype.generate = function( builder, output ) {
+	
+	var material = builder.material;
 	
 	var type = this.getType();
 	
 	var a, b, c,
 		al = this.getFormatLength( this.a.getType() ),
 		bl = this.getFormatLength( this.b.getType() ),
-		cl = this.getFormatLength( this.b.getType() )
+		cl = this.getFormatLength( this.c.getType() )
 	
 	// optimzer
 	
 	switch(this.method) {
 		case THREE.NodeMath3.REFRACT:
-			a = this.a.build( material, shader, type );
-			b = this.b.build( material, shader, type );
-			c = this.c.build( material, shader, 'fv1' );
+			a = this.a.build( builder, type );
+			b = this.b.build( builder, type );
+			c = this.c.build( builder, 'fv1' );
 			break;
 		
 		case THREE.NodeMath3.MIX:
 		case THREE.NodeMath3.SMOOTHSTEP:
-			a = this.a.build( material, shader, type );
-			b = this.b.build( material, shader, type );
-			c = this.c.build( material, shader, cl == 1 ? 'fv1' : type );
+			a = this.a.build( builder, type );
+			b = this.b.build( builder, type );
+			c = this.c.build( builder, cl == 1 ? 'fv1' : type );
 			break;
 			
 		default:
-			a = this.a.build( material, shader, type );
-			b = this.b.build( material, shader, type );
-			c = this.c.build( material, shader, type );
+			a = this.a.build( builder, type );
+			b = this.b.build( builder, type );
+			c = this.c.build( builder, type );
 			break;
 	
 	}

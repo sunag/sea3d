@@ -40,7 +40,9 @@ THREE.NodeJoin.prototype.getType = function() {
 	
 };
 
-THREE.NodeJoin.prototype.generate = function( material, shader, output ) {
+THREE.NodeJoin.prototype.generate = function( builder, output ) {
+	
+	var material = builder.material;
 	
 	var type = this.getType();
 	var length = this.getNumElements();
@@ -52,7 +54,7 @@ THREE.NodeJoin.prototype.generate = function( material, shader, output ) {
 	
 		var elm = this[inputs[i]];
 		
-		outputs.push( elm ? elm.build( material, shader, 'fv1' ) : '0.' );
+		outputs.push( elm ? elm.build( builder, 'fv1' ) : '0.' );
 	
 	}
 	

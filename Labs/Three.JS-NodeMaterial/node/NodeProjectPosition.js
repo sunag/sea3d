@@ -11,9 +11,9 @@ THREE.NodeProjectPosition = function() {
 THREE.NodeProjectPosition.prototype = Object.create( THREE.NodeTemp.prototype );
 THREE.NodeProjectPosition.prototype.constructor = THREE.NodeGLPosition;
 
-THREE.NodeProjectPosition.prototype.generate = function( material, shader ) {
+THREE.NodeProjectPosition.prototype.generate = function( config ) {
 
-	if (shader == 'vertex') {
+	if (builder.isShader('vertex')) {
 	
 		return '(projectionMatrix * modelViewMatrix * vec4( position, 1.0 ))';
 		

@@ -11,29 +11,40 @@ THREE.NodeGL = function( type ) {
 	
 };
 
-THREE.NodeGL.prototype.verify = function( material ) {
+THREE.NodeGL.prototype.verify = function( builder ) {
 	
-	this.build( material, 'verify', 'v4' );
+	builder.isVerify = true;
+	
+	var material = builder.material;
+	
+	this.build( builder, 'v4' );
 	
 	material.clearVertexNode();
 	material.clearFragmentNode();
+	
+	builder.setCache(); // reset cache
+	
+	builder.isVerify = false;
 
 };
 
-THREE.NodeGL.prototype.verifyAndBuildCode = function( material, shader, output, uuid ) {
-
-	this.verify( material );
+THREE.NodeGL.prototype.verifyAndBuildCode = function( builder, output, cache ) {
 	
-	return this.buildCode( material, shader, output, uuid );
+	this.verify( builder.setCache(cache) );
+	
+	return this.buildCode( builder.setCache(cache), output );
 	
 };
 
-THREE.NodeGL.prototype.buildCode = function( material, shader, output, uuid ) {
+THREE.NodeGL.prototype.buildCode = function( builder, output, uuid ) {
 	
-	var data = { result : this.build( material, shader, output, uuid ) };
+	var material = builder.material;
+	var data = { result : this.build( builder, output, uuid ) };
 	
-	if (shader == 'vertex') data.code = material.clearVertexNode();
+	if (builder.isShader('vertex')) data.code = material.clearVertexNode();
 	else data.code = material.clearFragmentNode();
+	
+	builder.setCache(); // reset cache
 	
 	return data;
 
@@ -54,13 +65,14 @@ THREE.NodeGL.prototype.verifyNodeDeps = function( data, output ) {
 
 };
 
-THREE.NodeGL.prototype.build = function( material, shader, output, uuid ) {
+THREE.NodeGL.prototype.build = function( builder, output, uuid ) {
 
+	var material = builder.material;
 	var data = material.getNodeData( uuid || this.uuid );
 	
-	if (shader == 'verify') this.verifyNodeDeps( data, output );
+	if (builder.isShader('verify')) this.verifyNodeDeps( data, output );
 	
-	if (this.allow[shader] === false) {
+	if (this.allow[builder.shader] === false) {
 		throw new Error( 'Shader ' + shader + ' is not compatible with this node.' );
 	}
 	
@@ -69,7 +81,7 @@ THREE.NodeGL.prototype.build = function( material, shader, output, uuid ) {
 		data.requestUpdate = true;
 	}
 	
-	return this.generate( material, shader, output, uuid );
+	return this.generate( builder, output, uuid );
 	
 };
 
@@ -114,12 +126,12 @@ THREE.NodeGL.prototype.format = function(code, from, to) {
 		case 'v1=v4': return 'vec4(' + code + ')';
 		
 		case 'v2=v1': return code + '.x';
-		case 'v2=v3': return 'vec3(' + code + ',0.)';
-		case 'v2=v4': return 'vec4(' + code + ',0.,0.)';
+		case 'v2=v3': return 'vec3(' + code + ',0.0)';
+		case 'v2=v4': return 'vec4(' + code + ',0.0,0.0)';
 		
 		case 'v3=v1': return code + '.x';
 		case 'v3=v2': return code + '.xy';
-		case 'v3=v4': return 'vec4(' + code + ',0.)';
+		case 'v3=v4': return 'vec4(' + code + ',0.0)';
 		
 		case 'v4=v1': return code + '.x';
 		case 'v4=v2': return code + '.xy';
@@ -131,16 +143,16 @@ THREE.NodeGL.prototype.format = function(code, from, to) {
 };
 
 
-THREE.NodeGL.prototype.generate = function( material, shader ) {
+THREE.NodeGL.prototype.generate = function( builder, output ) {
 	
-	if (shader == 'vertex') {
+	if (builder.isShader('vertex')) {
 		
-		return 'gl_Position = ' + this.value.generate( material, shader, output ) + ';';
+		return 'gl_Position = ' + this.value.generate( builder, output ) + ';';
 		
 	}
 	else {
 		
-		return 'gl_FragColor = ' + this.value.generate( material, shader, output ) + ';';
+		return 'gl_FragColor = ' + this.value.generate( builder, output ) + ';';
 	
 	}
 

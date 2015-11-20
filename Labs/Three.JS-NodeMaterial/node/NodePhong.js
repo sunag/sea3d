@@ -15,8 +15,9 @@ THREE.NodePhong = function() {
 THREE.NodePhong.prototype = Object.create( THREE.NodeGL.prototype );
 THREE.NodePhong.prototype.constructor = THREE.NodePhong;
 
-THREE.NodePhong.prototype.generate = function( material, shader ) {
+THREE.NodePhong.prototype.build = function( builder ) {
 	
+	var material = builder.material;
 	var code;
 	
 	material.define( 'PHONG' );
@@ -24,9 +25,9 @@ THREE.NodePhong.prototype.generate = function( material, shader ) {
 	
 	material.needsLight = true;
 	
-	if (shader == 'vertex') {
+	if (builder.isShader('vertex')) {
 		
-		var transform = this.transform ? this.transform.verifyAndBuildCode( material, shader, 'v3' ) : undefined;
+		var transform = this.transform ? this.transform.verifyAndBuildCode( builder, 'v3' ) : undefined;
 		
 		material.mergeUniform( THREE.UniformsUtils.merge( [
 
@@ -95,41 +96,41 @@ THREE.NodePhong.prototype.generate = function( material, shader ) {
 		
 		// verify all nodes to reuse generate codes
 		
-		this.color.verify( material );
-		this.specular.verify( material );
-		this.shininess.verify( material );
+		this.color.verify( builder );
+		this.specular.verify( builder );
+		this.shininess.verify( builder );
 		
-		if (this.alpha) this.alpha.verify( material );
+		if (this.alpha) this.alpha.verify( builder );
 		
-		if (this.ao) this.ao.verify( material );
-		if (this.ambient) this.ambient.verify( material );
-		if (this.shadow) this.shadow.verify( material );
-		if (this.emissive) this.emissive.verify( material );
+		if (this.ao) this.ao.verify( builder );
+		if (this.ambient) this.ambient.verify( builder );
+		if (this.shadow) this.shadow.verify( builder );
+		if (this.emissive) this.emissive.verify( builder );
 		
-		if (this.normal) this.normal.verify( material );
-		if (this.normalScale && this.normal) this.normalScale.verify( material );
+		if (this.normal) this.normal.verify( builder );
+		if (this.normalScale && this.normal) this.normalScale.verify( builder );
 		
-		if (this.environment) this.environment.verify( material );
-		if (this.reflectivity && this.environment) this.reflectivity.verify( material );
+		if (this.environment) this.environment.verify( builder );
+		if (this.reflectivity && this.environment) this.reflectivity.verify( builder );
 		
 		// build code
 		
-		var color = this.color.buildCode( material, shader, 'v4' );
-		var specular = this.specular.buildCode( material, shader, 'c' );
-		var shininess = this.shininess.buildCode( material, shader, 'fv1' );
+		var color = this.color.buildCode( builder, 'v4' );
+		var specular = this.specular.buildCode( builder, 'c' );
+		var shininess = this.shininess.buildCode( builder, 'fv1' );
 		
-		var alpha = this.alpha ? this.alpha.buildCode( material, shader, 'fv1' ) : undefined;
+		var alpha = this.alpha ? this.alpha.buildCode( builder, 'fv1' ) : undefined;
 		
-		var ao = this.ao ? this.ao.buildCode( material, shader, 'c' ) : undefined;
-		var ambient = this.ambient ? this.ambient.buildCode( material, shader, 'c' ) : undefined;
-		var shadow = this.shadow ? this.shadow.buildCode( material, shader, 'c' ) : undefined;
-		var emissive = this.emissive ? this.emissive.buildCode( material, shader, 'c' ) : undefined;
+		var ao = this.ao ? this.ao.buildCode( builder, 'c' ) : undefined;
+		var ambient = this.ambient ? this.ambient.buildCode( builder, 'c' ) : undefined;
+		var shadow = this.shadow ? this.shadow.buildCode( builder, 'c' ) : undefined;
+		var emissive = this.emissive ? this.emissive.buildCode( builder, 'c' ) : undefined;
 		
-		var normal = this.normal ? this.normal.buildCode( material, shader, 'v3' ) : undefined;
-		var normalScale = this.normalScale && this.normal ? this.normalScale.buildCode( material, shader, 'fv1' ) : undefined;
+		var normal = this.normal ? this.normal.buildCode( builder, 'v3' ) : undefined;
+		var normalScale = this.normalScale && this.normal ? this.normalScale.buildCode( builder, 'fv1' ) : undefined;
 		
-		var environment = this.environment ? this.environment.buildCode( material, shader, 'c' ) : undefined;
-		var reflectivity = this.reflectivity && this.environment ? this.reflectivity.buildCode( material, shader, 'fv1' ) : undefined;
+		var environment = this.environment ? this.environment.buildCode( builder.setCache('env'), 'c' ) : undefined; 
+		var reflectivity = this.reflectivity && this.environment ? this.reflectivity.buildCode( builder, 'fv1' ) : undefined;
 		
 		material.needsTransparent = alpha != undefined;
 		
@@ -173,7 +174,7 @@ THREE.NodePhong.prototype.generate = function( material, shader ) {
 		
 		if (normal) {
 			
-			material.include( shader, 'perturbNormal2Arb' );
+			builder.include( 'perturbNormal2Arb' );
 			
 			output.push(normal.code);
 			
@@ -182,7 +183,7 @@ THREE.NodePhong.prototype.generate = function( material, shader ) {
 			output.push(
 				'normal = perturbNormal2Arb(-vViewPosition,normal,' +
 				normal.result + ',' +
-				new THREE.NodeUV().build( material, shader, 'v2' ) + ',' +
+				new THREE.NodeUV().build( builder, 'v2' ) + ',' +
 				(normalScale ? normalScale.result : '1.0') + ');'
 			);
 

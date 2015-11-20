@@ -100,8 +100,10 @@ THREE.NodeMaterial.prototype.build = function() {
 	this.vertexNode = '';
 	this.fragmentNode = '';
 	
-	vertex = this.vertex.generate( this, 'vertex', 'v4' );
-	fragment = this.fragment.generate( this, 'fragment', 'v4' );
+	var builder = new THREE.NodeBuilder(this);
+	
+	vertex = this.vertex.build( builder.setShader('vertex'), 'v4' );
+	fragment = this.fragment.build( builder.setShader('fragment'), 'v4' );
 	
 	if (this.needsUv) {
 		
@@ -140,9 +142,13 @@ THREE.NodeMaterial.prototype.build = function() {
 	}
 	
 	if (this.needsWorldPosition) {
-
-		// force the use of "varying vec3 vWorldPosition"
-		this.define( 'USE_ENVMAP' );
+		
+		// for future update replace from a native "varying vec3 vWorldPosition" for optimization
+		
+		this.addVertexPars( 'varying vec3 vWPosition;' );
+-		this.addFragmentPars( 'varying vec3 vWPosition;' );
+-		
+-		this.addVertexCode( 'vWPosition = worldPosition.xyz;' );
 
 	}
 	
@@ -190,6 +196,12 @@ THREE.NodeMaterial.prototype.build = function() {
 THREE.NodeMaterial.prototype.define = function(name, value) {
 
 	this.defines[name] = value == undefined ? 1 : value;
+
+};
+
+THREE.NodeMaterial.prototype.isDefined = function(name) {
+
+	return this.defines[name] != undefined;
 
 };
 

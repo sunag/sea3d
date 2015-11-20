@@ -16,8 +16,9 @@ THREE.NodeDepth = function( value, near, far ) {
 THREE.NodeDepth.prototype = Object.create( THREE.NodeGL.prototype );
 THREE.NodeDepth.prototype.constructor = THREE.NodeDepth;
 
-THREE.NodeDepth.prototype.generate = function( material, shader, output ) {
+THREE.NodeDepth.prototype.generate = function( builder, output ) {
 	
+	var material = builder.material;
 	var data = material.getNodeData( this.uuid );
 	
 	if (!data.initied) {
@@ -44,8 +45,8 @@ THREE.NodeDepth.prototype.generate = function( material, shader, output ) {
 		
 	}
 	
-	var near = this.near.build( material, shader, 'fv1' )
-	var far = this.far.build( material, shader, 'fv1' )
+	var near = this.near.build( builder, 'fv1' )
+	var far = this.far.build( builder, 'fv1' )
 	
 	return this.format( 'depthcolor(' + near + ',' + far + ')', this.type, output );
 

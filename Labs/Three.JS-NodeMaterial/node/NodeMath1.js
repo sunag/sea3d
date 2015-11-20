@@ -48,11 +48,13 @@ THREE.NodeMath1.prototype.getType = function() {
 	
 };
 
-THREE.NodeMath1.prototype.generate = function( material, shader, output ) {
+THREE.NodeMath1.prototype.generate = function( builder, output ) {
+	
+	var material = builder.material;
 	
 	var type = this.getType();
 	
-	var a = this.a.build( material, shader, type );
+	var a = this.a.build( builder, type );
 	
 	return this.format( this.method + '(' + a + ')', type, output );
 

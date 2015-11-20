@@ -11,13 +11,15 @@ THREE.NodeTransformedPosition = function() {
 THREE.NodeTransformedPosition.prototype = Object.create( THREE.NodeReference.prototype );
 THREE.NodeTransformedPosition.prototype.constructor = THREE.NodeTransformedPosition;
 
-THREE.NodeTransformedPosition.prototype.generate = function( material, shader, output ) {
+THREE.NodeTransformedPosition.prototype.generate = function( builder, output ) {
+	
+	var material = builder.material;
 	
 	material.needsPosition = true;
 	
-	if (shader == 'vertex') this.name = 'transformed';
+	if (builder.isShader('vertex')) this.name = 'transformed';
 	else this.name = 'vPosition';
 	
-	return THREE.NodeReference.prototype.generate.call( this, material, shader, output );
+	return THREE.NodeReference.prototype.generate.call( this, builder, output );
 
 };

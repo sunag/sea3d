@@ -27,12 +27,13 @@ THREE.NodeOperator.prototype.getType = function() {
 
 };
 
-THREE.NodeOperator.prototype.generate = function( material, shader, output ) {
+THREE.NodeOperator.prototype.generate = function( builder, output ) {
 	
-	var a = this.a.build( material, shader, output );
-	var b = this.b.build( material, shader, output );
-	
+	var material = builder.material;
 	var data = material.getNodeData( this.uuid );
+	
+	var a = this.a.build( builder, output );
+	var b = this.b.build( builder, output );
 	
 	return '(' + a + this.op + b + ')';
 

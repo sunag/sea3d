@@ -11,14 +11,16 @@ THREE.NodeInput = function(type) {
 THREE.NodeInput.prototype = Object.create( THREE.NodeGL.prototype );
 THREE.NodeInput.prototype.constructor = THREE.NodeInput;
 
-THREE.NodeInput.prototype.generate = function( material, shader, output, uuid, type ) {
+THREE.NodeInput.prototype.generate = function( builder, output, uuid, type ) {
 
-	uuid = uuid || this.uuid;
+	var material = builder.material;
+
+	uuid = builder.getUuid( uuid || this.uuid );
 	type = type || this.type;
 	
 	var data = material.getNodeData( uuid );
-	
-	if (shader == 'vertex') {
+	console.log( uuid, builder.cache );
+	if (builder.isShader('vertex')) {
 	
 		if (!data.vertex) {
 		

@@ -17,12 +17,12 @@ THREE.NodeSwitch.prototype.constructor = THREE.NodeSwitch;
 
 THREE.NodeSwitch.elements = ['x','y','z','w'];
 
-THREE.NodeSwitch.prototype.generate = function( material, shader, output ) {
+THREE.NodeSwitch.prototype.generate = function( builder, output ) {
 	
 	var type = this.a.getType();
 	var inputLength = this.getFormatLength(type);
 		
-	var a = this.a.build( material, shader, type );
+	var a = this.a.build( builder, type );
 	
 	var outputLength = THREE.NodeSwitch.elements.indexOf( this.component ) + 1;
 	

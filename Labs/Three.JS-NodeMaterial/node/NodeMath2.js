@@ -53,7 +53,9 @@ THREE.NodeMath2.prototype.getType = function() {
 	return this.getInputType();
 };
 
-THREE.NodeMath2.prototype.generate = function( material, shader, output ) {
+THREE.NodeMath2.prototype.generate = function( builder, output ) {
+	
+	var material = builder.material;
 	
 	var type = this.getInputType();
 	
@@ -65,25 +67,25 @@ THREE.NodeMath2.prototype.generate = function( material, shader, output ) {
 	
 	switch(this.method) {
 		case THREE.NodeMath2.CROSS:
-			a = this.a.build( material, shader, 'v3' );
-			b = this.b.build( material, shader, 'v3' );
+			a = this.a.build( builder, 'v3' );
+			b = this.b.build( builder, 'v3' );
 			break;
 		
 		case THREE.NodeMath2.STEP:
-			a = this.a.build( material, shader, al == 1 ? 'fv1' : type );
-			b = this.b.build( material, shader, type );
+			a = this.a.build( builder, al == 1 ? 'fv1' : type );
+			b = this.b.build( builder, type );
 			break;
 			
 		case THREE.NodeMath2.MIN:
 		case THREE.NodeMath2.MAX:
 		case THREE.NodeMath2.MODULO:
-			a = this.a.build( material, shader, type );
-			b = this.b.build( material, shader, bl == 1 ? 'fv1' : type );
+			a = this.a.build( builder, type );
+			b = this.b.build( builder, bl == 1 ? 'fv1' : type );
 			break;
 			
 		default:
-			a = this.a.build( material, shader, type );
-			b = this.b.build( material, shader, type );
+			a = this.a.build( builder, type );
+			b = this.b.build( builder, type );
 			break;
 	
 	}

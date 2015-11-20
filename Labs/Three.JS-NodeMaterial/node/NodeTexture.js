@@ -2,12 +2,13 @@
  * @author sunag / http://www.sunag.com.br/
  */
 
-THREE.NodeTexture = function( value, coords ) {
+THREE.NodeTexture = function( value, coord, bias ) {
 	
 	THREE.NodeInput.call( this, 'v4' );
 	
 	this.value = value;
-	this.coords = coords || new THREE.NodeUV();
+	this.coord = coord || new THREE.NodeUV();
+	this.bias = bias;
 	
 };
 
@@ -16,17 +17,24 @@ THREE.NodeTexture.prototype.constructor = THREE.NodeTexture;
 
 THREE.NodeTexture.prototype.getTemp = THREE.NodeTemp.prototype.getTemp;
 
-THREE.NodeTexture.prototype.build = function( material, shader, output, uuid ) {
+THREE.NodeTexture.prototype.build = function( builder, output, uuid ) {
 	
-	return THREE.NodeTemp.prototype.build.call( this, material, shader, output, uuid );
+	return THREE.NodeTemp.prototype.build.call( this, builder, output, uuid );
 	
 };
 
-THREE.NodeTexture.prototype.generate = function( material, shader, output ) {
+THREE.NodeTexture.prototype.generate = function( builder, output ) {
 
-	var tex = THREE.NodeInput.prototype.generate.call( this, material, shader, output, this.value.uuid, 't' );
-	var coords = this.coords.build( material, shader, 'v2' );
+	var tex = THREE.NodeInput.prototype.generate.call( this, builder, output, this.value.uuid, 't' );
 	
-	return this.format( 'texture2D(' + tex + ',' + coords + ')', this.type, output );
+	var coord = this.coord.build( builder, 'v2' );
+	var bias = this.bias ? this.bias.build( builder, 'fv1' ) : undefined;
+	
+	var code;
+
+	if (bias) code = 'texture2D(' + tex + ',' + coord + ',' + bias + ')';
+	else code = 'texture2D(' + tex + ',' + coord + ')';
+	
+	return this.format(code, this.type, output );
 
 };
