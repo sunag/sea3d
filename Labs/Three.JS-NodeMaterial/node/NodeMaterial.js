@@ -146,9 +146,9 @@ THREE.NodeMaterial.prototype.build = function() {
 		// for future update replace from a native "varying vec3 vWorldPosition" for optimization
 		
 		this.addVertexPars( 'varying vec3 vWPosition;' );
--		this.addFragmentPars( 'varying vec3 vWPosition;' );
--		
--		this.addVertexCode( 'vWPosition = worldPosition.xyz;' );
+		this.addFragmentPars( 'varying vec3 vWPosition;' );
+		
+		this.addVertexCode( 'vWPosition = worldPosition.xyz;' );
 
 	}
 	
