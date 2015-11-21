@@ -6,8 +6,8 @@ THREE.NodeMaterial = function( vertex, fragment ) {
 	
 	THREE.ShaderMaterial.call( this );
 	
-	this.vertex = vertex || new THREE.NodeGL( new THREE.NodeProjectPosition() );
-	this.fragment = fragment || new THREE.NodeGL( new THREE.NodeColor( 0xFF0000 ) );
+	this.vertex = vertex || new THREE.NodeRaw( new THREE.NodeProjectPosition() );
+	this.fragment = fragment || new THREE.NodeRaw( new THREE.NodeColor( 0xFF0000 ) );
 	
 };
 

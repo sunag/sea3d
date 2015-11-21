@@ -11,7 +11,7 @@ THREE.NodeProjectPosition = function() {
 THREE.NodeProjectPosition.prototype = Object.create( THREE.NodeTemp.prototype );
 THREE.NodeProjectPosition.prototype.constructor = THREE.NodeGLPosition;
 
-THREE.NodeProjectPosition.prototype.generate = function( config ) {
+THREE.NodeProjectPosition.prototype.generate = function( builder ) {
 
 	if (builder.isShader('vertex')) {
 	

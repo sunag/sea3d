@@ -142,20 +142,4 @@ THREE.NodeGL.prototype.format = function(code, from, to) {
 
 };
 
-
-THREE.NodeGL.prototype.generate = function( builder, output ) {
-	
-	if (builder.isShader('vertex')) {
-		
-		return 'gl_Position = ' + this.value.generate( builder, output ) + ';';
-		
-	}
-	else {
-		
-		return 'gl_FragColor = ' + this.value.generate( builder, output ) + ';';
-	
-	}
-
-};
-
 THREE.NodeGL.formatConstructor = ['', 'vec2', 'vec3', 'vec4'];

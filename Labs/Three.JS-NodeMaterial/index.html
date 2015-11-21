@@ -18,9 +18,10 @@
 		<script src="three74dev.js"></script>
 		
 		<!-- NodeMaterial Base -->
+		<script src="node/NodeGL.js"></script>
+		<script src="node/NodeRaw.js"></script>
 		<script src="node/NodeMaterial.js"></script>
 		<script src="node/NodeBuilder.js"></script>
-		<script src="node/NodeGL.js"></script>
 		<script src="node/NodeFunction.js"></script>
 		<script src="node/NodeInput.js"></script>
 		<script src="node/NodeTemp.js"></script>
@@ -172,6 +173,11 @@
 				material.uniforms.specular.value = new THREE.Color( 0x111111 );
 				material.uniforms.shininess.value = Math.max( 30, 1e-4 );*/
 				
+				
+				materials.push( nodemat );
+				
+				nodemat = new THREE.NodeMaterial( null, new THREE.NodeRaw( new THREE.NodeTexture( imgTexture ) ) );
+				nodemat.build();
 				
 				materials.push( nodemat );
 				
