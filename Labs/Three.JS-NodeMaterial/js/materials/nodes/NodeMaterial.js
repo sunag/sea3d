@@ -86,7 +86,6 @@ THREE.NodeMaterial.prototype.build = function() {
 	this.needsUv2 = false;
 	this.needsColor = false;
 	this.needsLight = false;
-	this.needsDerivatives = false;
 	this.needsPosition = false;
 	this.needsTransparent = false;
 	this.needsWorldPosition = false;
@@ -141,6 +140,15 @@ THREE.NodeMaterial.prototype.build = function() {
 		
 	}
 	
+	if (this.needsNormal) {
+
+		this.addVertexPars( 'varying vec3 vObjectNormal;' );
+		this.addFragmentPars( 'varying vec3 vObjectNormal;' );
+		
+		this.addVertexCode( 'vObjectNormal = normal;' );
+		
+	}
+	
 	if (this.needsWorldPosition) {
 		
 		// for future update replace from a native "varying vec3 vWorldPosition" for optimization
@@ -161,7 +169,6 @@ THREE.NodeMaterial.prototype.build = function() {
 		
 	}
 	
-	this.extensions.derivatives = this.needsDerivatives;
 	this.lights = this.needsLight;
 	this.transparent = this.needsTransparent;
 	
@@ -266,7 +273,7 @@ THREE.NodeMaterial.prototype.getIncludes = function( shader ) {
 		
 		for(var i = 0; i < incs.length; i++) {
 			
-			code += THREE.NodeLib.nodes[incs[i].name].src + '\n';
+			code += incs[i].node.src + '\n';
 		
 		}
 		
@@ -406,23 +413,25 @@ THREE.NodeMaterial.prototype.getNodeData = function( uuid ) {
 
 THREE.NodeMaterial.prototype.include = function( shader, func ) {
 	
+	var node = typeof func === 'string' ? THREE.NodeLib.nodes[func] : func;
+	
 	var includes = this.includes[shader] = this.includes[shader] || [];
 	
-	if (includes[func] === undefined) {
+	if (includes[node.name] === undefined) {
 		
-		var node = THREE.NodeLib.nodes[func];
+		for (var ext in node.extensions) {
+			
+			this.extensions[ext] = true;
+			
+		}
 		
-		this.needsDerivatives = node.needsDerivatives || this.needsDerivatives;
-		
-		if (!node) throw new Error("Library " + func + " not found!");
-		
-		includes[func] = { 
-			name : func,
+		includes[node.name] = { 
+			node : node,
 			deps : 1
 		};
-			
-		includes.push(includes[func]);
+		
+		includes.push(includes[node.name]);
 	}
-	else ++includes[func].deps;
+	else ++includes[node.name].deps;
 
 };

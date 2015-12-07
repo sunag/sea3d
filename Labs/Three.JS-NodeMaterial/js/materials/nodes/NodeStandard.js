@@ -158,7 +158,7 @@ THREE.NodeStandard.prototype.build = function( builder ) {
 				THREE.ShaderChunk[ "normal_fragment" ],
 				
 				// prevent undeclared material
-			"	PhysicalMaterial material;",
+			"	StandardMaterial material;",
 			
 				color.code,
 			"	vec4 diffuseColor = " + color.result + ";",
@@ -204,7 +204,7 @@ THREE.NodeStandard.prototype.build = function( builder ) {
 			
 			// accumulation
 			'material.diffuseColor = diffuseColor.rgb * ( 1.0 - metalnessFactor );',
-			'material.specularRoughness = clamp( roughnessFactor, 0.04, 1.0 );', // disney's remapping of [ 0, 1 ] roughness to [ 0.04, 1 ]
+			'material.specularRoughness = clamp( roughnessFactor, 0.001, 1.0 );', // disney's remapping of [ 0, 1 ] roughness to [ 0.001, 1 ]
 			'material.specularColor = mix( vec3( 0.04 ), diffuseColor.rgb, metalnessFactor );',
 			
 			THREE.ShaderChunk[ "lights_template" ]
@@ -233,7 +233,7 @@ THREE.NodeStandard.prototype.build = function( builder ) {
 		
 		if (environment) {
 			output.push( environment.code );
-			output.push( "Material_RE_IndirectSpecularLight(" + environment.result + ", geometry, material, reflectedLight );" );
+			output.push( "RE_IndirectSpecular(" + environment.result + ", geometry, material, reflectedLight );" );
 		}
 		
 		if (reflectivity) {	

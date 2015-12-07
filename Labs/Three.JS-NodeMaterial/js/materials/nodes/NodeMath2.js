@@ -13,18 +13,18 @@ THREE.NodeMath2 = function( a, b, method ) {
 	
 };
 
-THREE.NodeMath2.prototype = Object.create( THREE.NodeGL.prototype );
+THREE.NodeMath2.prototype = Object.create( THREE.NodeTemp.prototype );
 THREE.NodeMath2.prototype.constructor = THREE.NodeMath2;
 
 THREE.NodeMath2.MIN = 'min';
 THREE.NodeMath2.MAX = 'max';
-THREE.NodeMath2.MODULO = 'mod';
+THREE.NodeMath2.MOD = 'mod';
 THREE.NodeMath2.STEP = 'step';
 THREE.NodeMath2.REFLECT = 'reflect';
 THREE.NodeMath2.DISTANCE = 'distance';
 THREE.NodeMath2.DOT = 'dot';
 THREE.NodeMath2.CROSS = 'cross';
-THREE.NodeMath2.EXPONENTIATION = 'pow';
+THREE.NodeMath2.POW = 'pow';
 
 THREE.NodeMath2.prototype.getInputType = function() {
 	

@@ -6,7 +6,7 @@ THREE.NodeOperator = function( a, b, op ) {
 	
 	THREE.NodeTemp.call( this );
 	
-	this.op = op || '+';
+	this.op = op || THREE.NodeOperator.ADD;
 	
 	this.a = a;
 	this.b = b;
@@ -15,6 +15,11 @@ THREE.NodeOperator = function( a, b, op ) {
 
 THREE.NodeOperator.prototype = Object.create( THREE.NodeTemp.prototype );
 THREE.NodeOperator.prototype.constructor = THREE.NodeOperator;
+
+THREE.NodeOperator.ADD = '+';
+THREE.NodeOperator.SUB = '-';
+THREE.NodeOperator.MUL = '*';
+THREE.NodeOperator.DIV = '/';
 
 THREE.NodeOperator.prototype.getType = function() {
 	

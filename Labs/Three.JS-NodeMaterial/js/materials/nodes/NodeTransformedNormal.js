@@ -17,7 +17,7 @@ THREE.NodeTransformedNormal.prototype.generate = function( builder, output ) {
 	
 	material.needsTransformedNormal = true;
 	
-	if (builder.isShader('vertex')) this.name = 'normal';
+	if (builder.isShader('vertex')) this.name = 'transformedNormal';
 	else this.name = 'vTransformedNormal';
 	
 	return THREE.NodeReference.prototype.generate.call( this, builder, output );

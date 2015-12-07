@@ -32,7 +32,7 @@ THREE.NodeLib.add(new THREE.NodeFunction([
 	"mat3 tsn = mat3( S, T, N );",
 	"return normalize( tsn * mapN );",
 "}"
-].join( "\n" ), true));
+].join( "\n" ), null, {derivates:true}));
 
 //
 //	Saturation

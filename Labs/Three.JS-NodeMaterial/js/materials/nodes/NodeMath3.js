@@ -14,7 +14,7 @@ THREE.NodeMath3 = function( a, b, c, method ) {
 	
 };
 
-THREE.NodeMath3.prototype = Object.create( THREE.NodeGL.prototype );
+THREE.NodeMath3.prototype = Object.create( THREE.NodeTemp.prototype );
 THREE.NodeMath3.prototype.constructor = THREE.NodeMath3;
 
 THREE.NodeMath3.MIX = 'mix';
