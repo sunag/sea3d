@@ -724,8 +724,8 @@
 					"}"
 					].join( "\n" ), [voronoi]);
 
-					var timer = new THREE.NodeTimer();
-					var timerScale = new THREE.NodeFloat(2);
+					var time = new THREE.NodeTimer();
+					var timeScale = new THREE.NodeFloat(2);
 					
 					var alpha = new THREE.NodeFloat(1);
 					var scale = new THREE.NodeFloat(.12);
@@ -746,9 +746,9 @@
 					// clamp0at1
 					mask = new THREE.NodeMath1( mask, THREE.NodeMath1.SAT );
 					
-					var timerOffset = new THREE.NodeOperator(
-						timer,
-						timerScale,
+					var timeOffset = new THREE.NodeOperator(
+						time,
+						timeScale,
 						THREE.NodeOperator.MUL
 					);					
 					
@@ -760,7 +760,7 @@
 					
 					var voronoi = new THREE.NodeFunctionCall(voronoiLayers);
 					voronoi.input.p = uvPos;
-					voronoi.input.time = timerOffset;
+					voronoi.input.time = timeOffset;
 					
 					var maskCaustic = new THREE.NodeOperator(
 						alpha,
@@ -799,9 +799,9 @@
 					
 					//	GUI
 					
-					addGui( 'timerScale', timerScale.number, function( val ) {
+					addGui( 'timeScale', timeScale.number, function( val ) {
 						
-						timerScale.number = val;
+						timeScale.number = val;
 
 					}, false, 0, 5 );
 					
