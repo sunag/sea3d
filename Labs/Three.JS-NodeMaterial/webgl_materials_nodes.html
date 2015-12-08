@@ -94,6 +94,10 @@
 		<script src="js/materials/nodes/NodeTexture.js"></script>
 		<script src="js/materials/nodes/NodeCubeTexture.js"></script>
 		
+		<!-- Optionals -->
+		<script src="js/materials/nodes/NodeVelocity.js"></script>
+		
+		
 		<script>
 
 		var container = document.getElementById( 'container' );
@@ -101,9 +105,10 @@
 		var renderer, scene, camera, clock = new THREE.Clock(), fov = 50;
 		var teapot, mesh;
 		var controls;
+		var move = false;
 		var gui, guiElements = [];
 		
-		var param = { example: 'displace' };
+		var param = { example: 'soft-body' };
 
 		var uvGrid = new THREE.TextureLoader().load( 'textures/UV_Grid_Sm.jpg' );
 		var brick = new THREE.TextureLoader().load( 'textures/brick_diffuse.jpg' );
@@ -192,6 +197,7 @@
 				'adv / saturation': 'saturation',
 				'adv / top-bottom': 'top-bottom',
 				'adv / displace': 'displace',
+				'adv / soft-body': 'soft-body',
 				'misc / smoke' : 'smoke',
 				'misc / firefly' : 'firefly'
 			} ).onFinishChange(function() {
@@ -234,6 +240,8 @@
 		}
 
 		function updateMaterial() {
+		
+			move = false;
 		
 			var name = param.example;
 			var mtl; 
@@ -461,6 +469,8 @@
 					mtl.color = saturation;
 					mtl.environment = new THREE.NodeCubeTexture(cubemap); // optional
 			
+					//	GUI
+			
 					addGui( 'saturation', sat.number, function( val ) {
 						
 						sat.number = val;
@@ -658,7 +668,86 @@
 					}, true );
 			
 					break;
+				
+				case 'soft-body':
+				
+					//	MATERIAL
 					
+					move = true;
+					
+					mtl = new THREE.NodeStandardMaterial();
+					
+					var scale = new THREE.NodeFloat(2);
+					var colorA = new THREE.NodeColor(0xFF6633);
+					var colorB = new THREE.NodeColor(0x3366FF);
+					
+					var pos = new THREE.NodeTransformedPosition();
+					var posNorm = new THREE.NodeMath1(pos, THREE.NodeMath1.NORMALIZE);					
+					
+					var mask = new THREE.NodeSwitch(posNorm, 'y');
+					
+					var velocity = new THREE.NodeVelocity( mesh, {
+						type:'elastic', 
+						spring:.8, 
+						friction:.9
+					} );
+					
+					var velocityArea = new THREE.NodeOperator(
+						mask,
+						scale,
+						THREE.NodeOperator.MUL
+					);
+					
+					var softVelocity = new THREE.NodeOperator(
+						velocity,
+						velocityArea,
+						THREE.NodeOperator.MUL
+					);
+					
+					var softPosition = new THREE.NodeOperator(
+						new THREE.NodeTransformedPosition(),
+						softVelocity,
+						THREE.NodeOperator.ADD
+					);
+					
+					var colors = new THREE.NodeMath3(
+						colorB,
+						colorA,
+						mask,
+						THREE.NodeMath3.MIX
+					);
+					
+					mtl.color = colors;
+					mtl.transform = softPosition;
+					
+					//	GUI
+					
+					addGui( 'spring', velocity.params.spring, function( val ) {
+						
+						velocity.params.spring = val;
+
+					}, false, 0, 1 );
+					
+					addGui( 'friction', velocity.params.friction, function( val ) {
+						
+						velocity.params.friction = val;
+
+					}, false, 0, 1 );
+					
+					addGui( 'colorA', colorA.value.getHex(), function( val ) {
+						
+						colorA.value.setHex( val );
+					
+					}, true );
+					
+					addGui( 'colorB', colorB.value.getHex(), function( val ) {
+						
+						colorB.value.setHex( val );
+					
+					}, true );
+					
+					break;
+				
 				case 'firefly':
 					
 					//	MATERIAL
@@ -727,7 +816,20 @@
 
 			var delta = clock.getDelta();
 			
-			// update material animation and pre-renderer
+			if (move) {
+				
+				var time = Date.now() * 0.005;
+				
+				mesh.position.y = Math.sin( time ) * 10;
+			
+			}
+			else {
+				
+				mesh.position.x = mesh.position.z = 0;
+			
+			}
+			
+			// update material animation and/or gpu calcs (pre-renderer)
 			mesh.material.updateAnimation( delta );
 			
 			renderer.render( scene, camera );
