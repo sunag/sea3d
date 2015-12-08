@@ -415,6 +415,12 @@ THREE.NodeMaterial.prototype.include = function( shader, func ) {
 	
 	var node = typeof func === 'string' ? THREE.NodeLib.nodes[func] : func;
 	
+	for (var i = 0; i < node.includes.length; i++) {
+		
+		this.include( shader, node.includes[i] );
+	
+	}
+	
 	var includes = this.includes[shader] = this.includes[shader] || [];
 	
 	if (includes[node.name] === undefined) {

@@ -76,6 +76,8 @@
 		<script src="js/materials/nodes/NodeTransformedPosition.js"></script>
 		<script src="js/materials/nodes/NodeTransformedNormal.js"></script>
 		<script src="js/materials/nodes/NodeNormal.js"></script>
+		<script src="js/materials/nodes/NodePosition.js"></script>
+		<script src="js/materials/nodes/NodeWorldPosition.js"></script>
 		<script src="js/materials/nodes/NodeViewPosition.js"></script>
 		<script src="js/materials/nodes/NodeViewNormal.js"></script>
 		<script src="js/materials/nodes/NodeCameraPosition.js"></script>
@@ -108,7 +110,7 @@
 		var move = false;
 		var gui, guiElements = [];
 		
-		var param = { example: 'soft-body' };
+		var param = { example: 'caustic' };
 
 		var uvGrid = new THREE.TextureLoader().load( 'textures/UV_Grid_Sm.jpg' );
 		var brick = new THREE.TextureLoader().load( 'textures/brick_diffuse.jpg' );
@@ -198,6 +200,7 @@
 				'adv / top-bottom': 'top-bottom',
 				'adv / displace': 'displace',
 				'adv / soft-body': 'soft-body',
+				'adv / caustic': 'caustic',
 				'misc / smoke' : 'smoke',
 				'misc / firefly' : 'firefly'
 			} ).onFinishChange(function() {
@@ -318,12 +321,15 @@
 							mtl.emissive = color;	
 							mtl.alpha = rimPower;		
 							mtl.blending = THREE.AdditiveBlending;
+							mtl.depthWrite = false;
+							
 						}
 						else {
 							
 							mtl.emissive = rimColor;	
 							mtl.alpha = null;
 							mtl.blending = THREE.NormalBlending;
+							mtl.depthWrite = true;
 							
 						}
 						
@@ -598,7 +604,7 @@
 						
 						scale.number = val;
 
-					}, false, -10, 10 );
+					}, false, 0, 10 );
 			
 					addGui( 'colorA', colorA.value.getHex(), function( val ) {
 						
@@ -669,6 +675,174 @@
 			
 					break;
 				
+				case 'caustic':
+					
+					//	MATERIAL
+					
+					mtl = new THREE.NodeStandardMaterial();
+					
+					var hash2 = new THREE.NodeFunction([
+					"vec2 hash2(vec2 p) {",
+						"return fract(sin(vec2(dot(p, vec2(123.4, 748.6)), dot(p, vec2(547.3, 659.3))))*5232.85324);",
+					"}"
+					].join( "\n" ));
+					
+					var voronoi = new THREE.NodeFunction([
+					// Based off of iq's described here: http://www.iquilezles.org/www/articles/voronoili
+					"float voronoi(vec2 p, in float time) {",
+						"vec2 n = floor(p);",
+						"vec2 f = fract(p);",
+						"float md = 5.0;",
+						"vec2 m = vec2(0.0);",
+						"for (int i = -1; i <= 1; i++) {",
+							"for (int j = -1; j <= 1; j++) {",
+								"vec2 g = vec2(i, j);",
+								"vec2 o = hash2(n + g);",
+								"o = 0.5 + 0.5 * sin(time + 5.038 * o);",
+								"vec2 r = g + o - f;",
+								"float d = dot(r, r);",
+								"if (d < md) {",
+									"md = d;",
+									"m = n+g+o;",
+								"}",
+							"}",
+						"}",
+						"return md;",
+					"}"
+					].join( "\n" ), [hash2]);
+					
+					var voronoiLayers = new THREE.NodeFunction([
+					"float voronoiLayers(vec2 p, in float time) {",
+						"float v = 0.0;",
+						"float a = 0.4;",
+						"for (int i = 0; i < 3; i++) {",
+							"v += voronoi(p, time) * a;",
+							"p *= 2.0;",
+							"a *= 0.5;",
+						"}",
+						"return v;",
+					"}"
+					].join( "\n" ), [voronoi]);
+
+					var timer = new THREE.NodeTimer();
+					var timerScale = new THREE.NodeFloat(2);
+					
+					var alpha = new THREE.NodeFloat(1);
+					var scale = new THREE.NodeFloat(.12);
+					var intensity = new THREE.NodeFloat(1.5);
+					
+					var color = new THREE.NodeColor(0xFFFFFF);
+					var colorA = new THREE.NodeColor(0xFFFFFF);
+					var colorB = new THREE.NodeColor(0x0054df);
+					
+					var worldPos = new THREE.NodeWorldPosition();
+					var worldPosTop = new THREE.NodeSwitch(worldPos, 'xz');
+					
+					var pos = new THREE.NodeTransformedPosition();
+					var posNorm = new THREE.NodeMath1(pos, THREE.NodeMath1.NORMALIZE);
+					
+					var mask = new THREE.NodeSwitch(posNorm, 'y');
+					
+					// clamp0at1
+					mask = new THREE.NodeMath1( mask, THREE.NodeMath1.SAT );
+					
+					var timerOffset = new THREE.NodeOperator(
+						timer,
+						timerScale,
+						THREE.NodeOperator.MUL
+					);					
+					
+					var uvPos = new THREE.NodeOperator(
+						worldPosTop,
+						scale,
+						THREE.NodeOperator.MUL
+					);	
+					
+					var voronoi = new THREE.NodeFunctionCall(voronoiLayers);
+					voronoi.input.p = uvPos;
+					voronoi.input.time = timerOffset;
+					
+					var maskCaustic = new THREE.NodeOperator(
+						alpha,
+						mask,
+						THREE.NodeOperator.MUL
+					);	
+					
+					var voronoiIntensity = new THREE.NodeOperator(
+						voronoi,
+						intensity,
+						THREE.NodeOperator.MUL
+					);	
+					
+					var voronoiColors = new THREE.NodeMath3(
+						colorB,
+						colorA,
+						new THREE.NodeMath1( voronoiIntensity, THREE.NodeMath1.SAT ), // mix needs clamp
+						THREE.NodeMath3.MIX
+					);
+					
+					var caustic = new THREE.NodeMath3(
+						color,
+						voronoiColors,
+						maskCaustic,
+						THREE.NodeMath3.MIX
+					);
+					
+					var causticLights = new THREE.NodeOperator(
+						voronoiIntensity,
+						maskCaustic,
+						THREE.NodeOperator.MUL
+					);
+					
+					mtl.color = caustic;
+					mtl.ambient = causticLights;
+					
+					//	GUI
+					
+					addGui( 'timerScale', timerScale.number, function( val ) {
+						
+						timerScale.number = val;
+
+					}, false, 0, 5 );
+					
+					addGui( 'intensity', intensity.number, function( val ) {
+						
+						intensity.number = val;
+
+					}, false, 0, 3 );
+					
+					addGui( 'scale', scale.number, function( val ) {
+						
+						scale.number = val;
+
+					}, false, 0, 1 );
+					
+					addGui( 'alpha', alpha.number, function( val ) {
+						
+						alpha.number = val;
+
+					}, false, 0, 1 );
+					
+					addGui( 'color', color.value.getHex(), function( val ) {
+						
+						color.value.setHex( val );
+					
+					}, true );
+					
+					addGui( 'colorA', colorA.value.getHex(), function( val ) {
+						
+						colorA.value.setHex( val );
+					
+					}, true );
+					
+					addGui( 'colorB', colorB.value.getHex(), function( val ) {
+						
+						colorB.value.setHex( val );
+					
+					}, true );
+					
+					break;
+				
 				case 'soft-body':
 				
 					//	MATERIAL
@@ -726,13 +900,19 @@
 						
 						velocity.params.spring = val;
 
-					}, false, 0, 1 );
+					}, false, 0, .9 );
 					
 					addGui( 'friction', velocity.params.friction, function( val ) {
 						
 						velocity.params.friction = val;
 
-					}, false, 0, 1 );
+					}, false, 0, .9 );
+					
+					addGui( 'scale', scale.number, function( val ) {
+						
+						scale.number = val;
+
+					}, false, 0, 3 );
 					
 					addGui( 'colorA', colorA.value.getHex(), function( val ) {
 						

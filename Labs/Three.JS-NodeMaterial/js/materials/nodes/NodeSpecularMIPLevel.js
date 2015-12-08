@@ -38,7 +38,7 @@ THREE.NodeSpecularMIPLevel.prototype.generate = function( builder, output ) {
 		
 		}
 		
-		return this.format( 'specularMIPLevel', this.type, output );
+		return builder.format( 'specularMIPLevel', this.type, output );
 		
 	}
 

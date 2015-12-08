@@ -15,6 +15,6 @@ THREE.NodeReference.prototype.constructor = THREE.NodeReference;
 
 THREE.NodeReference.prototype.generate = function( builder, output ) {
 	
-	return this.format( this.name, this.type, output );
+	return builder.format( this.name, this.type, output );
 
 };

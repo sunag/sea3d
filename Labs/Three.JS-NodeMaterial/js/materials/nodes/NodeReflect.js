@@ -28,7 +28,7 @@ THREE.NodeReflect.prototype.generate = function( builder, output ) {
 			'vec3 vReflect = reflect( cameraToVertex, worldNormal );'
 		].join( "\n" ) );
 		
-		return this.format( 'vReflect', this.type, output );
+		return builder.format( 'vReflect', this.type, output );
 		
 	}
 

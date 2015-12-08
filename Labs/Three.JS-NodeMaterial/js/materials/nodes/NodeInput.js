@@ -28,7 +28,7 @@ THREE.NodeInput.prototype.generate = function( builder, output, uuid, type ) {
 			
 		}
 		
-		return this.format( data.vertex.name, type, output );
+		return builder.format( data.vertex.name, type, output );
 	}
 	else {
 		
@@ -38,7 +38,7 @@ THREE.NodeInput.prototype.generate = function( builder, output, uuid, type ) {
 			
 		}
 		
-		return this.format( data.fragment.name, type, output );
+		return builder.format( data.fragment.name, type, output );
 	}
 
 };

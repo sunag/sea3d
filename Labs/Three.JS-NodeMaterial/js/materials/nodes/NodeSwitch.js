@@ -15,24 +15,52 @@ THREE.NodeSwitch = function( a, component ) {
 THREE.NodeSwitch.prototype = Object.create( THREE.NodeGL.prototype );
 THREE.NodeSwitch.prototype.constructor = THREE.NodeSwitch;
 
-THREE.NodeSwitch.elements = ['x','y','z','w'];
+THREE.NodeSwitch.prototype.getType = function( builder ) {
+	
+	return builder.getFormatByLength( this.component.length );
+	
+};
 
 THREE.NodeSwitch.prototype.generate = function( builder, output ) {
 	
-	var type = this.a.getType();
-	var inputLength = this.getFormatLength(type);
+	var type = this.a.getType( builder );
+	var inputLength = builder.getFormatLength( type ) - 1;
 		
 	var a = this.a.build( builder, type );
 	
-	var outputLength = THREE.NodeSwitch.elements.indexOf( this.component ) + 1;
+	var outputLength = 0;
 	
-	if (inputLength > 1) {
+	var i, len = this.component.length;
 	
-		if (inputLength < outputLength) outputLength = inputLength;
+	// get max length
+	
+	for (i = 0; i < len; i++) {
 		
-		a = a + '.' + THREE.NodeSwitch.elements[outputLength-1];
+		outputLength = Math.max( outputLength, builder.getElementIndex( this.component.charAt(i) ) );
+		
 	}
 	
-	return this.format( a, this.type, output );
+	if (outputLength > inputLength) outputLength = inputLength;
+	
+	// build switch
+	
+	a += '.';
+	
+	for (i = 0; i < len; i++) {
+		
+		var elm = this.component.charAt(i);
+		var idx = builder.getElementIndex( this.component.charAt(i) );
+		
+		if (idx > outputLength) idx = outputLength;
+		
+		if (builder.getElementByIndex( idx ) == undefined) {
+			console.log( builder.getElementByIndex( idx ) );
+		}
+		
+		a += builder.getElementByIndex( idx );
+		
+	}
+	
+	return builder.format( a, this.type, output );
 
 };

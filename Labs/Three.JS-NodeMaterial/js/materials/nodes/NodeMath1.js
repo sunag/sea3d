@@ -37,7 +37,7 @@ THREE.NodeMath1.ABS = 'abc';
 THREE.NodeMath1.SIGN = 'sign';
 THREE.NodeMath1.LENGTH = 'length';
 
-THREE.NodeMath1.prototype.getType = function() {
+THREE.NodeMath1.prototype.getType = function( builder ) {
 	
 	switch(this.method) {
 		case THREE.NodeMath1.DISTANCE:
@@ -45,7 +45,7 @@ THREE.NodeMath1.prototype.getType = function() {
 			break;
 	}
 	
-	return this.a.getType();
+	return this.a.getType( builder );
 	
 };
 
@@ -53,10 +53,10 @@ THREE.NodeMath1.prototype.generate = function( builder, output ) {
 	
 	var material = builder.material;
 	
-	var type = this.getType();
+	var type = this.getType( builder );
 	
 	var a = this.a.build( builder, type );
 	
-	return this.format( this.method + '(' + a + ')', type, output );
+	return builder.format( this.method + '(' + a + ')', type, output );
 
 };

@@ -22,20 +22,20 @@ THREE.NodeMath3.REFRACT = 'refract';
 THREE.NodeMath3.SMOOTHSTEP = 'smoothstep';
 THREE.NodeMath3.FACEFORWARD = 'faceforward';
 
-THREE.NodeMath3.prototype.getType = function() {
+THREE.NodeMath3.prototype.getType = function( builder ) {
 	
-	var a = this.getFormatLength( this.a.getType() );
-	var b = this.getFormatLength( this.b.getType() );
-	var c = this.getFormatLength( this.c.getType() );
+	var a = builder.getFormatLength( this.a.getType( builder ) );
+	var b = builder.getFormatLength( this.b.getType( builder ) );
+	var c = builder.getFormatLength( this.c.getType( builder ) );
 	
 	if (a > b) {
-		if (a > c) return this.a.getType();
-		return this.c.getType();
+		if (a > c) return this.a.getType( builder );
+		return this.c.getType( builder );
 	} 
 	else {
-		if (b > c) return this.b.getType();
+		if (b > c) return this.b.getType( builder );
 	
-		return this.c.getType();
+		return this.c.getType( builder );
 	}
 	
 };
@@ -44,12 +44,12 @@ THREE.NodeMath3.prototype.generate = function( builder, output ) {
 	
 	var material = builder.material;
 	
-	var type = this.getType();
+	var type = this.getType( builder );
 	
 	var a, b, c,
-		al = this.getFormatLength( this.a.getType() ),
-		bl = this.getFormatLength( this.b.getType() ),
-		cl = this.getFormatLength( this.c.getType() )
+		al = builder.getFormatLength( this.a.getType( builder ) ),
+		bl = builder.getFormatLength( this.b.getType( builder ) ),
+		cl = builder.getFormatLength( this.c.getType( builder ) )
 	
 	// optimzer
 	
@@ -75,6 +75,6 @@ THREE.NodeMath3.prototype.generate = function( builder, output ) {
 	
 	}
 	
-	return this.format( this.method + '(' + a + ',' + b + ',' + c + ')', type, output );
+	return builder.format( this.method + '(' + a + ',' + b + ',' + c + ')', type, output );
 
 };

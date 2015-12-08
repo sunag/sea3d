@@ -21,14 +21,14 @@ THREE.NodeOperator.SUB = '-';
 THREE.NodeOperator.MUL = '*';
 THREE.NodeOperator.DIV = '/';
 
-THREE.NodeOperator.prototype.getType = function() {
+THREE.NodeOperator.prototype.getType = function( builder ) {
 	
 	// use the greater length vector
-	if (this.getFormatLength( this.b.getType() ) > this.getFormatLength( this.a.getType() )) {
-		return this.b.getType();
+	if (builder.getFormatLength( this.b.getType( builder ) ) > builder.getFormatLength( this.a.getType( builder ) )) {
+		return this.b.getType( builder );
 	}
 	
-	return this.a.getType();
+	return this.a.getType( builder );
 
 };
 

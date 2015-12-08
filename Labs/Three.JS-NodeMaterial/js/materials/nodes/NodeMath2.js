@@ -26,18 +26,18 @@ THREE.NodeMath2.DOT = 'dot';
 THREE.NodeMath2.CROSS = 'cross';
 THREE.NodeMath2.POW = 'pow';
 
-THREE.NodeMath2.prototype.getInputType = function() {
+THREE.NodeMath2.prototype.getInputType = function( builder ) {
 	
 	// use the greater length vector
-	if (this.getFormatLength( this.b.getType() ) > this.getFormatLength( this.a.getType() )) {
-		return this.b.getType();
+	if (builder.getFormatLength( this.b.getType( builder ) ) > builder.getFormatLength( this.a.getType( builder ) )) {
+		return this.b.getType( builder );
 	}
 	
-	return this.a.getType();
+	return this.a.getType( builder );
 	
 };
 
-THREE.NodeMath2.prototype.getType = function() {
+THREE.NodeMath2.prototype.getType = function( builder ) {
 	
 	switch(this.method) {
 		case THREE.NodeMath2.DISTANCE:
@@ -50,18 +50,18 @@ THREE.NodeMath2.prototype.getType = function() {
 			break;
 	}
 	
-	return this.getInputType();
+	return this.getInputType( builder );
 };
 
 THREE.NodeMath2.prototype.generate = function( builder, output ) {
 	
 	var material = builder.material;
 	
-	var type = this.getInputType();
+	var type = this.getInputType( builder );
 	
 	var a, b, 
-		al = this.getFormatLength( this.a.getType() ),
-		bl = this.getFormatLength( this.b.getType() );
+		al = builder.getFormatLength( this.a.getType( builder ) ),
+		bl = builder.getFormatLength( this.b.getType( builder ) );
 	
 	// optimzer
 	
@@ -90,6 +90,6 @@ THREE.NodeMath2.prototype.generate = function( builder, output ) {
 	
 	}
 	
-	return this.format( this.method + '(' + a + ',' + b + ')', this.getType(), output );
+	return builder.format( this.method + '(' + a + ',' + b + ')', this.getType( builder ), output );
 
 };

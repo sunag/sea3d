@@ -22,7 +22,7 @@ THREE.NodeTemp.prototype.build = function( builder, output, uuid ) {
 	
 	if (builder.isShader('verify')) {
 		if (data.deps || 0 > 0) {
-			this.verifyNodeDeps( data, output );
+			this.verifyNodeDeps( builder, data, output );
 			return '';
 		}
 		return THREE.NodeGL.prototype.build.call( this, builder, output, uuid );
@@ -32,11 +32,11 @@ THREE.NodeTemp.prototype.build = function( builder, output, uuid ) {
 	}
 	
 	var name = this.getTemp( builder, uuid );
-	var type = data.output || this.getType();
+	var type = data.output || this.getType( builder );
 	
 	if (name) {
 	
-		return this.format( name, type, output );
+		return builder.format( name, type, output );
 		
 	}
 	else {
@@ -48,7 +48,7 @@ THREE.NodeTemp.prototype.build = function( builder, output, uuid ) {
 		if (builder.isShader('vertex')) material.addVertexNode(name + '=' + code + ';');
 		else material.addFragmentNode(name + '=' + code + ';');
 		
-		return this.format( name, type, output );
+		return builder.format( name, type, output );
 	
 	}
 	
@@ -69,7 +69,7 @@ THREE.NodeTemp.prototype.generate = function( builder, output, uuid, type ) {
 	
 	uuid = uuid || this.uuid;
 	
-	if (builder.isShader('vertex')) return builder.material.getVertexTemp( uuid, type || this.getType() ).name;
-	else return builder.material.getFragmentTemp( uuid, type || this.getType() ).name;
+	if (builder.isShader('vertex')) return builder.material.getVertexTemp( uuid, type || this.getType( builder ) ).name;
+	else return builder.material.getFragmentTemp( uuid, type || this.getType( builder ) ).name;
 
 };

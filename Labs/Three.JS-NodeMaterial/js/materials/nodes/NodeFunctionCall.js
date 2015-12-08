@@ -26,9 +26,9 @@ THREE.NodeFunctionCall.prototype.getFunction = function() {
 	
 };
 
-THREE.NodeFunctionCall.prototype.getType = function() {
+THREE.NodeFunctionCall.prototype.getType = function( builder ) {
 	
-	return this.value.getType();
+	return this.value.getType( builder );
 	
 };
 
@@ -36,7 +36,7 @@ THREE.NodeFunctionCall.prototype.generate = function( builder, output ) {
 	
 	var material = builder.material;
 	
-	var type = this.getType();
+	var type = this.getType( builder );
 	var func = this.value;
 	
 	builder.include( func );
@@ -49,12 +49,12 @@ THREE.NodeFunctionCall.prototype.generate = function( builder, output ) {
 		var inpt = func.input[i];
 		var param = this.input[i] || this.input[inpt.name];
 		
-		params.push( param.build( builder, inpt.type ) );
+		params.push( param.build( builder, builder.getType( inpt.type ) ) );
 	
 	}
 	
 	code += params.join(',') + ')';
 	
-	return this.format( code, type, output );
+	return builder.format( code, type, output );
 
 };

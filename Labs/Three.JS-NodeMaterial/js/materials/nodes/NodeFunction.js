@@ -14,13 +14,6 @@ THREE.NodeFunction = function( src, includes, extensions ) {
 THREE.NodeFunction.prototype = Object.create( THREE.NodeGL.prototype );
 THREE.NodeFunction.prototype.constructor = THREE.NodeFunction;
 
-THREE.NodeFunction.types = {
-	float : 'fv1',
-	vec2 : 'v2',
-	vec3 : 'v3',
-	vec4 : 'v4'
-};
-
 THREE.NodeFunction.prototype.parseReference = function( name ) {
 	
 	switch(name) {
@@ -34,9 +27,9 @@ THREE.NodeFunction.prototype.parseReference = function( name ) {
 	
 };
 
-THREE.NodeFunction.prototype.getNodeType = function( type ) {
+THREE.NodeFunction.prototype.getNodeType = function( builder, type ) {
 
-	return THREE.NodeFunction.types[ type ] || type;
+	return builder.getType( type ) || type;
 
 };
 
@@ -53,9 +46,9 @@ THREE.NodeFunction.prototype.getInputByName = function( name ) {
 	
 };
 
-THREE.NodeFunction.prototype.getType = function() {
+THREE.NodeFunction.prototype.getType = function( builder ) {
 	
-	return this.getNodeType( this.type );
+	return this.getNodeType( builder, this.type );
 	
 };
 
@@ -65,8 +58,8 @@ THREE.NodeFunction.prototype.parse = function( src, includes, extensions ) {
 	var rProperties = /[a-z_0-9]+/ig;
 	
 	this.src = src;
+	this.includes = includes || [];
 	this.extensions = extensions || {};
-	this.includes = includes || {};
 	
 	var match = src.match( rDeclaration );
 	
@@ -91,7 +84,6 @@ THREE.NodeFunction.prototype.parse = function( src, includes, extensions ) {
 				if (qualifier == 'in' || qualifier == 'out' || qualifier == 'inout') {
 				
 					type = inputs[i++];
-					name = inputs[i++];
 					
 				}
 				else {
@@ -105,7 +97,7 @@ THREE.NodeFunction.prototype.parse = function( src, includes, extensions ) {
 				
 				this.input.push({
 					name : name,
-					type : this.getNodeType( type ),
+					type : type,
 					qualifier : qualifier
 				});
 			}
@@ -117,7 +109,7 @@ THREE.NodeFunction.prototype.parse = function( src, includes, extensions ) {
 		while (match = rProperties.exec(src)) {
 			
 			var prop = match[0];
-			var reference = this.includes[prop] || this.parseReference( prop );
+			var reference = this.parseReference( prop );
 			
 			
 			//console.log(prop, reference);

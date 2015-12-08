@@ -34,9 +34,9 @@ THREE.NodeJoin.prototype.getNumElements = function() {
 	
 };
 
-THREE.NodeJoin.prototype.getType = function() {
+THREE.NodeJoin.prototype.getType = function( builder ) {
 	
-	return this.getFormatByLength( this.getNumElements() );
+	return builder.getFormatByLength( this.getNumElements() );
 	
 };
 
@@ -44,7 +44,7 @@ THREE.NodeJoin.prototype.generate = function( builder, output ) {
 	
 	var material = builder.material;
 	
-	var type = this.getType();
+	var type = this.getType( builder );
 	var length = this.getNumElements();
 	
 	var inputs = THREE.NodeJoin.inputs;
@@ -58,8 +58,8 @@ THREE.NodeJoin.prototype.generate = function( builder, output ) {
 	
 	}
 	
-	var code = this.getFormatConstructor(length) + '(' + outputs.join(',') + ')';
+	var code = builder.getFormatConstructor(length) + '(' + outputs.join(',') + ')';
 	
-	return this.format( code, type, output );
+	return builder.format( code, type, output );
 
 };
