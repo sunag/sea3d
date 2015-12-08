@@ -361,7 +361,7 @@
 					
 					mtl.color = new THREE.NodeColor(0x3399FF);
 					mtl.environment = color;
-					mtl.reflectivity = fresnel;
+					mtl.reflectivity = new THREE.NodeMath1( fresnel, THREE.NodeMath1.SAT );
 					
 					//	GUI
 					
