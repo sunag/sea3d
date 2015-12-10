@@ -2,7 +2,7 @@
  * @author sunag / http://www.sunag.com.br/
  */
 
-THREE.NodeJoin = function( x, y, w, z ) {
+THREE.NodeJoin = function( x, y, z, w ) {
 	
 	THREE.NodeGL.call( this, 'fv1' );
 	

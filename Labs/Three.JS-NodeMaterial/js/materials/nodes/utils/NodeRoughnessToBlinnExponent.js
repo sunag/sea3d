@@ -2,7 +2,7 @@
  * @author sunag / http://www.sunag.com.br/
  */
 
-THREE.NodeSpecularMIPLevel = function() {
+THREE.NodeRoughnessToBlinnExponent = function() {
 	
 	THREE.NodeTemp.call( this, 'fv1' );
 	
@@ -10,15 +10,13 @@ THREE.NodeSpecularMIPLevel = function() {
 	
 };
 
-THREE.NodeSpecularMIPLevel.prototype = Object.create( THREE.NodeTemp.prototype );
-THREE.NodeSpecularMIPLevel.prototype.constructor = THREE.NodeSpecularMIPLevel;
+THREE.NodeRoughnessToBlinnExponent.prototype = Object.create( THREE.NodeTemp.prototype );
+THREE.NodeRoughnessToBlinnExponent.prototype.constructor = THREE.NodeRoughnessToBlinnExponent;
 
-THREE.NodeSpecularMIPLevel.prototype.generate = function( builder, output ) {
+THREE.NodeRoughnessToBlinnExponent.prototype.generate = function( builder, output ) {
 	
 	var material = builder.material;
 	var data = material.getNodeData( this.uuid );
-	
-	material.needsWorldPosition = true;
 	
 	if (builder.isShader('fragment')) {
 		

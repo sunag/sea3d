@@ -5,7 +5,9 @@
 THREE.NodeGL = function( type ) {
 	
 	this.uuid = THREE.Math.generateUUID();
+	
 	this.allow = {};
+	this.requestUpdate = false;
 	
 	this.type = type;
 	
@@ -76,7 +78,7 @@ THREE.NodeGL.prototype.build = function( builder, output, uuid ) {
 		throw new Error( 'Shader ' + shader + ' is not compatible with this node.' );
 	}
 	
-	if (this.allow.requestUpdate && !data.requestUpdate) {
+	if (this.requestUpdate && !data.requestUpdate) {
 		material.requestUpdate.push( this );
 		data.requestUpdate = true;
 	}

@@ -6,7 +6,7 @@ THREE.NodeMaterial = function( vertex, fragment ) {
 	
 	THREE.ShaderMaterial.call( this );
 	
-	this.vertex = vertex || new THREE.NodeRaw( new THREE.NodeProjectPosition() );
+	this.vertex = vertex || new THREE.NodeRaw( new THREE.NodePosition( THREE.NodePosition.PROJECTION ) );
 	this.fragment = fragment || new THREE.NodeRaw( new THREE.NodeColor( 0xFF0000 ) );
 	
 };
@@ -82,13 +82,15 @@ THREE.NodeMaterial.prototype.build = function() {
 	
 	this.requestUpdate = [];
 	
-	this.needsUv = false;
-	this.needsUv2 = false;
+	this.requestAttrib = {
+		uv:[],
+		color:[]
+	};
+	
 	this.needsColor = false;
 	this.needsLight = false;
 	this.needsPosition = false;
 	this.needsTransparent = false;
-	this.needsWorldPosition = false;
 	
 	this.vertexPars = '';
 	this.fragmentPars = '';
@@ -104,7 +106,7 @@ THREE.NodeMaterial.prototype.build = function() {
 	vertex = this.vertex.build( builder.setShader('vertex'), 'v4' );
 	fragment = this.fragment.build( builder.setShader('fragment'), 'v4' );
 	
-	if (this.needsUv) {
+	if (this.requestAttrib.uv[0]) {
 		
 		this.addVertexPars( 'varying vec2 vUv;' );
 		this.addFragmentPars( 'varying vec2 vUv;' );
@@ -113,7 +115,7 @@ THREE.NodeMaterial.prototype.build = function() {
 		
 	}
 	
-	if (this.needsUv2) {
+	if (this.requestAttrib.uv[1]) {
 		
 		this.addVertexPars( 'varying vec2 vUv2; attribute vec2 uv2;' );
 		this.addFragmentPars( 'varying vec2 vUv2;' );
@@ -122,7 +124,7 @@ THREE.NodeMaterial.prototype.build = function() {
 		
 	}
 	
-	if (this.needsColor) {
+	if (this.requestAttrib.color[0]) {
 
 		this.addVertexPars( 'varying vec4 vColor; attribute vec4 color;' );
 		this.addFragmentPars( 'varying vec4 vColor;' );
@@ -131,7 +133,7 @@ THREE.NodeMaterial.prototype.build = function() {
 		
 	}
 	
-	if (this.needsPosition) {
+	if (this.requestAttrib.position) {
 
 		this.addVertexPars( 'varying vec3 vPosition;' );
 		this.addFragmentPars( 'varying vec3 vPosition;' );
@@ -140,18 +142,9 @@ THREE.NodeMaterial.prototype.build = function() {
 		
 	}
 	
-	if (this.needsNormal) {
-
-		this.addVertexPars( 'varying vec3 vObjectNormal;' );
-		this.addFragmentPars( 'varying vec3 vObjectNormal;' );
+	if (this.requestAttrib.worldPosition) {
 		
-		this.addVertexCode( 'vObjectNormal = normal;' );
-		
-	}
-	
-	if (this.needsWorldPosition) {
-		
-		// for future update replace from a native "varying vec3 vWorldPosition" for optimization
+		// for future update replace from the native "varying vec3 vWorldPosition" for optimization
 		
 		this.addVertexPars( 'varying vec3 vWPosition;' );
 		this.addFragmentPars( 'varying vec3 vWPosition;' );
@@ -160,12 +153,21 @@ THREE.NodeMaterial.prototype.build = function() {
 
 	}
 	
-	if (this.needsTransformedNormal) {
+	if (this.requestAttrib.normal) {
 
-		this.addVertexPars( 'varying vec3 vTransformedNormal;' );
-		this.addFragmentPars( 'varying vec3 vTransformedNormal;' );
+		this.addVertexPars( 'varying vec3 vObjectNormal;' );
+		this.addFragmentPars( 'varying vec3 vObjectNormal;' );
 		
-		this.addVertexCode( 'vTransformedNormal = transformedNormal;' );
+		this.addVertexCode( 'vObjectNormal = normal;' );
+		
+	}
+	
+	if (this.requestAttrib.worldNormal) {
+
+		this.addVertexPars( 'varying vec3 vWNormal;' );
+		this.addFragmentPars( 'varying vec3 vWNormal;' );
+		
+		this.addVertexCode( 'vWNormal = ( modelMatrix * vec4( objectNormal, 0.0 ) ).xyz;' );
 		
 	}
 	
@@ -182,7 +184,7 @@ THREE.NodeMaterial.prototype.build = function() {
 		this.vertexCode,
 		'}'
 	].join( "\n" );
-	
+
 	this.fragmentShader = [
 		this.fragmentPars,
 		this.getCodePars( this.fragmentUniform, 'uniform' ),

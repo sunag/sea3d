@@ -23,9 +23,9 @@ THREE.NodeCubeTexture.prototype.generate = function( builder, output ) {
 	var coord = this.coord.build( builder, 'v3' );
 	var bias = this.bias ? this.bias.build( builder, 'fv1' ) : undefined;;
 	
-	if (bias == undefined && builder.cache == 'env') {
+	if (bias == undefined && builder.require.cubeTextureBias) {
 		
-		bias = new THREE.NodeSpecularMIPLevel().build( builder, 'fv1' );
+		bias = builder.require.cubeTextureBias.build( builder, 'fv1' );
 		
 	}
 	

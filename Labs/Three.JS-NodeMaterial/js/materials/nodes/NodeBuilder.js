@@ -5,6 +5,8 @@
 THREE.NodeBuilder = function( material ) {
 	
 	this.material = material;
+	
+	this.require = {};
 	this.isVerify = false;
 	this.cache = '';
 	
@@ -19,7 +21,7 @@ THREE.NodeBuilder.prototype = {
 
 	},
 	
-	getFormatConstructor : function ( name ) {
+	getFormatConstructor : function ( len ) {
 		
 		return THREE.NodeBuilder.constructors[len-1];
 	

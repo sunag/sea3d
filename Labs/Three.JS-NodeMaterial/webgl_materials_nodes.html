@@ -30,7 +30,7 @@
 
 		<div id="container"></div>
 		<div id="info">
-			<a href="http://threejs.org" target="_blank">three.js</a> - Node Material / Graph-Based Material
+			<a href="http://threejs.org" target="_blank">three.js</a> - Node-Based Material
 		</div>
 
 		<script src="../build/three.min.js"></script>
@@ -41,63 +41,55 @@
 		
 		<!-- NodeMaterial Base -->
 		<script src="js/materials/nodes/NodeGL.js"></script>
+		<script src="js/materials/nodes/NodeBuilder.js"></script>
 		<script src="js/materials/nodes/NodeRaw.js"></script>
 		<script src="js/materials/nodes/NodeTemp.js"></script>
 		<script src="js/materials/nodes/NodeInput.js"></script>
 		<script src="js/materials/nodes/NodeReference.js"></script>
 		<script src="js/materials/nodes/NodeMaterial.js"></script>
-		<script src="js/materials/nodes/NodeBuilder.js"></script>
+		<script src="js/materials/nodes/NodeConst.js"></script>
 		<script src="js/materials/nodes/NodeFunction.js"></script>
 		<script src="js/materials/nodes/NodeFunctionCall.js"></script>
 		<script src="js/materials/nodes/NodeLib.js"></script>
 		
-		<!-- Physical -->
-		<script src="js/materials/nodes/NodeStandard.js"></script>
-		<script src="js/materials/nodes/NodeStandardMaterial.js"></script>
-		
-		<!-- Phong -->
-		<script src="js/materials/nodes/NodePhong.js"></script>
-		<script src="js/materials/nodes/NodePhongMaterial.js"></script>
-		
-		<!-- Functions -->
-		<script src="js/materials/nodes/NodeOperator.js"></script>
-		<script src="js/materials/nodes/NodeMath1.js"></script>
-		<script src="js/materials/nodes/NodeMath2.js"></script>
-		<script src="js/materials/nodes/NodeMath3.js"></script>
-		<script src="js/materials/nodes/NodeSwitch.js"></script>
-		<script src="js/materials/nodes/NodeJoin.js"></script>
-		
-		<!-- Natives -->
-		<script src="js/materials/nodes/NodeDepth.js"></script>
-		<script src="js/materials/nodes/NodeConst.js"></script>
-		<script src="js/materials/nodes/NodeUV.js"></script>
-		<script src="js/materials/nodes/NodeReflect.js"></script>
-		<script src="js/materials/nodes/NodeTransformedPosition.js"></script>
-		<script src="js/materials/nodes/NodeTransformedNormal.js"></script>
-		<script src="js/materials/nodes/NodeNormal.js"></script>
-		<script src="js/materials/nodes/NodePosition.js"></script>
-		<script src="js/materials/nodes/NodeWorldPosition.js"></script>
-		<script src="js/materials/nodes/NodeViewPosition.js"></script>
-		<script src="js/materials/nodes/NodeViewNormal.js"></script>
-		<script src="js/materials/nodes/NodeCameraPosition.js"></script>
-		<script src="js/materials/nodes/NodeProjectPosition.js"></script>
-		<script src="js/materials/nodes/NodeSpecularMIPLevel.js"></script>
+		<!-- Accessors -->
+		<script src="js/materials/nodes/accessors/NodeCamera.js"></script>
+		<script src="js/materials/nodes/accessors/NodeDepth.js"></script>
+		<script src="js/materials/nodes/accessors/NodeNormal.js"></script>
+		<script src="js/materials/nodes/accessors/NodePosition.js"></script>
+		<script src="js/materials/nodes/accessors/NodeReflect.js"></script>
+		<script src="js/materials/nodes/accessors/NodeUV.js"></script>
 		
 		<!-- Inputs -->
-		<script src="js/materials/nodes/NodeFloat.js"></script>
-		<script src="js/materials/nodes/NodeVector2.js"></script>
-		<script src="js/materials/nodes/NodeVector3.js"></script>
-		<script src="js/materials/nodes/NodeVector4.js"></script>
-		<script src="js/materials/nodes/NodeColor.js"></script>
-		<script src="js/materials/nodes/NodeTimer.js"></script>
+		<script src="js/materials/nodes/inputs/NodeColor.js"></script>
+		<script src="js/materials/nodes/inputs/NodeFloat.js"></script>
+		<script src="js/materials/nodes/inputs/NodeInt.js"></script>
+		<script src="js/materials/nodes/inputs/NodeVector2.js"></script>
+		<script src="js/materials/nodes/inputs/NodeVector3.js"></script>
+		<script src="js/materials/nodes/inputs/NodeVector4.js"></script>
+		<script src="js/materials/nodes/inputs/NodeTexture.js"></script>
+		<script src="js/materials/nodes/inputs/NodeCubeTexture.js"></script>
 		
-		<!-- Textures -->
-		<script src="js/materials/nodes/NodeTexture.js"></script>
-		<script src="js/materials/nodes/NodeCubeTexture.js"></script>
+		<!-- Math -->
+		<script src="js/materials/nodes/math/NodeMath1.js"></script>
+		<script src="js/materials/nodes/math/NodeMath2.js"></script>
+		<script src="js/materials/nodes/math/NodeMath3.js"></script>
+		<script src="js/materials/nodes/math/NodeOperator.js"></script>
 		
-		<!-- Optionals -->
-		<script src="js/materials/nodes/NodeVelocity.js"></script>
+		<!-- Utils -->
+		<script src="js/materials/nodes/utils/NodeJoin.js"></script>
+		<script src="js/materials/nodes/utils/NodeSwitch.js"></script>
+		<script src="js/materials/nodes/utils/NodeTime.js"></script>
+		<script src="js/materials/nodes/utils/NodeRoughnessToBlinnExponent.js"></script>
 		
+		<!-- Interfaces -->
+		<script src="js/materials/nodes/interfaces/NodePhong.js"></script>
+		<script src="js/materials/nodes/interfaces/NodePhongMaterial.js"></script>
+		<script src="js/materials/nodes/interfaces/NodeStandard.js"></script>
+		<script src="js/materials/nodes/interfaces/NodeStandardMaterial.js"></script>
+		
+		<!-- Extras -->
+		<script src="js/materials/nodes/extras/NodeVelocity.js"></script>
 		
 		<script>
 
@@ -109,11 +101,11 @@
 		var move = false;
 		var gui, guiElements = [];
 		
-		var param = { example: 'caustic' };
+		var param = { example: 'standard' };
 
-		var uvGrid = new THREE.TextureLoader().load( 'textures/UV_Grid_Sm.jpg' );
 		var brick = new THREE.TextureLoader().load( 'textures/brick_diffuse.jpg' );
 		var grass = new THREE.TextureLoader().load( 'textures/terrain/grasslight-big.jpg' );
+		var grassNormal = new THREE.TextureLoader().load( 'textures/terrain/grasslight-big-nm.jpg' );
 		
 		var decalDiffuse = new THREE.TextureLoader().load( 'textures/decal/decal-diffuse.png' );
 		decalDiffuse.wrapS = decalDiffuse.wrapT = THREE.RepeatWrapping;
@@ -192,14 +184,17 @@
 			gui = new dat.GUI();
 			
 			var example = gui.add( param, 'example', { 
+				'basic / standard (PBR)': 'standard',
+				'basic / phong': 'phong',
 				'basic / layers': 'layers',
 				'basic / rim': 'rim', 
 				'adv / fresnel': 'fresnel',
 				'adv / saturation': 'saturation',
 				'adv / top-bottom': 'top-bottom',
+				'adv / caustic': 'caustic',
 				'adv / displace': 'displace',
 				'adv / soft-body': 'soft-body',
-				'adv / caustic': 'caustic',
+				'adv / wave': 'wave',
 				'misc / smoke' : 'smoke',
 				'misc / firefly' : 'firefly'
 			} ).onFinishChange(function() {
@@ -245,12 +240,247 @@
 		
 			move = false;
 		
+			if (mesh.material) mesh.material.dispose();
+		
 			var name = param.example;
 			var mtl; 
 		
 			clearGui();
 		
 			switch( name ) {
+				
+				case 'phong':
+					
+					//	MATERIAL
+					
+					mtl = new THREE.NodePhongMaterial();
+					
+					//mtl.color = // albedo color
+					//mtl.alpha = // opacity (0 at 1)
+					//mtl.specular = // specular color
+					//mtl.shininess = // shininess (float)
+					//mtl.normal = // normalmap
+					//mtl.normalScale = // normalmap scale
+					//mtl.emissive = // emissive color
+					//mtl.ambient = // ambient color
+					//mtl.shadow = // shadowmap
+					//mtl.ao = // ambient occlusion
+					//mtl.environment = // reflection map (CubeMap recommended)
+					//mtl.reflectivity = // environment intensity
+					//mtl.transform = // vertex transformation
+					
+					var mask = new THREE.NodeSwitch(new THREE.NodeTexture(decalDiffuse), 'w');
+					
+					mtl.color = new THREE.NodeTexture(grass);
+					mtl.specular = new THREE.NodeFloat(.5);
+					mtl.shininess = new THREE.NodeFloat(15);
+					mtl.environment = new THREE.NodeCubeTexture(cubemap);
+					mtl.reflectivity = mask;
+					mtl.normal = new THREE.NodeTexture(grassNormal);
+					mtl.normalScale = new THREE.NodeMath1( mask, THREE.NodeMath1.INVERT );
+					
+					break;
+				
+				case 'standard':
+					
+					//	MATERIAL
+					
+					mtl = new THREE.NodeStandardMaterial();
+					
+					//mtl.color = // albedo color
+					//mtl.alpha = // opacity (0 at 1)
+					//mtl.roughness = // roughness (float)
+					//mtl.metalness = // metalness (float)
+					//mtl.normal = // normalmap
+					//mtl.normalScale = // normalmap scale
+					//mtl.emissive = // emissive color
+					//mtl.ambient = // ambient color
+					//mtl.shadow = // shadowmap
+					//mtl.ao = // ambient occlusion
+					//mtl.environment = // reflection map (CubeMap recommended)
+					//mtl.reflectivity = // environment intensity
+					//mtl.transform = // vertex transformation
+					
+					var mask = new THREE.NodeSwitch(new THREE.NodeTexture(decalDiffuse), 'w');
+					
+					var normalScale = new THREE.NodeFloat(.3);
+					
+					var roughnessA = new THREE.NodeFloat(.5);
+					var metalnessA = new THREE.NodeFloat(.5);
+					
+					var roughnessB = new THREE.NodeFloat(0);
+					var metalnessB = new THREE.NodeFloat(1);
+
+					var roughness = new THREE.NodeMath3(
+						roughnessA,
+						roughnessB,
+						mask,
+						THREE.NodeMath3.MIX
+					);					
+					
+					var metalness = new THREE.NodeMath3(
+						metalnessA,
+						metalnessB,
+						mask,
+						THREE.NodeMath3.MIX
+					);
+					
+					var normalMask = new THREE.NodeOperator(
+						new THREE.NodeMath1( mask, THREE.NodeMath1.INVERT ),
+						normalScale,
+						THREE.NodeOperator.MUL
+					);
+					
+					mtl.color = new THREE.NodeColor(0xFFFFFF);
+					mtl.roughness = roughness;
+					mtl.metalness = metalness;
+					mtl.environment = new THREE.NodeCubeTexture(cubemap);
+					mtl.normal = new THREE.NodeTexture(grassNormal);
+					mtl.normalScale = normalMask;
+					
+					// GUI
+					
+					addGui( 'color', mtl.color.value.getHex(), function( val ) {
+						
+						mtl.color.value.setHex( val );
+					
+					}, true );
+					
+					addGui( 'roughnessA', roughnessA.number, function( val ) {
+						
+						 roughnessA.number = val;
+
+					}, false, 0, 1 );
+					
+					addGui( 'metalnessA', roughnessA.number, function( val ) {
+						
+						roughnessA.number = val;
+
+					}, false, 0, 1 );
+					
+					addGui( 'roughnessB', roughnessB.number, function( val ) {
+						
+						 roughnessB.number = val;
+
+					}, false, 0, 1 );
+					
+					addGui( 'metalnessB', roughnessB.number, function( val ) {
+						
+						metalnessB.number = val;
+
+					}, false, 0, 1 );
+					
+					addGui( 'normalScale', normalScale.number, function( val ) {
+						
+						normalScale.number = val;
+
+					}, false, 0, 1 );
+					
+					break;
+				
+				case 'wave':
+					
+					//	MATERIAL
+					
+					mtl = new THREE.NodePhongMaterial();
+					
+					var time = new THREE.NodeTime();
+					var speed = new THREE.NodeFloat(5);
+					var scale = new THREE.NodeFloat(1);
+					var worldScale = new THREE.NodeFloat(.4);
+					var colorA = new THREE.NodeColor(0xFFFFFF);
+					var colorB = new THREE.NodeColor(0x0054df);
+					
+					var uv = new THREE.NodeUV();
+					
+					var timeScale = new THREE.NodeOperator(
+						time,
+						speed,
+						THREE.NodeOperator.MUL
+					);
+					
+					var worldScl = new THREE.NodeOperator(
+						new THREE.NodePosition(),
+						worldScale,
+						THREE.NodeOperator.MUL
+					);
+					
+					var posContinuous = new THREE.NodeOperator(
+						worldScl,
+						timeScale,
+						THREE.NodeOperator.ADD
+					);
+					
+					var wave = new THREE.NodeMath1(posContinuous, THREE.NodeMath1.SIN);
+					wave = new THREE.NodeSwitch(wave, 'x');
+					
+					var waveScale = new THREE.NodeOperator(
+						wave,
+						scale,
+						THREE.NodeOperator.MUL
+					);
+					
+					var waveY = new THREE.NodeJoin(
+						new THREE.NodeFloat(),
+						waveScale,
+						new THREE.NodeFloat()
+					);
+					
+					var displace = new THREE.NodeOperator(
+						new THREE.NodeNormal(),
+						waveY,
+						THREE.NodeOperator.MUL
+					);
+					
+					var blend = new THREE.NodeOperator(
+						new THREE.NodePosition(),
+						displace,
+						THREE.NodeOperator.ADD
+					);
+					
+					var color = new THREE.NodeMath3(
+						colorB,
+						colorA,
+						wave,
+						THREE.NodeMath3.MIX
+					);
+					
+					mtl.color = color;
+					mtl.transform = blend;
+
+					//	GUI
+					
+					addGui( 'speed', speed.number, function( val ) {
+						
+						speed.number = val;
+
+					}, false, 0, 10 );
+					
+					addGui( 'scale', scale.number, function( val ) {
+						
+						scale.number = val;
+
+					}, false, 0, 3 );
+					
+					addGui( 'worldScale', worldScale.number, function( val ) {
+						
+						worldScale.number = val;
+
+					}, false, 0, 1 );
+			
+					addGui( 'colorA', colorA.value.getHex(), function( val ) {
+						
+						colorA.value.setHex( val );
+					
+					}, true );
+					
+					addGui( 'colorB', colorB.value.getHex(), function( val ) {
+						
+						colorB.value.setHex( val );
+					
+					}, true );
+					
+					break;
 				
 				case 'rim':
 					
@@ -263,7 +493,7 @@
 					var color = new THREE.NodeColor(0xFFFFFF);
 						
 					var viewZ = new THREE.NodeMath2(
-						new THREE.NodeViewNormal(), 
+						new THREE.NodeNormal( THREE.NodeNormal.VIEW ), 
 						new THREE.NodeVector3(0, 0, -intensity), 
 						THREE.NodeMath2.DOT
 					);
@@ -349,7 +579,7 @@
 					var color = new THREE.NodeCubeTexture(cubemap);
 						
 					var viewZ = new THREE.NodeMath2(
-						new THREE.NodeViewNormal(), 
+						new THREE.NodeNormal( THREE.NodeNormal.VIEW ), 
 						new THREE.NodeVector3(0, 0, -1), 
 						THREE.NodeMath2.DOT
 					);
@@ -493,7 +723,7 @@
 					var top = new THREE.NodeTexture(grass);
 					var bottom = new THREE.NodeTexture(brick);
 					
-					var normal = new THREE.NodeNormal();
+					var normal = new THREE.NodeNormal( THREE.NodeNormal.WORLD );
 					var normalY = new THREE.NodeSwitch(normal, 'y');
 			
 					var hard = new THREE.NodeFloat(9);
@@ -539,7 +769,7 @@
 					
 					mtl = new THREE.NodePhongMaterial();
 					
-					var timer = new THREE.NodeTimer();
+					var time = new THREE.NodeTime();
 					var scale = new THREE.NodeFloat(2);
 					var speed = new THREE.NodeFloat(.2);
 					var colorA = new THREE.NodeColor(0xFFFFFF);
@@ -547,14 +777,14 @@
 					
 					var uv = new THREE.NodeUV();
 					
-					var timerScl = new THREE.NodeOperator(
-						timer,
+					var timeScl = new THREE.NodeOperator(
+						time,
 						speed,
 						THREE.NodeOperator.MUL
 					);
 					
 					var displaceOffset = new THREE.NodeOperator(
-						timerScl,
+						timeScl,
 						uv,
 						THREE.NodeOperator.ADD
 					);
@@ -575,7 +805,7 @@
 					);
 					
 					var blend = new THREE.NodeOperator(
-						new THREE.NodeTransformedPosition(),
+						new THREE.NodePosition(),
 						displaceScale,
 						THREE.NodeOperator.ADD
 					);
@@ -625,29 +855,29 @@
 					
 					mtl = new THREE.NodePhongMaterial();
 					
-					var timer = new THREE.NodeTimer();
+					var time = new THREE.NodeTime();
 					var uv = new THREE.NodeUV();
 					
-					var timerSpeedA = new THREE.NodeOperator(
-						timer,
+					var timeSpeedA = new THREE.NodeOperator(
+						time,
 						new THREE.NodeVector2(0.3, 0.1),
 						THREE.NodeOperator.MUL
 					);
 					
-					var timerSpeedB = new THREE.NodeOperator(
-						timer,
+					var timeSpeedB = new THREE.NodeOperator(
+						time,
 						new THREE.NodeVector2(0.15, 0.4),
 						THREE.NodeOperator.MUL
 					);
 					
 					var uvOffsetA = new THREE.NodeOperator(
-						timerSpeedA,
+						timeSpeedA,
 						uv,
 						THREE.NodeOperator.ADD
 					);
 					
 					var uvOffsetB = new THREE.NodeOperator(
-						timerSpeedB,
+						timeSpeedB,
 						uv,
 						THREE.NodeOperator.ADD
 					);
@@ -708,9 +938,10 @@
 						"}",
 						"return md;",
 					"}"
-					].join( "\n" ), [hash2]);
+					].join( "\n" ), [hash2]); // define hash2 as dependencies
 					
 					var voronoiLayers = new THREE.NodeFunction([
+					// based on https://www.shadertoy.com/view/4tXSDf
 					"float voronoiLayers(vec2 p, in float time) {",
 						"float v = 0.0;",
 						"float a = 0.4;",
@@ -721,23 +952,23 @@
 						"}",
 						"return v;",
 					"}"
-					].join( "\n" ), [voronoi]);
+					].join( "\n" ), [voronoi]); // define voronoi as dependencies
 
-					var time = new THREE.NodeTimer();
+					var time = new THREE.NodeTime();
 					var timeScale = new THREE.NodeFloat(2);
 					
 					var alpha = new THREE.NodeFloat(1);
-					var scale = new THREE.NodeFloat(.12);
+					var scale = new THREE.NodeFloat(.1);
 					var intensity = new THREE.NodeFloat(1.5);
 					
 					var color = new THREE.NodeColor(0xFFFFFF);
 					var colorA = new THREE.NodeColor(0xFFFFFF);
 					var colorB = new THREE.NodeColor(0x0054df);
 					
-					var worldPos = new THREE.NodeWorldPosition();
+					var worldPos = new THREE.NodePosition( THREE.NodePosition.WORLD );
 					var worldPosTop = new THREE.NodeSwitch(worldPos, 'xz');
 					
-					var pos = new THREE.NodeTransformedPosition();
+					var pos = new THREE.NodePosition( THREE.NodePosition.WORLD );
 					var posNorm = new THREE.NodeMath1(pos, THREE.NodeMath1.NORMALIZE);
 					
 					var mask = new THREE.NodeSwitch(posNorm, 'y');
@@ -854,7 +1085,7 @@
 					var colorA = new THREE.NodeColor(0xFF6633);
 					var colorB = new THREE.NodeColor(0x3366FF);
 					
-					var pos = new THREE.NodeTransformedPosition();
+					var pos = new THREE.NodePosition();
 					var posNorm = new THREE.NodeMath1(pos, THREE.NodeMath1.NORMALIZE);					
 					
 					var mask = new THREE.NodeSwitch(posNorm, 'y');
@@ -878,7 +1109,7 @@
 					);
 					
 					var softPosition = new THREE.NodeOperator(
-						new THREE.NodeTransformedPosition(),
+						new THREE.NodePosition(),
 						softVelocity,
 						THREE.NodeOperator.ADD
 					);
@@ -933,19 +1164,19 @@
 					
 					mtl = new THREE.NodePhongMaterial();
 					
-					var timer = new THREE.NodeTimer();
+					var time = new THREE.NodeTime();
 					var speed = new THREE.NodeFloat(.5);
 					
 					var color = new THREE.NodeColor(0x98ff00);
 					
-					var timerSpeed = new THREE.NodeOperator(
-						timer,
+					var timeSpeed = new THREE.NodeOperator(
+						time,
 						speed,
 						THREE.NodeOperator.MUL
 					);
 					
 					var sinCycleInSecs = new THREE.NodeOperator(
-						timerSpeed, 
+						timeSpeed, 
 						new THREE.NodeConst( THREE.NodeConst.PI2 ),
 						THREE.NodeOperator.MUL
 					);
@@ -1008,6 +1239,8 @@
 				mesh.position.z = mesh.position.y = 0;
 			
 			}
+			
+			//mesh.rotation.z += .01;
 			
 			// update material animation and/or gpu calcs (pre-renderer)
 			mesh.material.updateAnimation( delta );

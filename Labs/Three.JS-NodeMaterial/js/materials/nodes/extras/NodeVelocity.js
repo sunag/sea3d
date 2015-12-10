@@ -6,7 +6,7 @@ THREE.NodeVelocity = function( target, params ) {
 	
 	THREE.NodeVector3.call( this );
 	
-	this.allow.requestUpdate = true;
+	this.requestUpdate = true;
 	
 	this.target = target;
 	

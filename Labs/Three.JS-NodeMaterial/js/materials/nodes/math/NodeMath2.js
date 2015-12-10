@@ -9,7 +9,7 @@ THREE.NodeMath2 = function( a, b, method ) {
 	this.a = a;
 	this.b = b;
 	
-	this.method = method || THREE.NodeMath2.MIN;
+	this.method = method || THREE.NodeMath2.DISTANCE;
 	
 };
 
@@ -43,11 +43,9 @@ THREE.NodeMath2.prototype.getType = function( builder ) {
 		case THREE.NodeMath2.DISTANCE:
 		case THREE.NodeMath2.DOT:
 			return 'fv1';
-			break;
 		
 		case THREE.NodeMath2.CROSS:
 			return 'v3';
-			break;
 	}
 	
 	return this.getInputType( builder );

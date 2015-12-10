@@ -8,7 +8,7 @@ THREE.NodeMath1 = function( a, method ) {
 	
 	this.a = a;
 	
-	this.method = method || THREE.NodeMath1.SINE;
+	this.method = method || THREE.NodeMath1.SIN;
 	
 };
 
@@ -36,13 +36,14 @@ THREE.NodeMath1.ARCTAN = 'atan';
 THREE.NodeMath1.ABS = 'abc';
 THREE.NodeMath1.SIGN = 'sign';
 THREE.NodeMath1.LENGTH = 'length';
+THREE.NodeMath1.NEGATE = 'negate';
+THREE.NodeMath1.INVERT = 'invert';
 
 THREE.NodeMath1.prototype.getType = function( builder ) {
 	
 	switch(this.method) {
 		case THREE.NodeMath1.DISTANCE:
 			return 'fv1';
-			break;
 	}
 	
 	return this.a.getType( builder );
@@ -57,6 +58,21 @@ THREE.NodeMath1.prototype.generate = function( builder, output ) {
 	
 	var a = this.a.build( builder, type );
 	
-	return builder.format( this.method + '(' + a + ')', type, output );
+	switch(this.method) {
+		
+		case THREE.NodeMath1.NEGATE:
+			a = '(-' + a + ')';
+			break;
+		
+		case THREE.NodeMath1.INVERT:
+			a = '(1.0-' + a + ')';
+			break;
+		
+		default:
+			a = this.method + '(' + a + ')';
+			break;
+	}
+	
+	return builder.format( a, type, output );
 
 };

@@ -94,6 +94,10 @@ THREE.NodeStandard.prototype.build = function( builder ) {
 	}
 	else {
 		
+		// CubeMap blur effect (PBR)
+		
+		builder.require.cubeTextureBias = builder.require.cubeTextureBias || new THREE.NodeRoughnessToBlinnExponent();
+		
 		// verify all nodes to reuse generate codes
 		
 		this.color.verify( builder );
