@@ -4,22 +4,34 @@
 
 THREE.NodeNormal = function( scope ) {
 	
-	THREE.NodeReference.call( this, 'v3' );
+	THREE.NodeTemp.call( this, 'v3' );
 	
 	this.scope = scope || THREE.NodeNormal.LOCAL;
 	
 };
 
-THREE.NodeNormal.prototype = Object.create( THREE.NodeReference.prototype );
+THREE.NodeNormal.prototype = Object.create( THREE.NodeTemp.prototype );
 THREE.NodeNormal.prototype.constructor = THREE.NodeNormal;
 
 THREE.NodeNormal.LOCAL = 'local';
 THREE.NodeNormal.WORLD = 'world';
 THREE.NodeNormal.VIEW = 'view';
 
+THREE.NodeNormal.prototype.isShared = function( builder ) {
+	
+	switch(this.method) {
+		case THREE.NodeNormal.WORLD:
+			return true;
+	}
+	
+	return false;
+	
+};
+
 THREE.NodeNormal.prototype.generate = function( builder, output ) {
 	
 	var material = builder.material;
+	var result;
 	
 	switch (this.scope) {
 	
@@ -27,8 +39,8 @@ THREE.NodeNormal.prototype.generate = function( builder, output ) {
 	
 			material.requestAttrib.normal = true;
 	
-			if (builder.isShader('vertex')) this.name = 'normal';
-			else this.name = 'vObjectNormal';
+			if (builder.isShader('vertex')) result = 'normal';
+			else result = 'vObjectNormal';
 			
 			break;
 			
@@ -36,19 +48,19 @@ THREE.NodeNormal.prototype.generate = function( builder, output ) {
 	
 			material.requestAttrib.worldNormal = true;
 			
-			if (builder.isShader('vertex')) this.name = '( modelMatrix * vec4( objectNormal, 0.0 ) ).xyz';
-			else this.name = 'vWNormal';
+			if (builder.isShader('vertex')) result = '( modelMatrix * vec4( objectNormal, 0.0 ) ).xyz';
+			else result = 'vWNormal';
 			
 			break;
 			
 		case THREE.NodeNormal.VIEW:
 	
-			this.name = 'vNormal';
+			result = 'vNormal';
 			
 			break;
 			
 	}
 	
-	return THREE.NodeReference.prototype.generate.call( this, builder, output );
+	return builder.format( result, this.getType( builder ), output );
 
 };

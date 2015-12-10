@@ -4,7 +4,7 @@
 
 THREE.NodeVector4 = function( x, y, z, w ) {
 	
-	THREE.NodeInput.call( this, 'v4' );
+	THREE.NodeInput.call( this, 'v4', {share:false} );
 	
 	this.value = new THREE.Vector4( x, y, z, w );
 	

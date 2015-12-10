@@ -78,7 +78,8 @@ THREE.NodeMaterial.prototype.build = function() {
 	
 	this.uniformList = [];
 	
-	this.includes = [];
+	this.consts = [];
+	this.functions = [];
 	
 	this.requestUpdate = [];
 	
@@ -133,6 +134,15 @@ THREE.NodeMaterial.prototype.build = function() {
 		
 	}
 	
+	if (this.requestAttrib.color[1]) {
+
+		this.addVertexPars( 'varying vec4 vColor2; attribute vec4 color2;' );
+		this.addFragmentPars( 'varying vec4 vColor2;' );
+		
+		this.addVertexCode( 'vColor2 = color2;' );
+		
+	}
+	
 	if (this.requestAttrib.position) {
 
 		this.addVertexPars( 'varying vec3 vPosition;' );
@@ -177,7 +187,8 @@ THREE.NodeMaterial.prototype.build = function() {
 	this.vertexShader = [
 		this.vertexPars,
 		this.getCodePars( this.vertexUniform, 'uniform' ),
-		this.getIncludes('vertex'),
+		this.getIncludes(this.consts['vertex']),
+		this.getIncludes(this.functions['vertex']),
 		'void main(){',
 		this.getCodePars( this.vertexTemps ),
 		vertex,
@@ -188,7 +199,8 @@ THREE.NodeMaterial.prototype.build = function() {
 	this.fragmentShader = [
 		this.fragmentPars,
 		this.getCodePars( this.fragmentUniform, 'uniform' ),
-		this.getIncludes('fragment'),
+		this.getIncludes(this.consts['fragment']),
+		this.getIncludes(this.functions['fragment']),
 		'void main(){',
 		this.getCodePars( this.fragmentTemps ),
 		this.fragmentCode,
@@ -258,15 +270,13 @@ THREE.NodeMaterial.prototype.getVertexTemp = function( uuid, type ) {
 	
 };
 
-THREE.NodeMaterial.prototype.getIncludes = function( shader ) {
+THREE.NodeMaterial.prototype.getIncludes = function( incs ) {
 	
 	function sortByPosition(a, b){
 		return b.deps - a.deps;
 	}
 	
-	return function( shader ) {
-		
-		var incs = this.includes[shader];
+	return function( incs ) {
 		
 		if (!incs) return '';
 		
@@ -413,20 +423,31 @@ THREE.NodeMaterial.prototype.getNodeData = function( uuid ) {
 
 };
 
-THREE.NodeMaterial.prototype.include = function( shader, func ) {
+THREE.NodeMaterial.prototype.include = function( shader, node ) {
 	
-	var node = typeof func === 'string' ? THREE.NodeLib.nodes[func] : func;
+	var includes;
 	
-	for (var i = 0; i < node.includes.length; i++) {
+	node = typeof node === 'string' ? THREE.NodeLib.get(node) : node;
+	
+	if (node instanceof THREE.NodeFunction) {
+	
+		for (var i = 0; i < node.includes.length; i++) {
+			
+			this.include( shader, node.includes[i] );
 		
-		this.include( shader, node.includes[i] );
+		}
+		
+		includes = this.functions[shader] = this.functions[shader] || [];
+		
+	}
+	else if (node instanceof THREE.NodeConst) {
+		
+		includes = this.consts[shader] = this.consts[shader] || [];
 	
 	}
 	
-	var includes = this.includes[shader] = this.includes[shader] || [];
-	
 	if (includes[node.name] === undefined) {
-		
+			
 		for (var ext in node.extensions) {
 			
 			this.extensions[ext] = true;
@@ -439,6 +460,7 @@ THREE.NodeMaterial.prototype.include = function( shader, func ) {
 		};
 		
 		includes.push(includes[node.name]);
+		
 	}
 	else ++includes[node.name].deps;
 

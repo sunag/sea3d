@@ -9,8 +9,37 @@ THREE.NodeLib = {
 	},
 	remove:function(node) {
 		delete this.nodes[node.name];
+	},
+	get:function(name) {
+		return this.nodes[name];
+	},
+	contains:function(name) {
+		return this.nodes[name] != undefined;
 	}
 };
+
+//
+//	Luma
+//
+
+THREE.NodeLib.add(new THREE.NodeConst("vec3 LUMA = vec3(0.2125, 0.7154, 0.0721);") );
+
+//
+//	DepthColor
+//
+			
+THREE.NodeLib.add(new THREE.NodeFunction([
+"float depthcolor( float mNear, float mFar ) {",
+
+	"#ifdef USE_LOGDEPTHBUF_EXT",
+		"float depth = gl_FragDepthEXT / gl_FragCoord.w;",
+	"#else",
+		"float depth = gl_FragCoord.z / gl_FragCoord.w;",
+	"#endif",
+	
+	"return 1.0 - smoothstep( mNear, mFar, depth );",
+"}"
+].join( "\n" )));
 
 //
 //	NormalMap
@@ -41,8 +70,7 @@ THREE.NodeLib.add(new THREE.NodeFunction([
 THREE.NodeLib.add(new THREE.NodeFunction([
 // Algorithm from Chapter 16 of OpenGL Shading Language
 "vec3 saturation_rgb(vec3 rgb, float adjustment) {",
-	"const vec3 W = vec3(0.2125, 0.7154, 0.0721);",
-	"vec3 intensity = vec3(dot(rgb, W));",
+	"vec3 intensity = vec3(dot(rgb, LUMA));",
 	"return mix(intensity, rgb, adjustment);",
 "}"
 ].join( "\n" )));
@@ -54,7 +82,6 @@ THREE.NodeLib.add(new THREE.NodeFunction([
 THREE.NodeLib.add(new THREE.NodeFunction([
 // Algorithm from Chapter 10 of Graphics Shaders.
 "float luminance_rgb(vec3 rgb) {",
-	"const vec3 W = vec3(0.2125, 0.7154, 0.0721);",
-	"return dot(rgb, W);",
+	"return dot(rgb, LUMA);",
 "}"
 ].join( "\n" )));

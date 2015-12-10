@@ -45,7 +45,6 @@
 		<script src="js/materials/nodes/NodeRaw.js"></script>
 		<script src="js/materials/nodes/NodeTemp.js"></script>
 		<script src="js/materials/nodes/NodeInput.js"></script>
-		<script src="js/materials/nodes/NodeReference.js"></script>
 		<script src="js/materials/nodes/NodeMaterial.js"></script>
 		<script src="js/materials/nodes/NodeConst.js"></script>
 		<script src="js/materials/nodes/NodeFunction.js"></script>
@@ -53,6 +52,7 @@
 		<script src="js/materials/nodes/NodeLib.js"></script>
 		
 		<!-- Accessors -->
+		<script src="js/materials/nodes/accessors/NodeColors.js"></script>
 		<script src="js/materials/nodes/accessors/NodeCamera.js"></script>
 		<script src="js/materials/nodes/accessors/NodeDepth.js"></script>
 		<script src="js/materials/nodes/accessors/NodeNormal.js"></script>
@@ -193,6 +193,7 @@
 				'adv / top-bottom': 'top-bottom',
 				'adv / caustic': 'caustic',
 				'adv / displace': 'displace',
+				'adv / camera-depth': 'camera-depth',
 				'adv / soft-body': 'soft-body',
 				'adv / wave': 'wave',
 				'misc / smoke' : 'smoke',
@@ -277,7 +278,7 @@
 					mtl.environment = new THREE.NodeCubeTexture(cubemap);
 					mtl.reflectivity = mask;
 					mtl.normal = new THREE.NodeTexture(grassNormal);
-					mtl.normalScale = new THREE.NodeMath1( mask, THREE.NodeMath1.INVERT );
+					mtl.normalScale = new THREE.NodeMath1( mask, THREE.NodeMath1.INVERT );					
 					
 					break;
 				
@@ -420,7 +421,7 @@
 						THREE.NodeOperator.MUL
 					);
 					
-					var waveY = new THREE.NodeJoin(
+					var displaceY = new THREE.NodeJoin(
 						new THREE.NodeFloat(),
 						waveScale,
 						new THREE.NodeFloat()
@@ -428,13 +429,13 @@
 					
 					var displace = new THREE.NodeOperator(
 						new THREE.NodeNormal(),
-						waveY,
+						displaceY,
 						THREE.NodeOperator.MUL
 					);
 					
 					var blend = new THREE.NodeOperator(
 						new THREE.NodePosition(),
-						displace,
+						displaceY,
 						THREE.NodeOperator.ADD
 					);
 					
@@ -479,6 +480,14 @@
 						colorB.value.setHex( val );
 					
 					}, true );
+					
+					addGui( 'useNormals', false, function( val ) {
+							
+						blend.b = val ? displace : displaceY;
+						
+						mtl.build();
+					
+					} );
 					
 					break;
 				
@@ -686,8 +695,8 @@
 					
 					var satrgb = new THREE.NodeFunction([
 					"vec3 satrgb(vec3 rgb, float adjustment) {",
-						"const vec3 W = vec3(0.2125, 0.7154, 0.0721);", // LUMA
-						"vec3 intensity = vec3(dot(rgb, W));",
+						//"const vec3 W = vec3(0.2125, 0.7154, 0.0721);", // LUMA
+						"vec3 intensity = vec3(dot(rgb, LUMA));",
 						"return mix(intensity, rgb, adjustment);",
 					"}"
 					].join( "\n" ));
@@ -900,6 +909,55 @@
 						
 						mtl.environment.value.setHex( val );
 
+					}, true );
+			
+					break;
+					
+				case 'camera-depth':
+					
+					//	MATERIAL
+					
+					var colorA = new THREE.NodeColor(0xFFFFFF);
+					var colorB = new THREE.NodeColor(0x0054df);
+					
+					var depth = new THREE.NodeCamera( THREE.NodeCamera.DEPTH );
+					depth.near.number = 1;
+					depth.far.number = 200;
+					
+					var colors = new THREE.NodeMath3(
+						colorB,
+						colorA,
+						depth,
+						THREE.NodeMath3.MIX
+					);
+					
+					mtl = new THREE.NodePhongMaterial();
+					mtl.color = colors;
+					
+					//	GUI
+					
+					addGui( 'near', depth.near.number, function( val ) {
+						
+						depth.near.number = val;
+
+					}, false, 1, 1200 );
+					
+					addGui( 'far', depth.far.number, function( val ) {
+						
+						depth.far.number = val;
+
+					}, false, 1, 1200 );
+					
+					addGui( 'nearColor', colorA.value.getHex(), function( val ) {
+						
+						colorA.value.setHex( val );
+					
+					}, true );
+					
+					addGui( 'farColor', colorB.value.getHex(), function( val ) {
+						
+						colorB.value.setHex( val );
+					
 					}, true );
 			
 					break;

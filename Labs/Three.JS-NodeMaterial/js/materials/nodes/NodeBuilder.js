@@ -79,9 +79,11 @@ THREE.NodeBuilder.prototype = {
 	
 	},
 	
-	getUuid : function ( uuid ) {
+	getUuid : function ( uuid, useCache ) {
 		
-		if (this.cache) uuid = this.cache + '-' + uuid;
+		useCache = useCache !== undefined ? useCache : true;
+		
+		if (useCache && this.cache) uuid = this.cache + '-' + uuid;
 		
 		return uuid;
 

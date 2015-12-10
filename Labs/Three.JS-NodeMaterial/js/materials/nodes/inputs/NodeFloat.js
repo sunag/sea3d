@@ -4,7 +4,7 @@
 
 THREE.NodeFloat = function( value ) {
 	
-	THREE.NodeInput.call( this, 'fv1' );
+	THREE.NodeInput.call( this, 'fv1', {share:false} );
 	
 	this.value = [ value || 0 ];
 	

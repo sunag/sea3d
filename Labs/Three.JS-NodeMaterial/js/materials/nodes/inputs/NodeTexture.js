@@ -15,18 +15,9 @@ THREE.NodeTexture = function( value, coord, bias ) {
 THREE.NodeTexture.prototype = Object.create( THREE.NodeInput.prototype );
 THREE.NodeTexture.prototype.constructor = THREE.NodeTexture;
 
-THREE.NodeTexture.prototype.getTemp = THREE.NodeTemp.prototype.getTemp;
-
-THREE.NodeTexture.prototype.build = function( builder, output, uuid ) {
-	
-	return THREE.NodeTemp.prototype.build.call( this, builder, output, uuid );
-	
-};
-
 THREE.NodeTexture.prototype.generate = function( builder, output ) {
 
 	var tex = THREE.NodeInput.prototype.generate.call( this, builder, output, this.value.uuid, 't' );
-	
 	var coord = this.coord.build( builder, 'v2' );
 	var bias = this.bias ? this.bias.build( builder, 'fv1' ) : undefined;
 	

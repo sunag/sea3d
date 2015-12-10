@@ -4,9 +4,7 @@
 
 THREE.NodeRoughnessToBlinnExponent = function() {
 	
-	THREE.NodeTemp.call( this, 'fv1' );
-	
-	this.allow.vertex = false;
+	THREE.NodeTemp.call( this, 'fv1', {unique:true} );
 	
 };
 
@@ -16,28 +14,31 @@ THREE.NodeRoughnessToBlinnExponent.prototype.constructor = THREE.NodeRoughnessTo
 THREE.NodeRoughnessToBlinnExponent.prototype.generate = function( builder, output ) {
 	
 	var material = builder.material;
-	var data = material.getNodeData( this.uuid );
 	
 	if (builder.isShader('fragment')) {
 		
 		if (material.isDefined('STANDARD')) {
 		
-			material.addFragmentNode([
-				'float specularMIPLevel = GGXRoughnessToBlinnExponent( 1.0 - material.specularRoughness );'
-				//'float specularMIPLevel = getSpecularMIPLevel( material.specularRoughness, 8 );'
-			].join( "\n" ) );
+			material.addFragmentNode('float specularMIPLevel = GGXRoughnessToBlinnExponent( 1.0 - material.specularRoughness );');
 			
 		}
 		else {
-		
-			material.addFragmentNode([
-				'float specularMIPLevel = 0.0;'
-			].join( "\n" ) );
+			
+			console.warn("THREE.NodeRoughnessToBlinnExponent is compatible with StandardMaterial only");
+			
+			material.addFragmentNode('float specularMIPLevel = 0.0;');
 		
 		}
 		
 		return builder.format( 'specularMIPLevel', this.type, output );
 		
+	}
+	else {
+		
+		console.warn("THREE.NodeRoughnessToBlinnExponent is not compatible with " + builder.shader + " shader");
+		
+		return builder.format( '0.0', this.type, output );
+	
 	}
 
 };

@@ -4,13 +4,13 @@
 
 THREE.NodePosition = function( scope ) {
 	
-	THREE.NodeReference.call( this, 'v3' );
+	THREE.NodeTemp.call( this, 'v3' );
 	
 	this.scope = scope || THREE.NodePosition.LOCAL;
 	
 };
 
-THREE.NodePosition.prototype = Object.create( THREE.NodeReference.prototype );
+THREE.NodePosition.prototype = Object.create( THREE.NodeTemp.prototype );
 THREE.NodePosition.prototype.constructor = THREE.NodePosition;
 
 THREE.NodePosition.LOCAL = 'local';
@@ -29,9 +29,22 @@ THREE.NodePosition.prototype.getType = function( builder ) {
 	
 };
 
+THREE.NodePosition.prototype.isShared = function( builder ) {
+	
+	switch(this.method) {
+		case THREE.NodePosition.LOCAL:
+		case THREE.NodePosition.WORLD:
+			return false;
+	}
+	
+	return true;
+	
+};
+
 THREE.NodePosition.prototype.generate = function( builder, output ) {
 	
 	var material = builder.material;
+	var result;
 	
 	switch (this.scope) {
 	
@@ -39,8 +52,8 @@ THREE.NodePosition.prototype.generate = function( builder, output ) {
 	
 			material.requestAttrib.position = true;
 			
-			if (builder.isShader('vertex')) this.name = 'transformed';
-			else this.name = 'vPosition';
+			if (builder.isShader('vertex')) result = 'transformed';
+			else result = 'vPosition';
 			
 			break;
 			
@@ -48,27 +61,27 @@ THREE.NodePosition.prototype.generate = function( builder, output ) {
 	
 			material.requestAttrib.worldPosition = true;
 			
-			if (builder.isShader('vertex')) this.name = 'vWPosition';
-			else this.name = 'vWPosition';
+			if (builder.isShader('vertex')) result = 'vWPosition';
+			else result = 'vWPosition';
 			
 			break;
 			
 		case THREE.NodePosition.VIEW:
 	
-			if (builder.isShader('vertex')) this.name = '-mvPosition.xyz';
-			else this.name = 'vViewPosition';
+			if (builder.isShader('vertex')) result = '-mvPosition.xyz';
+			else result = 'vViewPosition';
 			
 			break;
 			
 		case THREE.NodePosition.PROJECTION:
 	
-			if (builder.isShader('vertex')) this.name = '(projectionMatrix * modelViewMatrix * vec4( position, 1.0 ))';
-			else this.name = 'vec4( 0.0 )';
+			if (builder.isShader('vertex')) result = '(projectionMatrix * modelViewMatrix * vec4( position, 1.0 ))';
+			else result = 'vec4( 0.0 )';
 			
 			break;
 			
 	}
 	
-	return THREE.NodeReference.prototype.generate.call( this, builder, output );
+	return builder.format( result, this.getType( builder ), output );
 
 };

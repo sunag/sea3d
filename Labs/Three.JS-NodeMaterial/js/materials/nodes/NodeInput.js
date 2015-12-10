@@ -2,13 +2,13 @@
  * @author sunag / http://www.sunag.com.br/
  */
 
-THREE.NodeInput = function(type) {
+THREE.NodeInput = function(type, params) {
 	
-	THREE.NodeGL.call( this, type );
+	THREE.NodeTemp.call( this, type, params );
 	
 };
 
-THREE.NodeInput.prototype = Object.create( THREE.NodeGL.prototype );
+THREE.NodeInput.prototype = Object.create( THREE.NodeTemp.prototype );
 THREE.NodeInput.prototype.constructor = THREE.NodeInput;
 
 THREE.NodeInput.prototype.generate = function( builder, output, uuid, type ) {
@@ -19,7 +19,7 @@ THREE.NodeInput.prototype.generate = function( builder, output, uuid, type ) {
 	type = type || this.type;
 	
 	var data = material.getNodeData( uuid );
-	console.log( uuid, builder.cache );
+	
 	if (builder.isShader('vertex')) {
 	
 		if (!data.vertex) {

@@ -4,7 +4,7 @@
 
 THREE.NodeColor = function( color ) {
 	
-	THREE.NodeInput.call( this, 'c' );
+	THREE.NodeInput.call( this, 'c', {share:false} );
 	
 	this.value = new THREE.Color( color || 0 );
 	

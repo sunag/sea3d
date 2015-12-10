@@ -56,23 +56,23 @@ THREE.NodeMath1.prototype.generate = function( builder, output ) {
 	
 	var type = this.getType( builder );
 	
-	var a = this.a.build( builder, type );
+	var result = this.a.build( builder, type );
 	
 	switch(this.method) {
 		
 		case THREE.NodeMath1.NEGATE:
-			a = '(-' + a + ')';
+			result = '(-' + result + ')';
 			break;
 		
 		case THREE.NodeMath1.INVERT:
-			a = '(1.0-' + a + ')';
+			result = '(1.0-' + result + ')';
 			break;
 		
 		default:
-			a = this.method + '(' + a + ')';
+			result = this.method + '(' + result + ')';
 			break;
 	}
 	
-	return builder.format( a, type, output );
+	return builder.format( result, type, output );
 
 };

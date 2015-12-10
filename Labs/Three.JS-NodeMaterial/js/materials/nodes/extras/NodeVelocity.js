@@ -30,8 +30,10 @@ THREE.NodeVelocity.prototype.updateAnimation = function( delta ) {
 			
 		case "elastic":
 			
-			var spring = this.params.spring;
-			var friction = this.params.friction;
+			delta *= this.params.fps || 60;
+			
+			var spring = Math.pow( this.params.spring, delta );
+			var friction = Math.pow( this.params.friction, delta );
 			
 			// spring
 			this.moment.x += this.velocity.x * spring;

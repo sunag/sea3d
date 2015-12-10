@@ -4,11 +4,9 @@
 
 THREE.NodeReflect = function() {
 	
-	THREE.NodeTemp.call( this, 'v3' );
+	THREE.NodeTemp.call( this, 'v3', {unique:true} );
 	
 	this.worldPosition = new THREE.NodePosition( THREE.NodePosition.WORLD );
-	
-	this.allow.vertex = false;
 	
 };
 
@@ -18,7 +16,6 @@ THREE.NodeReflect.prototype.constructor = THREE.NodeReflect;
 THREE.NodeReflect.prototype.generate = function( builder, output ) {
 	
 	var material = builder.material;
-	var data = material.getNodeData( this.uuid );
 	
 	if (builder.isShader('fragment')) {
 		
@@ -30,6 +27,13 @@ THREE.NodeReflect.prototype.generate = function( builder, output ) {
 		
 		return builder.format( 'vReflect', this.type, output );
 		
+	}
+	else {
+		
+		console.warn("THREE.NodeReflect is not compatible with " + builder.shader + " shader");
+		
+		return builder.format( 'vec3( 0.0 )', this.type, output );
+	
 	}
 
 };

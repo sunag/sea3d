@@ -5,9 +5,7 @@
 THREE.NodeCubeTexture = function( value, coord, bias ) {
 	
 	THREE.NodeInput.call( this, 'v4' );
-	
-	this.allow.vertex = false;
-	
+
 	this.value = value;
 	this.coord = coord || new THREE.NodeReflect();
 	this.bias = bias;

@@ -18,9 +18,13 @@ THREE.NodeFunction.prototype.parseReference = function( name ) {
 	
 	switch(name) {
 		case 'uv': return new THREE.NodeUV().name;
-		case 'uv2': return new THREE.NodeUV(true).name;
-		case 'position': return new THREE.NodeTransformedPosition().name;
-		case 'normal': return new THREE.NodeTransformedPosition().name;
+		case 'uv2': return new THREE.NodeUV(1).name;
+		case 'position': return new THREE.NodePosition().name;
+		case 'worldPosition': return new THREE.NodePosition( THREE.NodePosition.WORLD ).name;
+		case 'normal': return new THREE.NodeNormal().name;
+		case 'normalPosition': return new THREE.NodeNormal( THREE.NodeNormal.WORLD ).name;
+		case 'viewPosition': return new THREE.NodePosition( THREE.NodeNormal.VIEW ).name;
+		case 'viewNormal': return new THREE.NodeNormal( THREE.NodeNormal.VIEW ).name;
 	}
 	
 	return name;
@@ -52,12 +56,26 @@ THREE.NodeFunction.prototype.getType = function( builder ) {
 	
 };
 
+THREE.NodeFunction.prototype.getInclude = function( name ) {
+	
+	var i = this.includes.length;
+	
+	while(i--) {
+		
+		if (this.includes[i].name === name)
+			return this.includes[i];
+	
+	}
+	
+	return undefined;
+	
+};
+
 THREE.NodeFunction.prototype.parse = function( src, includes, extensions ) {
 	
 	var rDeclaration = /^([a-z_0-9]+)\s([a-z_0-9]+)\s?\((.*?)\)/i;
 	var rProperties = /[a-z_0-9]+/ig;
 	
-	this.src = src;
 	this.includes = includes || [];
 	this.extensions = extensions || {};
 	
@@ -104,17 +122,30 @@ THREE.NodeFunction.prototype.parse = function( src, includes, extensions ) {
 			
 		}
 
-		var match;
+		var match, offset = 0;
 		
 		while (match = rProperties.exec(src)) {
 			
 			var prop = match[0];
 			var reference = this.parseReference( prop );
 			
+			if (prop != reference) {
+				
+				src = src.substring( 0, match.index + offset ) + reference + src.substring( match.index + prop.length + offset  );
+				
+				offset += reference.length - prop.length;
+				
+			}
 			
-			//console.log(prop, reference);
+			if (this.getInclude(reference) === undefined && THREE.NodeLib.contains(reference)) {
+					
+				this.includes.push( THREE.NodeLib.get(reference) );
+				
+			}
 			
 		}
+		
+		this.src = src;
 
 	}
 	else {
