@@ -13,5 +13,5 @@ THREE.PhongNodeMaterial = function() {
 THREE.PhongNodeMaterial.prototype = Object.create( THREE.NodeMaterial.prototype );
 THREE.PhongNodeMaterial.prototype.constructor = THREE.PhongNodeMaterial;
 
-THREE.NodeMaterial.Shortcuts( THREE.PhongNodeMaterial.prototype, 'node',
-[ 'color', 'alpha', 'specular', 'shininess', 'normal', 'normalScale', 'emissive', 'ambient', 'shadow', 'ao', 'environment', 'reflectivity', 'transform' ] );
+THREE.NodeMaterial.addShortcuts( THREE.PhongNodeMaterial.prototype, 'node',
+[ 'color', 'alpha', 'specular', 'shininess', 'normal', 'normalScale', 'emissive', 'ambient', 'light', 'shadow', 'ao', 'environment', 'environmentAlpha', 'transform' ] );

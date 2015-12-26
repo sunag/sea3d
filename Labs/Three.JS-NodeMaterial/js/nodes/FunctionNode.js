@@ -39,12 +39,12 @@ THREE.FunctionNode.prototype.getTypeNode = function( builder, type ) {
 
 THREE.FunctionNode.prototype.getInputByName = function( name ) {
 
-	var i = this.input.length;
+	var i = this.inputs.length;
 
 	while ( i -- ) {
 
-		if ( this.input[ i ].name === name )
-			return this.input[ i ];
+		if ( this.inputs[ i ].name === name )
+			return this.inputs[ i ];
 
 	}
 
@@ -81,7 +81,7 @@ THREE.FunctionNode.prototype.parse = function( src, includes, extensions ) {
 
 	var match = src.match( rDeclaration );
 
-	this.input = [];
+	this.inputs = [];
 
 	if ( match && match.length == 4 ) {
 
@@ -113,7 +113,7 @@ THREE.FunctionNode.prototype.parse = function( src, includes, extensions ) {
 
 				name = inputs[ i ++ ];
 
-				this.input.push( {
+				this.inputs.push( {
 					name : name,
 					type : type,
 					qualifier : qualifier
@@ -138,9 +138,9 @@ THREE.FunctionNode.prototype.parse = function( src, includes, extensions ) {
 
 			}
 
-			if ( this.getInclude( reference ) === undefined && THREE.LibNode.contains( reference ) ) {
+			if ( this.getInclude( reference ) === undefined && THREE.NodeLib.contains( reference ) ) {
 
-				this.includes.push( THREE.LibNode.get( reference ) );
+				this.includes.push( THREE.NodeLib.get( reference ) );
 
 			}
 

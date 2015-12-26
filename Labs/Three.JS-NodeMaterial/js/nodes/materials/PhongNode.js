@@ -27,11 +27,12 @@ THREE.PhongNode.prototype.build = function( builder ) {
 
 	if ( builder.isShader( 'vertex' ) ) {
 
-		var transform = this.transform ? this.transform.verifyAndBuildCode( builder, 'v3' ) : undefined;
+		var transform = this.transform ? this.transform.verifyAndBuildCode( builder, 'v3', 'transform' ) : undefined;
 
 		material.mergeUniform( THREE.UniformsUtils.merge( [
 
 			THREE.UniformsLib[ "fog" ],
+			THREE.UniformsLib[ "ambient" ],
 			THREE.UniformsLib[ "lights" ],
 			THREE.UniformsLib[ "shadowmap" ]
 
@@ -73,8 +74,10 @@ THREE.PhongNode.prototype.build = function( builder ) {
 
 		if ( transform ) {
 
-			output.push( transform.code );
-			output.push( "transformed = " + transform.result + ";" );
+			output.push(
+				transform.code,
+				"transformed = " + transform.result + ";"
+			);
 
 		}
 
@@ -104,6 +107,8 @@ THREE.PhongNode.prototype.build = function( builder ) {
 
 		if ( this.alpha ) this.alpha.verify( builder );
 
+		if ( this.light ) this.light.verify( builder, 'light' );
+
 		if ( this.ao ) this.ao.verify( builder );
 		if ( this.ambient ) this.ambient.verify( builder );
 		if ( this.shadow ) this.shadow.verify( builder );
@@ -113,26 +118,28 @@ THREE.PhongNode.prototype.build = function( builder ) {
 		if ( this.normalScale && this.normal ) this.normalScale.verify( builder );
 
 		if ( this.environment ) this.environment.verify( builder );
-		if ( this.reflectivity && this.environment ) this.reflectivity.verify( builder );
+		if ( this.environmentAlpha && this.environment ) this.environmentAlpha.verify( builder );
 
 		// build code
 
-		var color = this.color.buildCode( builder, 'v4' );
+		var color = this.color.buildCode( builder, 'c' );
 		var specular = this.specular.buildCode( builder, 'c' );
 		var shininess = this.shininess.buildCode( builder, 'fv1' );
 
 		var alpha = this.alpha ? this.alpha.buildCode( builder, 'fv1' ) : undefined;
 
-		var ao = this.ao ? this.ao.buildCode( builder, 'c' ) : undefined;
+		var light = this.light ? this.light.buildCode( builder, 'v3', 'light' ) : undefined;
+
+		var ao = this.ao ? this.ao.buildCode( builder, 'fv1' ) : undefined;
 		var ambient = this.ambient ? this.ambient.buildCode( builder, 'c' ) : undefined;
 		var shadow = this.shadow ? this.shadow.buildCode( builder, 'c' ) : undefined;
 		var emissive = this.emissive ? this.emissive.buildCode( builder, 'c' ) : undefined;
 
 		var normal = this.normal ? this.normal.buildCode( builder, 'v3' ) : undefined;
-		var normalScale = this.normalScale && this.normal ? this.normalScale.buildCode( builder, 'fv1' ) : undefined;
+		var normalScale = this.normalScale && this.normal ? this.normalScale.buildCode( builder, 'v2' ) : undefined;
 
-		var environment = this.environment ? this.environment.buildCode( builder.setCache( 'env' ), 'c' ) : undefined;
-		var reflectivity = this.reflectivity && this.environment ? this.reflectivity.buildCode( builder, 'fv1' ) : undefined;
+		var environment = this.environment ? this.environment.buildCode( builder, 'c' ) : undefined;
+		var environmentAlpha = this.environmentAlpha && this.environment ? this.environmentAlpha.buildCode( builder, 'fv1' ) : undefined;
 
 		material.requestAttrib.transparent = alpha != undefined;
 
@@ -140,6 +147,7 @@ THREE.PhongNode.prototype.build = function( builder ) {
 			THREE.ShaderChunk[ "common" ],
 			THREE.ShaderChunk[ "fog_pars_fragment" ],
 			THREE.ShaderChunk[ "bsdfs" ],
+			THREE.ShaderChunk[ "ambient_pars" ],
 			THREE.ShaderChunk[ "lights_pars" ],
 			THREE.ShaderChunk[ "lights_phong_pars_fragment" ],
 			THREE.ShaderChunk[ "shadowmap_pars_fragment" ],
@@ -150,8 +158,12 @@ THREE.PhongNode.prototype.build = function( builder ) {
 				// prevent undeclared normal
 				THREE.ShaderChunk[ "normal_fragment" ],
 
+				// prevent undeclared material
+			"	BlinnPhongMaterial material;",
+			"	material.diffuseColor = vec3( 1.0 );",
+
 				color.code,
-			"	vec4 diffuseColor = " + color.result + ";",
+			"	vec3 diffuseColor = " + color.result + ";",
 			"	ReflectedLight reflectedLight = ReflectedLight( vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ) );",
 
 				THREE.ShaderChunk[ "logdepthbuf_fragment" ],
@@ -186,7 +198,7 @@ THREE.PhongNode.prototype.build = function( builder ) {
 				'normal = perturbNormal2Arb(-vViewPosition,normal,' +
 				normal.result + ',' +
 				new THREE.UVNode().build( builder, 'v2' ) + ',' +
-				( normalScale ? normalScale.result : '1.0' ) + ');'
+				( normalScale ? normalScale.result : 'vec2( 1.0 )' ) + ');'
 			);
 
 		}
@@ -195,50 +207,77 @@ THREE.PhongNode.prototype.build = function( builder ) {
 			THREE.ShaderChunk[ "shadowmap_fragment" ],
 
 			// accumulation
-			THREE.ShaderChunk[ "lights_phong_fragment" ],
+			'material.specularColor = specular;',
+			'material.specularShininess = shininess;',
+			'material.specularStrength = specularStrength;',
+
 			THREE.ShaderChunk[ "lights_template" ]
+		);
+
+		if ( light ) {
+
+			output.push(
+				light.code,
+				"reflectedLight.directDiffuse = " + light.result + ";"
+			);
+
+		}
+
+		// apply color
+		output.push(
+			"reflectedLight.directDiffuse *= diffuseColor;",
+			"reflectedLight.indirectDiffuse *= diffuseColor;"
 		);
 
 		if ( ao ) {
 
-			output.push( ao.code );
-			output.push( "reflectedLight.indirectDiffuse *= " + ao.result + ";" );
+			output.push(
+				ao.code,
+				"reflectedLight.indirectDiffuse *= " + ao.result + ";"
+			);
 
 		}
 
 		if ( ambient ) {
 
-			output.push( ambient.code );
-			output.push( "reflectedLight.indirectDiffuse += " + ambient.result + ";" );
+			output.push(
+				ambient.code,
+				"reflectedLight.indirectDiffuse += " + ambient.result + ";"
+			);
 
 		}
 
 		if ( shadow ) {
 
-			output.push( shadow.code );
-			output.push( "reflectedLight.directDiffuse *= " + shadow.result + ";" );
-			output.push( "reflectedLight.directSpecular *= " + shadow.result + ";" );
+			output.push(
+				shadow.code,
+				"reflectedLight.directDiffuse *= " + shadow.result + ";",
+				"reflectedLight.directSpecular *= " + shadow.result + ";"
+			);
 
 		}
 
 		if ( emissive ) {
 
-			output.push( emissive.code );
-			output.push( "reflectedLight.directDiffuse += " + emissive.result + ";" );
+			output.push(
+				emissive.code,
+				"reflectedLight.directDiffuse += " + emissive.result + ";"
+			);
 
 		}
 
-		output.push( "vec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + reflectedLight.directSpecular + reflectedLight.indirectSpecular;" );
+		output.push( "vec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + reflectedLight.directSpecular;" );
 
 		if ( environment ) {
 
 			output.push( environment.code );
 
-			if ( reflectivity ) {
+			if ( environmentAlpha ) {
 
-				output.push( reflectivity.code );
-
-				output.push( "outgoingLight = mix(" + 'outgoingLight' + "," + environment.result + "," + reflectivity.result + ");" );
+				output.push(
+					environmentAlpha.code,
+					"outgoingLight = mix(" + 'outgoingLight' + "," + environment.result + "," + environmentAlpha.result + ");"
+				);
 
 			}
 			else {

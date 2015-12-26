@@ -6,18 +6,79 @@ THREE.BuilderNode = function( material ) {
 
 	this.material = material;
 
-	this.require = {};
+	this.caches = [];
 	this.isVerify = false;
-	this.cache = '';
+
+	this.addCache();
 
 };
 
 THREE.BuilderNode.prototype = {
 	constructor: THREE.BuilderNode,
 
+	addCache : function( name, requires ) {
+
+		this.caches.push( {
+			name : name || '',
+			requires : requires || {}
+		} );
+
+		return this.updateCache();
+
+	},
+
+	removeCache : function() {
+
+		this.caches.pop();
+
+		return this.updateCache();
+
+	},
+
+	isCache : function( name ) {
+
+		var i = this.caches.length;
+
+		while ( i -- ) {
+
+			if ( this.caches[ i ].name == name ) return true;
+
+		}
+
+		return false;
+
+	},
+
+	updateCache : function() {
+
+		var cache = this.caches[ this.caches.length - 1 ];
+
+		this.cache = cache.name;
+		this.requires = cache.requires;
+
+		return this;
+
+	},
+
+	require : function( name, node ) {
+
+		this.requires[ name ] = node;
+
+		return this;
+
+	},
+
 	include : function( func ) {
 
 		this.material.include( this.shader, func );
+
+		return this;
+
+	},
+
+	colorToVector : function( color ) {
+
+		return color.replace( 'r', 'x' ).replace( 'g', 'y' ).replace( 'b', 'z' ).replace( 'a', 'w' );
 
 	},
 
@@ -27,7 +88,7 @@ THREE.BuilderNode.prototype = {
 
 	},
 
-	getFormat : function( format ) {
+	getFormatName : function( format ) {
 
 		return format.replace( 'c', 'v3' ).replace( /fv1|iv1/, 'v1' );
 
@@ -35,7 +96,7 @@ THREE.BuilderNode.prototype = {
 
 	getFormatLength : function( format ) {
 
-		return parseInt( this.getFormat( format ).substr( 1 ) );
+		return parseInt( this.getFormatName( format ).substr( 1 ) );
 
 	},
 
@@ -49,7 +110,7 @@ THREE.BuilderNode.prototype = {
 
 	format : function( code, from, to ) {
 
-		var format = this.getFormat( from + '=' + to );
+		var format = this.getFormatName( from + '=' + to );
 
 		switch ( format ) {
 			case 'v1=v2': return 'vec2(' + code + ')';
@@ -89,21 +150,13 @@ THREE.BuilderNode.prototype = {
 
 	},
 
-	setCache : function( name ) {
-
-		this.cache = name || '';
-
-		return this;
-
-	},
-
 	getElementByIndex : function( index ) {
 
 		return THREE.BuilderNode.elements[ index ];
 
 	},
 
-	getElementIndex : function( elm ) {
+	getIndexByElement : function( elm ) {
 
 		return THREE.BuilderNode.elements.indexOf( elm );
 

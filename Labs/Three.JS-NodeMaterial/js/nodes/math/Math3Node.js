@@ -14,13 +14,13 @@ THREE.Math3Node = function( a, b, c, method ) {
 
 };
 
-THREE.Math3Node.prototype = Object.create( THREE.TempNode.prototype );
-THREE.Math3Node.prototype.constructor = THREE.Math3Node;
-
 THREE.Math3Node.MIX = 'mix';
 THREE.Math3Node.REFRACT = 'refract';
 THREE.Math3Node.SMOOTHSTEP = 'smoothstep';
 THREE.Math3Node.FACEFORWARD = 'faceforward';
+
+THREE.Math3Node.prototype = Object.create( THREE.TempNode.prototype );
+THREE.Math3Node.prototype.constructor = THREE.Math3Node;
 
 THREE.Math3Node.prototype.getType = function( builder ) {
 
@@ -62,20 +62,19 @@ THREE.Math3Node.prototype.generate = function( builder, output ) {
 			a = this.a.build( builder, type );
 			b = this.b.build( builder, type );
 			c = this.c.build( builder, 'fv1' );
-		break;
+			break;
 
 		case THREE.Math3Node.MIX:
-		case THREE.Math3Node.SMOOTHSTEP:
 			a = this.a.build( builder, type );
 			b = this.b.build( builder, type );
 			c = this.c.build( builder, cl == 1 ? 'fv1' : type );
-		break;
+			break;
 
 		default:
 			a = this.a.build( builder, type );
 			b = this.b.build( builder, type );
 			c = this.c.build( builder, type );
-		break;
+			break;
 
 	}
 
