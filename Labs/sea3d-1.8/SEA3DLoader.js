@@ -162,6 +162,8 @@ THREE.SEA3D.Object3DAnimator.prototype.resume = function() {
 THREE.SEA3D.Object3DAnimator.prototype.setTimeScale = function( val ) {
 
 	this.mixer._timeScale = val;
+	
+	this.mixer.timeScale = val * ( this.currentAnimation ? this.currentAnimation.timeScale : 1 );
 
 };
 
@@ -182,16 +184,15 @@ THREE.SEA3D.Object3DAnimator.prototype.play = function( name, crossfade, offset 
 
 	this.isPlaying = true;
 
-	var clip = this.mixer.clipAction( animation ).setLoop( animation.loop ? THREE.LoopRepeat : THREE.LoopOnce, Infinity ).reset().play();
-	
-	this.mixer.timeScale = animation.timeScale * this.mixer._timeScale;
+	this.mixer.clipAction( animation ).setLoop( animation.loop ? THREE.LoopRepeat : THREE.LoopOnce, Infinity ).reset().play();
+	this.mixer.timeScale = this.mixer._timeScale * this.currentAnimation.timeScale;
 
 	if ( this.previousAnimation ) {
 
 		this.mixer.clipAction( this.previousAnimation ).crossFadeTo( this.mixer.clipAction( this.currentAnimation ), crossfade || 0, true );
 
 	}
-
+	
 	THREE.SEA3D.AnimationHandler.addMixer( this.mixer );
 
 };
