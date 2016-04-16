@@ -13,16 +13,17 @@ THREE.SEA3D = function( config ) {
 
 	this.config = {
 		scripts : true,
+		runScripts : true,
 		autoPlay : false,
 		dummys : true,
 		multiplier : 1,
 		bounding : true,
 		audioRolloffFactor : 10,
-		timeLimit : 10,
-		streaming : true,
 		lights : true,
 		useVertexTexture : true,
-		forceStatic : false
+		forceStatic : false,
+		streaming : true,
+		timeLimit : 10
 	};
 
 	if ( config ) this.loadConfig( config );
