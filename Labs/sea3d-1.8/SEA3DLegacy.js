@@ -528,7 +528,7 @@ THREE.SEA3D.prototype.getSkeletonAnimationLegacy = function( sea, skl ) {
 		if ( sea.tag ) return sea.tag;
 
 		var animations = [],
-			delta = sea.frameRate / 1000,
+			delta = ( 1000 / sea.frameRate ) / 1000,
 			scale = [ 1, 1, 1 ];
 
 		for ( var i = 0; i < sea.sequence.length; i ++ ) {
@@ -537,10 +537,9 @@ THREE.SEA3D.prototype.getSkeletonAnimationLegacy = function( sea, skl ) {
 
 			var start = seq.start;
 			var end = start + seq.count;
-			var ns = sea.name + "/" + seq.name;
 
 			var animation = {
-				name: ns,
+				name: seq.name,
 				repeat: seq.repeat,
 				fps: sea.frameRate,
 				JIT: 0,
@@ -614,7 +613,11 @@ THREE.SEA3D.prototype.getSkeletonAnimationLegacy = function( sea, skl ) {
 
 			}
 
-			animations.push( animation );
+			var anm = THREE.AnimationClip.parseAnimation( animation, skl.tag );
+			anm.loop = seq.repeat;
+			anm.timeScale = 1;
+
+			animations.push( anm );
 
 		}
 
