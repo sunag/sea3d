@@ -161,13 +161,13 @@ THREE.SEA3D.Object3DAnimator.prototype.resume = function() {
 
 THREE.SEA3D.Object3DAnimator.prototype.setTimeScale = function( val ) {
 
-	this.mixer.timeScale = val;
+	this.mixer._timeScale = val;
 
 };
 
 THREE.SEA3D.Object3DAnimator.prototype.getTimeScale = function() {
 
-	return this.mixer.timeScale;
+	return this.mixer._timeScale;
 
 };
 
@@ -183,6 +183,8 @@ THREE.SEA3D.Object3DAnimator.prototype.play = function( name, crossfade, offset 
 	this.isPlaying = true;
 
 	var clip = this.mixer.clipAction( animation ).setLoop( animation.loop ? THREE.LoopRepeat : THREE.LoopOnce, Infinity ).reset().play();
+	
+	this.mixer.timeScale = animation.timeScale * this.mixer._timeScale;
 
 	if ( this.previousAnimation ) {
 
@@ -210,6 +212,8 @@ THREE.SEA3D.Object3DAnimator.prototype.updateAnimations = function() {
 		this.animations[ animations[ i ].name ] = animations[ i ];
 
 	}
+	
+	this.setTimeScale( 1 );
 
 };
 
@@ -236,29 +240,6 @@ THREE.SEA3D.Object3DAnimator.prototype.stop = function() {
 		this.isPlaying = false;
 
 	}
-
-};
-
-THREE.SEA3D.Object3DAnimator.prototype.play = function( name, crossfade, offset ) {
-
-	var animation = this.animations[ name ];
-
-	if ( ! animation ) throw new Error( 'Animation "' + name + '" not found.' );
-
-	this.previousAnimation = this.currentAnimation;
-	this.currentAnimation = animation;
-
-	this.isPlaying = true;
-
-	var clip = this.mixer.clipAction( animation ).setLoop( animation.loop ? THREE.LoopRepeat : THREE.LoopOnce, Infinity ).reset().play();
-
-	if ( this.previousAnimation ) {
-
-		this.mixer.clipAction( this.previousAnimation ).crossFadeTo( this.mixer.clipAction( this.currentAnimation ), crossfade || 0, true );
-
-	}
-
-	THREE.SEA3D.AnimationHandler.addMixer( this.mixer );
 
 };
 
@@ -1230,6 +1211,7 @@ THREE.SEA3D.prototype.readAnimation = function( sea ) {
 
 			var clip = new THREE.AnimationClip( seq.name, - 1, tracks );
 			clip.loop = seq.repeat;
+			clip.timeScale = 1;
 
 			clips.push( clip );
 
@@ -2224,6 +2206,7 @@ THREE.SEA3D.prototype.getSkeletonAnimation = function( sea, skl ) {
 
 		var anm = THREE.AnimationClip.parseAnimation( animation, skl.tag );
 		anm.loop = seq.repeat;
+		anm.timeScale = 1;
 
 		animations.push( anm );
 
@@ -2275,6 +2258,7 @@ THREE.SEA3D.prototype.readVertexAnimation = function( sea ) {
 
 		var anm = THREE.AnimationClip.CreateFromMorphTargetSequence( seq.name, seqTargets, sea.frameRate );
 		anm.loop = seq.repeat;
+		anm.timeScale = 1;
 
 		animations.push( anm );
 
