@@ -33,8 +33,7 @@ THREE.PhongNode.prototype.build = function( builder ) {
 
 			THREE.UniformsLib[ "fog" ],
 			THREE.UniformsLib[ "ambient" ],
-			THREE.UniformsLib[ "lights" ],
-			THREE.UniformsLib[ "shadowmap" ]
+			THREE.UniformsLib[ "lights" ]
 
 		] ) );
 
@@ -48,7 +47,6 @@ THREE.PhongNode.prototype.build = function( builder ) {
 			"#endif",
 
 			THREE.ShaderChunk[ "common" ],
-			THREE.ShaderChunk[ "lights_phong_pars_vertex" ],
 			THREE.ShaderChunk[ "morphtarget_pars_vertex" ],
 			THREE.ShaderChunk[ "skinning_pars_vertex" ],
 			THREE.ShaderChunk[ "shadowmap_pars_vertex" ],
@@ -90,7 +88,6 @@ THREE.PhongNode.prototype.build = function( builder ) {
 			"	vViewPosition = - mvPosition.xyz;",
 
 				THREE.ShaderChunk[ "worldpos_vertex" ],
-				THREE.ShaderChunk[ "lights_phong_vertex" ],
 				THREE.ShaderChunk[ "shadowmap_vertex" ]
 		);
 
@@ -207,8 +204,6 @@ THREE.PhongNode.prototype.build = function( builder ) {
 		output.push( 'material.diffuseColor = ' + ( light ? 'vec3( 1.0 )' : 'diffuseColor' ) + ';' );
 
 		output.push(
-			THREE.ShaderChunk[ "shadowmap_fragment" ],
-
 			// accumulation
 			'material.specularColor = specular;',
 			'material.specularShininess = shininess;',

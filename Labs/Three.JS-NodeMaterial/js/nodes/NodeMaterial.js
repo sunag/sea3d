@@ -108,6 +108,26 @@ THREE.NodeMaterial.prototype.build = function() {
 
 	this.vertexNode = '';
 	this.fragmentNode = '';
+	
+	this.prefixCode = [
+	"#ifdef GL_EXT_shader_texture_lod",
+
+		"#define texCube(a, b) textureCube(a, b)",
+		"#define texCubeBias(a, b, c) textureCubeLodEXT(a, b, c)",
+		
+		"#define tex2D(a, b) texture2D(a, b)",
+		"#define tex2DBias(a, b, c) texture2DLodEXT(a, b, c)",
+		
+	"#else",
+	
+		"#define texCube(a, b) textureCube(a, b)",
+		"#define texCubeBias(a, b, c) textureCube(a, b, c)",
+		
+		"#define tex2D(a, b) texture2D(a, b)",
+		"#define tex2DBias(a, b, c) texture2D(a, b, c)",
+		
+	"#endif"
+	].join( "\n" );
 
 	var builder = new THREE.BuilderNode( this );
 
@@ -192,6 +212,7 @@ THREE.NodeMaterial.prototype.build = function() {
 	this.transparent = this.requestAttrib.transparent;
 
 	this.vertexShader = [
+		this.prefixCode,
 		this.vertexPars,
 		this.getCodePars( this.vertexUniform, 'uniform' ),
 		this.getIncludes( this.consts[ 'vertex' ] ),
@@ -204,6 +225,7 @@ THREE.NodeMaterial.prototype.build = function() {
 	].join( "\n" );
 
 	this.fragmentShader = [
+		this.prefixCode,
 		this.fragmentPars,
 		this.getCodePars( this.fragmentUniform, 'uniform' ),
 		this.getIncludes( this.consts[ 'fragment' ] ),

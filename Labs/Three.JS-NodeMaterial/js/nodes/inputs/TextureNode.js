@@ -35,8 +35,8 @@ THREE.TextureNode.prototype.generate = function( builder, output ) {
 
 	var code;
 
-	if ( bias ) code = 'texture2D(' + tex + ',' + coord + ',' + bias + ')';
-	else code = 'texture2D(' + tex + ',' + coord + ')';
+	if ( bias ) code = 'tex2DBias(' + tex + ',' + coord + ',' + bias + ')';
+	else code = 'tex2D(' + tex + ',' + coord + ')';
 
 	return builder.format( code, this.type, output );
 

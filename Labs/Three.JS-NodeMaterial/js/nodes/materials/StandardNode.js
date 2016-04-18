@@ -33,8 +33,7 @@ THREE.StandardNode.prototype.build = function( builder ) {
 
 			THREE.UniformsLib[ "fog" ],
 			THREE.UniformsLib[ "ambient" ],
-			THREE.UniformsLib[ "lights" ],
-			THREE.UniformsLib[ "shadowmap" ]
+			THREE.UniformsLib[ "lights" ]
 
 		] ) );
 
@@ -48,7 +47,6 @@ THREE.StandardNode.prototype.build = function( builder ) {
 			"#endif",
 
 			THREE.ShaderChunk[ "common" ],
-			THREE.ShaderChunk[ "lights_phong_pars_vertex" ],
 			THREE.ShaderChunk[ "morphtarget_pars_vertex" ],
 			THREE.ShaderChunk[ "skinning_pars_vertex" ],
 			THREE.ShaderChunk[ "shadowmap_pars_vertex" ],
@@ -90,7 +88,6 @@ THREE.StandardNode.prototype.build = function( builder ) {
 			"	vViewPosition = - mvPosition.xyz;",
 
 				THREE.ShaderChunk[ "worldpos_vertex" ],
-				THREE.ShaderChunk[ "lights_phong_vertex" ],
 				THREE.ShaderChunk[ "shadowmap_vertex" ]
 		);
 
@@ -99,7 +96,7 @@ THREE.StandardNode.prototype.build = function( builder ) {
 	}
 	else {
 
-		// autoblur textures for PBR Material effect
+		// blur textures for PBR effect
 
 		var requires = {
 			bias : new THREE.RoughnessToBlinnExponentNode()
@@ -219,11 +216,9 @@ THREE.StandardNode.prototype.build = function( builder ) {
 		output.push( 'material.diffuseColor = ' + ( light ? 'vec3( 1.0 )' : 'diffuseColor * (1.0 - metalnessFactor)' ) + ';' );
 
 		output.push(
-			THREE.ShaderChunk[ "shadowmap_fragment" ],
-
 			// accumulation
 			'material.specularRoughness = clamp( roughnessFactor, 0.001, 1.0 );', // disney's remapping of [ 0, 1 ] roughness to [ 0.001, 1 ]
-			'material.specularColor = mix( vec3( 0.04 ), diffuseColor, metalnessFactor );',
+			'material.specularColor = mix( vec3( 0.001 ), diffuseColor, metalnessFactor );',
 
 			THREE.ShaderChunk[ "lights_template" ]
 		);

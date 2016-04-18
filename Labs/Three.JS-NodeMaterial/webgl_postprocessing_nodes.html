@@ -3,6 +3,7 @@
 	<head>
 		<title>three.js webgl - postprocessing</title>
 		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
 			body {
 				margin: 0px;
@@ -14,7 +15,7 @@
 				text-align:center;
 				overflow: hidden;
 			}
-			
+
 			#info {
 				color: #fff;
 				position: absolute;
@@ -29,8 +30,8 @@
 		<div id="info">
 			<a href="http://threejs.org" target="_blank">three.js</a> - Node-Based Post-Processing
 		</div>
-	
-		<script src="../build/three.min.js"></script>
+
+		<script src="three.js"></script>
 		<script src="js/libs/dat.gui.min.js"></script>
 
 		<script src="js/shaders/CopyShader.js"></script>
@@ -92,10 +93,12 @@
 
 			var param = { example: 'color-adjustment' };
 
-			var lensflare2 = new THREE.TextureLoader().load( 'textures/lensflare2.jpg' );
+			var textureLoader = new THREE.TextureLoader();
+
+			var lensflare2 = textureLoader.load( 'textures/lensflare2.jpg' );
 			lensflare2.wrapS = lensflare2.wrapT = THREE.RepeatWrapping;
 
-			var decalNormal = new THREE.TextureLoader().load( 'textures/decal/decal-normal.jpg' );
+			var decalNormal = textureLoader.load( 'textures/decal/decal-normal.jpg' );
 			decalNormal.wrapS = decalNormal.wrapT = THREE.RepeatWrapping;
 
 			init();
@@ -108,7 +111,7 @@
 				gui = new dat.GUI();
 
 				var example = gui.add( param, 'example', {
-					'basic / brightness': 'brightness',
+					'basic / color-adjustment': 'color-adjustment',
 					'basic / blends': 'blends',
 					'basic / fade': 'fade',
 					'basic / invert': 'invert',

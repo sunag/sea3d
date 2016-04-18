@@ -97,7 +97,11 @@ THREE.TempNode.prototype.isUnique = function() {
 
 THREE.TempNode.prototype.getUuid = function() {
 
-	return this.constructor.uuid || this.uuid;
+	var uuid = this.constructor.uuid || this.uuid;
+
+	if (typeof this.scope == "string") uuid = this.scope + '-' + uuid;
+
+	return uuid;
 
 };
 
