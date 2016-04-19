@@ -2172,7 +2172,7 @@ THREE.SEA3D.prototype.getSkeletonAnimation = function( sea, skl ) {
 		var animation = {
 			name: seq.name,
 			fps: sea.frameRate,
-			length: delta * ( seq.count - 1 ),
+			length: delta * seq.count,
 			hierarchy: []
 		};
 

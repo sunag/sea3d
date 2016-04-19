@@ -543,7 +543,7 @@ THREE.SEA3D.prototype.getSkeletonAnimationLegacy = function( sea, skl ) {
 				repeat: seq.repeat,
 				fps: sea.frameRate,
 				JIT: 0,
-				length: delta * ( seq.count - 1 ),
+				length: delta * seq.count,
 				hierarchy: []
 			};
 
