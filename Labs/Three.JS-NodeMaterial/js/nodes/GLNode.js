@@ -59,7 +59,7 @@ THREE.GLNode.prototype.verifyDepsNode = function( builder, data, output ) {
 
 	var outputLen = builder.getFormatLength( output );
 
-	if ( outputLen > data.outputMax || this.getType( builder ) ) {
+	if ( outputLen > (data.outputMax || 0) || this.getType( builder ) ) {
 
 		data.outputMax = outputLen;
 		data.output = output;

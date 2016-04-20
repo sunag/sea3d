@@ -20,7 +20,8 @@ THREE.NodeMaterial.types = {
 	c : 'vec3',
 	v2 : 'vec2',
 	v3 : 'vec3',
-	v4 : 'vec4'
+	v4 : 'vec4',
+	m4 : 'mat4'
 };
 
 THREE.NodeMaterial.addShortcuts = function( proto, prop, list ) {
@@ -266,7 +267,7 @@ THREE.NodeMaterial.prototype.mergeUniform = function( uniforms ) {
 
 };
 
-THREE.NodeMaterial.prototype.createUniform = function( value, type, ns, needsUpdate ) {
+THREE.NodeMaterial.prototype.createUniform = function( type, value, ns, needsUpdate ) {
 
 	var index = this.uniformList.length;
 
@@ -426,9 +427,9 @@ THREE.NodeMaterial.prototype.getCodePars = function( pars, prefix ) {
 
 };
 
-THREE.NodeMaterial.prototype.getVertexUniform = function( value, type, ns, needsUpdate ) {
+THREE.NodeMaterial.prototype.createVertexUniform = function( type, value, ns, needsUpdate ) {
 
-	var uniform = this.createUniform( value, type, ns, needsUpdate );
+	var uniform = this.createUniform( type, value, ns, needsUpdate );
 
 	this.vertexUniform.push( uniform );
 	this.vertexUniform[ uniform.name ] = uniform;
@@ -439,9 +440,9 @@ THREE.NodeMaterial.prototype.getVertexUniform = function( value, type, ns, needs
 
 };
 
-THREE.NodeMaterial.prototype.getFragmentUniform = function( value, type, ns, needsUpdate ) {
+THREE.NodeMaterial.prototype.createFragmentUniform = function( type, value, ns, needsUpdate ) {
 
-	var uniform = this.createUniform( value, type, ns, needsUpdate );
+	var uniform = this.createUniform( type, value, ns, needsUpdate );
 
 	this.fragmentUniform.push( uniform );
 	this.fragmentUniform[ uniform.name ] = uniform;
