@@ -2227,9 +2227,10 @@ THREE.SEA3D.prototype.readVertexAnimation = function( sea ) {
 			position : []
 		},
 		targets = [],
-		animations = [];
+		animations = [],
+		i, j, l;
 
-	for ( var i = 0, l = sea.frame.length; i < l; i ++ ) {
+	for ( i = 0, l = sea.frame.length; i < l; i ++ ) {
 
 		var frame = sea.frame[ i ];
 
@@ -2246,14 +2247,14 @@ THREE.SEA3D.prototype.readVertexAnimation = function( sea ) {
 
 	}
 
-	for ( var i = 0; i < sea.sequence.length; i ++ ) {
+	for ( i = 0; i < sea.sequence.length; i ++ ) {
 
 		var seq = sea.sequence[ i ];
 		var seqTargets = [];
 
-		for ( var i = 0; i < seq.count; i ++ ) {
+		for ( j = 0; j < seq.count; j ++ ) {
 
-			seqTargets[ i ] = { name: seq.start + i }
+			seqTargets[ j ] = { name: seq.start + j }
 
 		}
 
