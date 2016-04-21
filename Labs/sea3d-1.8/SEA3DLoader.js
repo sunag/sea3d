@@ -166,13 +166,15 @@ THREE.SEA3D.Object3DAnimator.prototype.play = function( name, crossfade, offset 
 	this.previousAnimation = this.currentAnimation;
 	this.currentAnimation = animation;
 
-	this.isPlaying = true;
-
 	this.previousAnimationAction = this.currentAnimationAction;
 	this.currentAnimationAction = this.mixer.clipAction( animation ).setLoop( animation.loop ? THREE.LoopRepeat : THREE.LoopOnce, Infinity ).reset().play();
 	
 	this.mixer.timeScale = this.mixer._timeScale * this.currentAnimation.timeScale;
 
+	if (!this.isPlaying) this.mixer.update(0);
+	
+	this.isPlaying = true;
+	
 	if ( this.previousAnimation ) {
 
 		this.mixer.clipAction( this.previousAnimation ).crossFadeTo( this.mixer.clipAction( this.currentAnimation ), crossfade || 0, true );
