@@ -55,7 +55,7 @@ THREE.TempNode.prototype.build = function( builder, output, uuid, ns ) {
 
 		var name = this.getTemp( builder, uuid );
 		var type = data.output || this.getType( builder );
-console.log( name, type );
+
 		if ( name ) {
 
 			return builder.format( name, type, output );

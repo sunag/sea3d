@@ -20,7 +20,7 @@ THREE.StandardNode.prototype.build = function( builder ) {
 	var material = builder.material;
 	var code;
 
-	material.define( 'STANDARD' );
+	material.define( 'PHYSICAL' );
 	material.define( 'ALPHATEST', '0.0' );
 
 	material.requestAttrib.light = true;
@@ -127,7 +127,9 @@ THREE.StandardNode.prototype.build = function( builder ) {
 		var color = this.color.buildCode( builder, 'c' );
 		var roughness = this.roughness.buildCode( builder, 'fv1' );
 		var metalness = this.metalness.buildCode( builder, 'fv1' );
-
+		
+		var reflectivity = this.reflectivity ? this.reflectivity.buildCode( builder, 'fv1' ) : undefined;
+		
 		var alpha = this.alpha ? this.alpha.buildCode( builder, 'fv1' ) : undefined;
 
 		var light = this.light ? this.light.buildCode( builder, 'v3', 'light' ) : undefined;
@@ -157,9 +159,8 @@ THREE.StandardNode.prototype.build = function( builder ) {
 			THREE.ShaderChunk[ "common" ],
 			THREE.ShaderChunk[ "fog_pars_fragment" ],
 			THREE.ShaderChunk[ "bsdfs" ],
-			THREE.ShaderChunk[ "ambient_pars" ],
 			THREE.ShaderChunk[ "lights_pars" ],
-			THREE.ShaderChunk[ "lights_standard_pars_fragment" ],
+			THREE.ShaderChunk[ "lights_physical_pars_fragment" ],
 			THREE.ShaderChunk[ "shadowmap_pars_fragment" ],
 			THREE.ShaderChunk[ "logdepthbuf_pars_fragment" ],
 		].join( "\n" ) );
@@ -169,7 +170,7 @@ THREE.StandardNode.prototype.build = function( builder ) {
 				THREE.ShaderChunk[ "normal_fragment" ],
 
 				// prevent undeclared material
-			"	StandardMaterial material;",
+			"	PhysicalMaterial material;",
 			"	material.diffuseColor = vec3( 1.0 );",
 
 				color.code,
@@ -217,9 +218,25 @@ THREE.StandardNode.prototype.build = function( builder ) {
 
 		output.push(
 			// accumulation
-			'material.specularRoughness = clamp( roughnessFactor, 0.001, 1.0 );', // disney's remapping of [ 0, 1 ] roughness to [ 0.001, 1 ]
-			'material.specularColor = mix( vec3( 0.001 ), diffuseColor, metalnessFactor );',
-
+			'material.specularRoughness = clamp( roughnessFactor, 0.04, 1.0 );' // disney's remapping of [ 0, 1 ] roughness to [ 0.001, 1 ]
+		);
+		
+		if (reflectivity) {
+		
+			output.push(
+				'material.specularColor = mix( vec3( 0.16 * pow2( ' + reflectivity.builder( builder, 'fv1' ) + ' ) ), diffuseColor, metalnessFactor );'
+			);
+			
+		}
+		else {
+			
+			output.push(
+				'material.specularColor = mix( vec3( 0.04 ), diffuseColor, metalnessFactor );'
+			);
+		
+		}
+		
+		output.push(
 			THREE.ShaderChunk[ "lights_template" ]
 		);
 

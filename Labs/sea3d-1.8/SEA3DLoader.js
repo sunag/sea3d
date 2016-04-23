@@ -63,21 +63,30 @@ THREE.SEA3D.RTT_SIZE = 512;
 //	Animator
 //
 
-THREE.SEA3D.Animator = function( clips ) {
+THREE.SEA3D.Animator = function( clips, mixer ) {
 
 	this.clips = clips;
-
-	this.isPlaying = false;
-
-	this.updateAnimations();
+	
+	this.updateAnimations( mixer );
 
 };
 
-THREE.SEA3D.Animator.prototype.updateAnimations = function() {
+THREE.SEA3D.Animator.prototype.updateAnimations = function( mixer ) {
 
+	if (this.isPlaying) this.stop();
+
+	if ( this.mixer ) THREE.SEA3D.AnimationHandler.removeMixer( this.mixer );
+
+	this.mixer = mixer;
+	
+	this.relative = false;
+	this.isPlaying = false;
+
+	this.setTimeScale( 1 );
+	
 	this.animations = [];
 
-	var animations = this.clips;
+	var animations = this instanceof THREE.SEA3D.Animator ? this.clips : this.geometry.animations;
 
 	for ( var i = 0; i < animations.length; i ++ ) {
 
@@ -85,7 +94,7 @@ THREE.SEA3D.Animator.prototype.updateAnimations = function() {
 		this.animations[ animations[ i ].name ] = animations[ i ];
 
 	}
-
+	
 };
 
 THREE.SEA3D.Animator.prototype.getStateByName = function( name ) {
@@ -100,26 +109,7 @@ THREE.SEA3D.Animator.prototype.getStateNameByIndex = function( index ) {
 
 };
 
-//
-//	Object3D Animator
-//
-
-THREE.SEA3D.Object3DAnimator = function( clips, object3d ) {
-
-	THREE.SEA3D.Animator.call( this, clips );
-
-	this.object3d = object3d;
-
-	this.mixer = new THREE.AnimationMixer( object3d );
-
-	this.relative = false;
-
-};
-
-THREE.SEA3D.Object3DAnimator.prototype = Object.create( THREE.SEA3D.Animator.prototype );
-THREE.SEA3D.Object3DAnimator.prototype.constructor = THREE.SEA3D.Object3DAnimator;
-
-THREE.SEA3D.Object3DAnimator.prototype.pause = function() {
+THREE.SEA3D.Animator.prototype.pause = function() {
 
 	if ( this.isPlaying && this.currentAnimation ) {
 
@@ -131,7 +121,7 @@ THREE.SEA3D.Object3DAnimator.prototype.pause = function() {
 
 };
 
-THREE.SEA3D.Object3DAnimator.prototype.resume = function() {
+THREE.SEA3D.Animator.prototype.resume = function() {
 
 	if ( ! this.isPlaying && this.currentAnimation ) {
 
@@ -143,7 +133,7 @@ THREE.SEA3D.Object3DAnimator.prototype.resume = function() {
 
 };
 
-THREE.SEA3D.Object3DAnimator.prototype.setTimeScale = function( val ) {
+THREE.SEA3D.Animator.prototype.setTimeScale = function( val ) {
 
 	this.mixer._timeScale = val;
 	
@@ -151,23 +141,29 @@ THREE.SEA3D.Object3DAnimator.prototype.setTimeScale = function( val ) {
 
 };
 
-THREE.SEA3D.Object3DAnimator.prototype.getTimeScale = function() {
+THREE.SEA3D.Animator.prototype.getTimeScale = function() {
 
 	return this.mixer._timeScale;
 
 };
 
-THREE.SEA3D.Object3DAnimator.prototype.play = function( name, crossfade, offset ) {
+THREE.SEA3D.Animator.prototype.play = function( name, crossfade, offset, weight ) {
 
 	var animation = this.animations[ name ];
 
+	if (animation == this.currentAnimation && offset === undefined) return;
+	
 	if ( ! animation ) throw new Error( 'Animation "' + name + '" not found.' );
 
 	this.previousAnimation = this.currentAnimation;
 	this.currentAnimation = animation;
 
 	this.previousAnimationAction = this.currentAnimationAction;
-	this.currentAnimationAction = this.mixer.clipAction( animation ).setLoop( animation.loop ? THREE.LoopRepeat : THREE.LoopOnce, Infinity ).reset().play();
+	this.currentAnimationAction = this.mixer.clipAction( animation ).setLoop( animation.loop ? THREE.LoopRepeat : THREE.LoopOnce, Infinity ).reset();
+	
+	if (weight !== undefined) this.currentAnimationAction.setEffectiveWeight( weight );
+	
+	this.currentAnimationAction.play();
 	
 	this.mixer.timeScale = this.mixer._timeScale * this.currentAnimation.timeScale;
 
@@ -185,6 +181,57 @@ THREE.SEA3D.Object3DAnimator.prototype.play = function( name, crossfade, offset 
 
 };
 
+THREE.SEA3D.Animator.prototype.stop = function() {
+
+	if ( this.currentAnimation ) {
+
+		this.currentAnimationAction.stop();
+		
+		THREE.SEA3D.AnimationHandler.removeMixer( this.mixer );
+
+		this.previousAnimation = this.currentAnimation;
+		this.previousAnimationAction = this.currentAnimationAction;
+
+		delete this.currentAnimationAction;
+		delete this.currentAnimation;
+
+		this.isPlaying = false;
+
+	}
+
+};
+
+THREE.SEA3D.Animator.prototype.setRelative = function( val ) {
+
+	if ( this.relative == val ) return;
+
+	this.stop();
+
+	this.relative = val;
+
+};
+
+THREE.SEA3D.Animator.prototype.getRelative = function() {
+
+	return this.relative;
+
+};
+
+//
+//	Object3D Animator
+//
+
+THREE.SEA3D.Object3DAnimator = function( clips, object3d ) {
+
+	this.object3d = object3d;
+
+	THREE.SEA3D.Animator.call( this, clips, new THREE.AnimationMixer( object3d ) );
+
+};
+
+THREE.SEA3D.Object3DAnimator.prototype = Object.create( THREE.SEA3D.Animator.prototype );
+THREE.SEA3D.Object3DAnimator.prototype.constructor = THREE.SEA3D.Object3DAnimator;
+
 THREE.SEA3D.Object3DAnimator.prototype.stop = function() {
 
 	if ( this.currentAnimation ) {
@@ -199,61 +246,20 @@ THREE.SEA3D.Object3DAnimator.prototype.stop = function() {
 
 		}
 
-		this.currentAnimationAction.stop();
-		
-		THREE.SEA3D.AnimationHandler.removeMixer( this.mixer );
-
-		this.previousAnimation = this.currentAnimation;
-		this.previousAnimationAction = this.currentAnimationAction;
-
-		
-		delete this.currentAnimationAction;
-		delete this.currentAnimation;
-
-		this.isPlaying = false;
-
-	}
-
-};
-
-THREE.SEA3D.Object3DAnimator.prototype.updateAnimations = function() {
-
-	if ( this.mixer ) THREE.SEA3D.AnimationHandler.removeMixer( this.mixer );
-
-	this.mixer = new THREE.AnimationMixer( this );
-
-	this.animations = [];
-
-	var animations = this instanceof THREE.SEA3D.Object3DAnimator ? this.clips : this.geometry.animations;
-
-	for ( var i = 0; i < animations.length; i ++ ) {
-
-		this.animations[ i ] = animations[ i ];
-		this.animations[ animations[ i ].name ] = animations[ i ];
-
 	}
 	
-	this.setTimeScale( 1 );
+	THREE.SEA3D.Animator.prototype.stop.call( this );
 
 };
+
 
 THREE.SEA3D.Object3DAnimator.prototype.setRelative = function( val ) {
 
-	if ( this.relative == val ) return;
+	THREE.SEA3D.Animator.prototype.setRelative.call( this, val );
 
-	this.stop();
-
-	this.relative = val;
-
-	this.object3d.setAnimate( this.relative );
-
-	this.mixer = new THREE.AnimationMixer( this.relative ? this.object3d.animate : this.object3d );
-
-};
-
-THREE.SEA3D.Object3DAnimator.prototype.getRelative = function() {
-
-	return this.relative;
+	this.object3d.setAnimator( this.relative );
+	
+	this.updateAnimations( new THREE.AnimationMixer( this.relative ? this.object3d.animate : this.object3d ) );
 
 };
 
@@ -335,9 +341,9 @@ THREE.SEA3D.Object3D.prototype.updateAnimateMatrix = function( force ) {
 
 };
 
-THREE.SEA3D.Object3D.prototype.setAnimate = function( val ) {
+THREE.SEA3D.Object3D.prototype.setAnimator = function( val ) {
 
-	if ( this.getAnimate() == val )
+	if ( this.getAnimator() == val )
 		return;
 
 	if ( val ) {
@@ -358,7 +364,7 @@ THREE.SEA3D.Object3D.prototype.setAnimate = function( val ) {
 
 };
 
-THREE.SEA3D.Object3D.prototype.getAnimate = function() {
+THREE.SEA3D.Object3D.prototype.getAnimator = function() {
 
 	return this.animate != undefined;
 
@@ -383,8 +389,8 @@ THREE.SEA3D.Dummy = function( width, height, depth ) {
 THREE.SEA3D.Dummy.prototype = Object.create( THREE.Mesh.prototype );
 THREE.SEA3D.Dummy.prototype.constructor = THREE.SEA3D.Dummy;
 
-THREE.SEA3D.Dummy.prototype.setAnimate = THREE.SEA3D.Object3D.prototype.setAnimate;
-THREE.SEA3D.Dummy.prototype.getAnimate = THREE.SEA3D.Object3D.prototype.getAnimate;
+THREE.SEA3D.Dummy.prototype.setAnimator = THREE.SEA3D.Object3D.prototype.setAnimator;
+THREE.SEA3D.Dummy.prototype.getAnimator = THREE.SEA3D.Object3D.prototype.getAnimator;
 
 THREE.SEA3D.Dummy.MATERIAL = new THREE.MeshBasicMaterial( { wireframe: true, color: THREE.SEA3D.HELPER_COLOR } );
 
@@ -420,8 +426,8 @@ THREE.SEA3D.Mesh = function( geometry, material ) {
 THREE.SEA3D.Mesh.prototype = Object.create( THREE.Mesh.prototype );
 THREE.SEA3D.Mesh.prototype.constructor = THREE.SEA3D.Mesh;
 
-THREE.SEA3D.Mesh.prototype.setAnimate = THREE.SEA3D.Object3D.prototype.setAnimate;
-THREE.SEA3D.Mesh.prototype.getAnimate = THREE.SEA3D.Object3D.prototype.getAnimate;
+THREE.SEA3D.Mesh.prototype.setAnimator = THREE.SEA3D.Object3D.prototype.setAnimator;
+THREE.SEA3D.Mesh.prototype.getAnimator = THREE.SEA3D.Object3D.prototype.getAnimator;
 
 THREE.SEA3D.Mesh.prototype.setWeight = function( name, val ) {
 
@@ -456,17 +462,15 @@ THREE.SEA3D.SkinnedMesh = function( geometry, material, useVertexTexture ) {
 
 	THREE.SkinnedMesh.call( this, geometry, material, useVertexTexture );
 
-	this.isPlaying = false;
-
-	this.updateAnimations();
+	this.updateAnimations( new THREE.AnimationMixer( this ) );
 
 };
 
 THREE.SEA3D.SkinnedMesh.prototype = Object.create( THREE.SkinnedMesh.prototype );
 THREE.SEA3D.SkinnedMesh.prototype.constructor = THREE.SEA3D.SkinnedMesh;
 
-THREE.SEA3D.SkinnedMesh.prototype.setAnimate = THREE.SEA3D.Object3D.prototype.setAnimate;
-THREE.SEA3D.SkinnedMesh.prototype.getAnimate = THREE.SEA3D.Object3D.prototype.getAnimate;
+THREE.SEA3D.SkinnedMesh.prototype.setAnimator = THREE.SEA3D.Object3D.prototype.setAnimator;
+THREE.SEA3D.SkinnedMesh.prototype.getAnimator = THREE.SEA3D.Object3D.prototype.getAnimator;
 
 THREE.SEA3D.SkinnedMesh.prototype.setTimeScale = THREE.SEA3D.Object3DAnimator.prototype.setTimeScale;
 THREE.SEA3D.SkinnedMesh.prototype.getTimeScale = THREE.SEA3D.Object3DAnimator.prototype.getTimeScale;
@@ -502,12 +506,6 @@ THREE.SEA3D.SkinnedMesh.prototype.copy = function( source ) {
 	
 	if ( this.animation ) this.animation = source.animation.clone( this );
 
-	if ( this.geometry.animations ) {
-
-		this.updateAnimations();
-
-	}
-
 	return this;
 
 };
@@ -522,17 +520,15 @@ THREE.SEA3D.VertexAnimationMesh = function( geometry, material ) {
 
 	this.type = 'MorphAnimMesh';
 
-	this.mixer = new THREE.AnimationMixer( this );
-
-	this.updateAnimations();
+	this.updateAnimations( new THREE.AnimationMixer( this ) );
 
 };
 
 THREE.SEA3D.VertexAnimationMesh.prototype = Object.create( THREE.Mesh.prototype );
 THREE.SEA3D.VertexAnimationMesh.prototype.constructor = THREE.SEA3D.VertexAnimationMesh;
 
-THREE.SEA3D.VertexAnimationMesh.prototype.setAnimate = THREE.SEA3D.Object3D.prototype.setAnimate;
-THREE.SEA3D.VertexAnimationMesh.prototype.getAnimate = THREE.SEA3D.Object3D.prototype.getAnimate;
+THREE.SEA3D.VertexAnimationMesh.prototype.setAnimator = THREE.SEA3D.Object3D.prototype.setAnimator;
+THREE.SEA3D.VertexAnimationMesh.prototype.getAnimator = THREE.SEA3D.Object3D.prototype.getAnimator;
 
 THREE.SEA3D.VertexAnimationMesh.prototype.setTimeScale = THREE.SEA3D.Object3DAnimator.prototype.setTimeScale;
 THREE.SEA3D.VertexAnimationMesh.prototype.getTimeScale = THREE.SEA3D.Object3DAnimator.prototype.getTimeScale;
@@ -570,8 +566,8 @@ THREE.SEA3D.Camera = function( fov, aspect, near, far ) {
 THREE.SEA3D.Camera.prototype = Object.create( THREE.PerspectiveCamera.prototype );
 THREE.SEA3D.Camera.prototype.constructor = THREE.SEA3D.Camera;
 
-THREE.SEA3D.Camera.prototype.setAnimate = THREE.SEA3D.Object3D.prototype.setAnimate;
-THREE.SEA3D.Camera.prototype.getAnimate = THREE.SEA3D.Object3D.prototype.getAnimate;
+THREE.SEA3D.Camera.prototype.setAnimator = THREE.SEA3D.Object3D.prototype.setAnimator;
+THREE.SEA3D.Camera.prototype.getAnimator = THREE.SEA3D.Object3D.prototype.getAnimator;
 
 THREE.SEA3D.Camera.prototype.setTimeScale = THREE.SEA3D.Object3DAnimator.prototype.setTimeScale;
 THREE.SEA3D.Camera.prototype.getTimeScale = THREE.SEA3D.Object3DAnimator.prototype.getTimeScale;
@@ -609,8 +605,8 @@ THREE.SEA3D.PointLight = function( hex, intensity, distance, decay ) {
 THREE.SEA3D.PointLight.prototype = Object.create( THREE.PointLight.prototype );
 THREE.SEA3D.PointLight.prototype.constructor = THREE.SEA3D.PointLight;
 
-THREE.SEA3D.PointLight.prototype.setAnimate = THREE.SEA3D.Object3D.prototype.setAnimate;
-THREE.SEA3D.PointLight.prototype.getAnimate = THREE.SEA3D.Object3D.prototype.getAnimate;
+THREE.SEA3D.PointLight.prototype.setAnimator = THREE.SEA3D.Object3D.prototype.setAnimator;
+THREE.SEA3D.PointLight.prototype.getAnimator = THREE.SEA3D.Object3D.prototype.getAnimator;
 
 THREE.SEA3D.PointLight.prototype.setTimeScale = THREE.SEA3D.Object3DAnimator.prototype.setTimeScale;
 THREE.SEA3D.PointLight.prototype.getTimeScale = THREE.SEA3D.Object3DAnimator.prototype.getTimeScale;
@@ -1062,7 +1058,7 @@ THREE.SEA3D.prototype.applyDefaultAnimation = function( sea, animatorClass ) {
 
 				if ( this.config.autoPlay ) {
 
-					obj.animation.play( obj.animation.getStateNameByIndex( 0 ) );
+					obj.animation.play( 0 );
 
 				}
 
@@ -1470,7 +1466,7 @@ THREE.SEA3D.prototype.readMesh = function( sea ) {
 
 		if ( this.config.autoPlay && skeletonAnimation ) {
 
-			mesh.play( mesh.animations[ 0 ].name );
+			mesh.play( 0 );
 
 		}
 
@@ -1480,7 +1476,7 @@ THREE.SEA3D.prototype.readMesh = function( sea ) {
 
 		if ( this.config.autoPlay ) {
 
-			mesh.play( mesh.animations[ 0 ].name );
+			mesh.play( 0 );
 
 		}
 

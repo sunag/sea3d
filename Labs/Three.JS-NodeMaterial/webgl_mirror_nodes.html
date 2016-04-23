@@ -188,9 +188,10 @@
 					THREE.Math3Node.MIX
 				);
 				
-				groundMirrorMaterial = new THREE.PhongNodeMaterial();
+				groundMirrorMaterial = new THREE.StandardNodeMaterial();
 				groundMirrorMaterial.environment = mirror;
-				groundMirrorMaterial.environmentAlpha = mask;
+				groundMirrorMaterial.environmentAlpha = mask; // to PhongNodeMaterial
+				groundMirrorMaterial.metalness = mask; // to StandardNodeMaterial
 				groundMirrorMaterial.normal = normal;
 				//groundMirrorMaterial.normalScale = new THREE.FloatNode( 1 );
 				groundMirrorMaterial.build();

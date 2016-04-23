@@ -31,7 +31,7 @@ THREE.RoughnessToBlinnExponentNode.prototype.generate = function( builder, outpu
 
 	if ( builder.isShader( 'fragment' ) ) {
 
-		if ( material.isDefined( 'STANDARD' ) ) {
+		if ( material.isDefined( 'PHYSICAL' ) ) {
 
 			builder.include( THREE.RoughnessToBlinnExponentNode.getSpecularMIPLevel );
 			
@@ -40,7 +40,7 @@ THREE.RoughnessToBlinnExponentNode.prototype.generate = function( builder, outpu
 		}
 		else {
 
-			console.warn( "THREE.RoughnessToBlinnExponentNode is only compatible with StandardMaterial." );
+			console.warn( "THREE.RoughnessToBlinnExponentNode is only compatible with PhysicalMaterial." );
 			
 			return builder.format( '0.0', this.type, output );
 			
