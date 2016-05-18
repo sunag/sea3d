@@ -150,18 +150,18 @@ THREE.SEA3D.prototype.readRigidBodyBase = function( sea ) {
 		transform;
 
 	if ( sea.target ) {
-	
+
 		transform = THREE.AMMO.getTransformFromMatrix( sea.target.tag.matrix );
-		
+
 	}
 	else {
 
 		THREE.SEA3D.MTXBUF.elements.set( sea.transform );
-		
+
 		transform = THREE.AMMO.getTransformFromMatrix( THREE.SEA3D.MTXBUF );
 
 	}
-	
+
 	var motionState = new Ammo.btDefaultMotionState( transform );
 	var localInertia = new Ammo.btVector3( 0, 0, 0 );
 
@@ -174,7 +174,7 @@ THREE.SEA3D.prototype.readRigidBodyBase = function( sea ) {
 	info.set_m_angularDamping( sea.angularDamping );
 
 	var rb = new Ammo.btRigidBody( info );
-	
+
 	this.domain.rigidBodies = this.rigidBodies = this.rigidBodies || [];
 	this.rigidBodies.push( this.objects[ "rb/" + sea.name ] = sea.tag = rb );
 
@@ -245,7 +245,7 @@ THREE.SEA3D.prototype.readCarController = function( sea ) {
 				target.parent.remove( target );
 
 			}
-			
+
 			if ( this.container ) {
 
 				this.container.add( target );
@@ -398,10 +398,10 @@ THREE.SEA3D.Domain.prototype.enabledPhysics = function( enabled ) {
 
 	var i = this.rigidBodies ? this.rigidBodies.length : 0;
 
-	while ( i-- ) {
-	
-		THREE.AMMO.setEnabledRigidBody( this.rigidBodies[i], enabled );
-		
+	while ( i -- ) {
+
+		THREE.AMMO.setEnabledRigidBody( this.rigidBodies[ i ], enabled );
+
 	}
 
 };
@@ -421,42 +421,42 @@ THREE.SEA3D.Domain.prototype.applyContainerTransform = function() {
 };
 
 THREE.SEA3D.Domain.prototype.applyTransform = function( matrix ) {
-	
+
 	var mtx = THREE.SEA3D.MTXBUF, vec = THREE.SEA3D.VECBUF;
-	
+
 	var i = this.rigidBodies ? this.rigidBodies.length : 0,
 		childs = this.container ? this.container.children : [],
 		targets = [];
-		
-	while ( i-- ) {
-	
+
+	while ( i -- ) {
+
 		var rb = this.rigidBodies[ i ],
 			target = THREE.AMMO.getTargetByRigidBody( rb ),
 			transform = rb.getWorldTransform(),
 			transformMatrix = THREE.AMMO.getMatrixFromTransform( transform );
-		
+
 		transformMatrix.multiplyMatrices( transformMatrix, matrix );
-		
+
 		transform = THREE.AMMO.getTransformFromMatrix( transformMatrix );
-		
+
 		rb.setWorldTransform( transform );
-		
-		if (target) targets.push( target );
-		
+
+		if ( target ) targets.push( target );
+
 	}
-	
-	for (i = 0; i < childs.length; i++) {
-		
+
+	for ( i = 0; i < childs.length; i ++ ) {
+
 		var obj3d = childs[ i ];
-		
-		if ( targets.indexOf( obj3d ) > -1 ) continue;
-		
+
+		if ( targets.indexOf( obj3d ) > - 1 ) continue;
+
 		obj3d.updateMatrix();
-		
+
 		mtx.copy( obj3d.matrix );
-		
+
 		mtx.multiplyMatrices( mtx, matrix );
-		
+
 		obj3d.position.setFromMatrixPosition( mtx );
 		obj3d.scale.setFromMatrixScale( mtx );
 
@@ -466,26 +466,26 @@ THREE.SEA3D.Domain.prototype.applyTransform = function( matrix ) {
 		obj3d.rotation.setFromRotationMatrix( mtx );
 
 	}
-	
+
 };
 
 //
 //	Extension
 //
 
-SEA3D.Domain.prototype.getShape = THREE.SEA3D.prototype.getShape = function( name ) {
+THREE.SEA3D.Domain.prototype.getShape = THREE.SEA3D.prototype.getShape = function( name ) {
 
 	return this.objects[ "shpe/" + name ];
 
 };
 
-SEA3D.Domain.prototype.getRigidBody = THREE.SEA3D.prototype.getRigidBody = function( name ) {
+THREE.SEA3D.Domain.prototype.getRigidBody = THREE.SEA3D.prototype.getRigidBody = function( name ) {
 
 	return this.objects[ "rb/" + name ];
 
 };
 
-SEA3D.Domain.prototype.getConstraint = THREE.SEA3D.prototype.getConstraint = function( name ) {
+THREE.SEA3D.Domain.prototype.getConstraint = THREE.SEA3D.prototype.getConstraint = function( name ) {
 
 	return this.objects[ "ctnt/" + name ];
 
@@ -494,16 +494,16 @@ SEA3D.Domain.prototype.getConstraint = THREE.SEA3D.prototype.getConstraint = fun
 THREE.SEA3D.EXTENSIONS_LOADER.push( {
 
 	parse : function() {
-		
+
 		delete this.shapes;
 		delete this.rigidBodies;
 		delete this.vehicles;
 		delete this.constraints;
-	
+
 	},
 
-	setTypeRead : function () {
-	
+	setTypeRead : function() {
+
 		// CONFIG
 
 		this.config.physics = this.config.physics !== undefined ? this.config.physics : true;
@@ -535,12 +535,13 @@ THREE.SEA3D.EXTENSIONS_LOADER.push( {
 			this.file.typeRead[ SEA3D.CarController.prototype.type ] = this.readCarController;
 
 		}
+
 	}
 } );
 
 THREE.SEA3D.EXTENSIONS_DOMAIN.push( {
-	
-	dispose : function () {
+
+	dispose : function() {
 
 		var i;
 

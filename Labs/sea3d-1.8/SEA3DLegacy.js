@@ -682,7 +682,7 @@ THREE.SEA3D.prototype.onHead = function( args ) {
 
 };
 
-THREE.SEA3D.EXTENSIONS_LOADER.push( {setTypeRead:function() {
+THREE.SEA3D.EXTENSIONS_LOADER.push( { setTypeRead: function() {
 
 	// CONFIG
 
@@ -690,4 +690,4 @@ THREE.SEA3D.EXTENSIONS_LOADER.push( {setTypeRead:function() {
 
 	this.file.typeRead[ SEA3D.Skeleton.prototype.type ] = this.readSkeleton;
 
-}} );
+} } );

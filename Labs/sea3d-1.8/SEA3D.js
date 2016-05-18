@@ -66,11 +66,11 @@ SEA3D.Stream.ASSET = 200;
 SEA3D.Stream.GROUP = 255;
 
 SEA3D.Stream.BLEND_MODE = [
-	"normal","add","subtract","multiply","dividing","mix","alpha","screen","darken",
-	"overlay","colorburn","linearburn","lighten","colordodge","lineardodge",
-	"softlight","hardlight","pinlight","spotlight","spotlightblend","hardmix",
-	"average","difference","exclusion","hue","saturation","color","value",
-	"linearlight","grainextract","reflect","glow","darkercolor","lightercolor","phoenix","negation"
+	"normal", "add", "subtract", "multiply", "dividing", "mix", "alpha", "screen", "darken",
+	"overlay", "colorburn", "linearburn", "lighten", "colordodge", "lineardodge",
+	"softlight", "hardlight", "pinlight", "spotlight", "spotlightblend", "hardmix",
+	"average", "difference", "exclusion", "hue", "saturation", "color", "value",
+	"linearlight", "grainextract", "reflect", "glow", "darkercolor", "lightercolor", "phoenix", "negation"
 ];
 
 SEA3D.Stream.INTERPOLATION_TABLE =	[
@@ -887,286 +887,6 @@ SEA3D.Timer.prototype = {
 		this.time = Date.now();
 
 	}
-};
-
-//
-//	Domain
-//
-
-SEA3D.Domain = function( id ) {
-
-	this.id = id;
-	this.scripts = [];
-	this.global = {};
-	this.events = new SEA3D.EventDispatcher();
-
-};
-
-SEA3D.Domain.prototype = {
-	constructor: SEA3D.Domain,
-
-	add : function( src ) {
-
-		this.scripts.push( src );
-
-	},
-
-	remove : function( src ) {
-
-		this.scripts.splice( this.scripts.indexOf( src ), 1 );
-
-	},
-
-	contains : function( src ) {
-
-		return this.scripts.indexOf( src ) != - 1;
-
-	},
-
-	addEvent : function( type, listener ) {
-
-		this.events.addEventListener( type, listener );
-
-	},
-
-	hasEvent : function( type, listener ) {
-
-		return this.events.hasEventListener( type, listener );
-
-	},
-
-	removeEvent : function( type, listener ) {
-
-		this.events.removeEventListener( type, listener );
-
-	},
-
-	print : function() {
-
-		console.log.apply( console, arguments );
-
-	},
-
-	watch : function() {
-
-		console.log.apply( console, 'watch:', arguments );
-
-	},
-
-	getReference : function( ns ) {
-
-		return eval( ns );
-
-	},
-
-	dispatchEvent : function( event ) {
-
-		event.domain = this;
-
-		var scripts = this.scripts.concat(),
-			i = scripts.length;
-
-		while ( i -- ) {
-
-			scripts[ i ].dispatchEvent( event );
-
-		}
-
-		this.events.dispatchEvent( event );
-
-	},
-
-	dispose : function() {
-
-		var scripts = this.scripts.concat(),
-			i = scripts.length;
-
-		while ( i -- ) {
-
-			scripts[ i ].dispose();
-
-		}
-
-		this.dispatchEvent( { type : "dispose" } );
-
-	}
-};
-
-//
-//	Domain Manager
-//
-
-SEA3D.DomainManager = function( autoDisposeRootDomain ) {
-
-	this.domains = [];
-	this.autoDisposeRootDomain = autoDisposeRootDomain == undefined ? true : false;
-
-};
-
-SEA3D.DomainManager.prototype = {
-	constructor: SEA3D.DomainManager,
-
-	onDisposeDomain : function( e ) {
-
-		this.remove( e.domain );
-
-		if ( this.autoDisposeRootDomain && this.domains.length == 1 ) {
-
-			this.dispose();
-
-		}
-
-	},
-
-	add : function( domain ) {
-
-		this._onDisposeDomain = this._onDisposeDomain || this.onDisposeDomain.bind( this );
-
-		domain.on( "dispose", this._onDisposeDomain );
-
-		this.domains.push( domain );
-
-	},
-
-	remove : function( domain ) {
-
-		domain.removeEvent( "dispose", this._onDisposeDomain );
-
-		this.domains.splice( this.domains.indexOf( domain ), 1 );
-
-	},
-
-	contains : function( domain ) {
-
-		return this.domains.indexOf( domain ) != - 1;
-
-	},
-
-	dispose : function() {
-
-		var domains = this.domains.concat(),
-			i = domains.length;
-
-		while ( i -- ) {
-
-			domains[ i ].dispose();
-
-		}
-
-	}
-};
-
-
-//
-//	Script
-//
-
-SEA3D.Script = function( domain, root ) {
-
-	domain = domain || new SEA3D.Domain();
-	domain.add( this );
-
-	var events = new SEA3D.EventDispatcher();
-
-	this.getId = function() {
-
-		return domain.id;
-
-	}
-
-	this.isRoot = function() {
-
-		return root;
-
-	}
-
-	this.addEvent = function( type, listener ) {
-
-		events.addEventListener( type, listener );
-
-	}
-
-	this.hasEvent = function( type, listener ) {
-
-		return events.hasEventListener( type, listener );
-
-	}
-
-	this.removeEvent = function( type, listener ) {
-
-		events.removeEventListener( type, listener );
-
-	}
-
-	this.dispatchEvent = function( event ) {
-
-		event.script = this;
-
-		events.dispatchEvent( event );
-
-	}
-
-	this.dispose = function() {
-
-		domain.remove( this );
-
-		if ( root ) domain.dispose();
-
-		this.dispatchEvent( { type : "dispose" } );
-
-	}
-
-};
-
-//
-//	Script Manager
-//
-
-SEA3D.ScriptManager = function() {
-
-	this.scripts = [];
-
-	var onDisposeScript = ( function( e ) {
-
-		this.remove( e.script );
-
-	} ).bind( this );
-
-	this.add = function( src ) {
-
-		src.addEvent( "dispose", onDisposeScript );
-
-		this.scripts.push( src );
-
-	}
-
-	this.remove = function( src ) {
-
-		src.removeEvent( "dispose", onDisposeScript );
-
-		this.scripts.splice( this.scripts.indexOf( src ), 1 );
-
-	}
-
-	this.contains = function( src ) {
-
-		return this.scripts.indexOf( src ) > - 1;
-
-	}
-
-	this.dispatchEvent = function( event ) {
-
-		var scripts = this.scripts.concat(),
-			i = scripts.length;
-
-		while ( i -- ) {
-
-			scripts[ i ].dispatchEvent( event );
-
-		}
-
-	}
-
 };
 
 //
@@ -2463,6 +2183,27 @@ SEA3D.Camera.prototype.constructor = SEA3D.Camera;
 SEA3D.Camera.prototype.type = "cam";
 
 //
+//	Orthographic Camera
+//
+
+SEA3D.OrthographicCamera = function( name, data, sea3d ) {
+
+	SEA3D.Object3D.call( this, name, data, sea3d );
+
+	this.transform = data.readMatrix();
+
+	this.height = data.readFloat();
+
+	data.readTags( this.readTag.bind( this ) );
+
+};
+
+SEA3D.OrthographicCamera.prototype = Object.create( SEA3D.Object3D.prototype );
+SEA3D.OrthographicCamera.prototype.constructor = SEA3D.OrthographicCamera;
+
+SEA3D.OrthographicCamera.prototype.type = "camo";
+
+//
 //	Joint Object
 //
 
@@ -2628,7 +2369,7 @@ SEA3D.Material = function( name, data, sea3d ) {
 	this.alpha = 1;
 	this.blendMode = "normal";
 	this.alphaThreshold = .5;
-	
+
 	this.physical = false;
 	this.anisotropy = false;
 
@@ -2672,7 +2413,7 @@ SEA3D.Material = function( name, data, sea3d ) {
 					gloss: data.readFloat()
 				};
 				break;
-			
+
 			case SEA3D.Material.PHYSICAL:
 				this.physical = true;
 				tech = {
@@ -2681,35 +2422,35 @@ SEA3D.Material = function( name, data, sea3d ) {
 					metalness: data.readFloat()
 				};
 				break;
-			
+
 			case SEA3D.Material.ANISOTROPIC:
 				this.anisotropy = true;
 				break;
-			
+
 			case SEA3D.Material.COMPOSITE_TEXTURE:
 				tech = {
 					composite: sea3d.getObject( data.readUInt() )
 				};
 				break;
-				
+
 			case SEA3D.Material.DIFFUSE_MAP:
 				tech = {
 					texture: sea3d.getObject( data.readUInt() )
 				};
 				break;
-				
+
 			case SEA3D.Material.SPECULAR_MAP:
 				tech = {
 					texture: sea3d.getObject( data.readUInt() )
 				};
 				break;
-				
+
 			case SEA3D.Material.NORMAL_MAP:
 				tech = {
 					texture: sea3d.getObject( data.readUInt() )
 				};
 				break;
-				
+
 			case SEA3D.Material.REFLECTION:
 			case SEA3D.Material.FRESNEL_REFLECTION:
 				tech = {
@@ -2724,7 +2465,7 @@ SEA3D.Material = function( name, data, sea3d ) {
 
 				}
 				break;
-				
+
 			case SEA3D.Material.REFRACTION:
 				tech = {
 					texture: sea3d.getObject( data.readUInt() ),
@@ -2732,7 +2473,7 @@ SEA3D.Material = function( name, data, sea3d ) {
 					ior: data.readFloat()
 				};
 				break;
-				
+
 			case SEA3D.Material.RIM:
 				tech = {
 					color: data.readUInt24(),
@@ -2741,7 +2482,7 @@ SEA3D.Material = function( name, data, sea3d ) {
 					blendMode: data.readBlendMode()
 				};
 				break;
-				
+
 			case SEA3D.Material.LIGHT_MAP:
 				tech = {
 					texture: sea3d.getObject( data.readUInt() ),
@@ -2749,7 +2490,7 @@ SEA3D.Material = function( name, data, sea3d ) {
 					blendMode: data.readBlendMode()
 				};
 				break;
-				
+
 			case SEA3D.Material.DETAIL_MAP:
 				tech = {
 					texture: sea3d.getObject( data.readUInt() ),
@@ -2757,7 +2498,7 @@ SEA3D.Material = function( name, data, sea3d ) {
 					blendMode: data.readBlendMode()
 				};
 				break;
-				
+
 			case SEA3D.Material.CEL:
 				tech = {
 					color: data.readUInt24(),
@@ -2767,14 +2508,14 @@ SEA3D.Material = function( name, data, sea3d ) {
 					smoothness: data.readFloat()
 				};
 				break;
-				
+
 			case SEA3D.Material.TRANSLUCENT:
 				tech = {
 					translucency: data.readFloat(),
 					scattering: data.readFloat()
 				};
 				break;
-				
+
 			case SEA3D.Material.BLEND_NORMAL_MAP:
 				methodAttrib = data.readUByte();
 
@@ -2801,7 +2542,7 @@ SEA3D.Material = function( name, data, sea3d ) {
 
 				tech.animate = methodAttrib & 2;
 				break;
-				
+
 			case SEA3D.Material.MIRROR_REFLECTION:
 				tech = {
 					texture: sea3d.getObject( data.readUInt() ),
@@ -2826,7 +2567,7 @@ SEA3D.Material = function( name, data, sea3d ) {
 					color: data.readUInt24()
 				};
 				break;
-				
+
 			case SEA3D.Material.EMISSIVE_MAP:
 				tech = {
 					texture: sea3d.getObject( data.readUInt() )
@@ -2839,7 +2580,7 @@ SEA3D.Material = function( name, data, sea3d ) {
 					texture: sea3d.getObject( data.readUInt() )
 				};
 				break;
-				
+
 			case SEA3D.Material.VERTEX_COLOR:
 				tech = {
 					blendMode: data.readBlendMode()
@@ -3604,6 +3345,7 @@ SEA3D.File = function( config ) {
 	this.addClass( SEA3D.SkeletonAnimation, true );
 	this.addClass( SEA3D.JointObject );
 	this.addClass( SEA3D.Camera );
+	this.addClass( SEA3D.OrthographicCamera );
 	this.addClass( SEA3D.Morph, true );
 	this.addClass( SEA3D.VertexAnimation, true );
 	this.addClass( SEA3D.CubeMap, true );
@@ -4033,115 +3775,5 @@ SEA3D.File.prototype.load = function( url ) {
 	}
 
 	xhr.send();
-
-};
-
-/**
- * EventDispatcher.js
- * @author mrdoob / http://mrdoob.com/
- * @sunag sunag / http://www.sunag.com.br/
- */
-
-SEA3D.EventDispatcher = function() {}
-
-SEA3D.EventDispatcher.prototype = {
-
-	constructor: SEA3D.EventDispatcher,
-
-	addEventListener: function( type, listener ) {
-
-		if ( this._listeners === undefined ) this._listeners = {};
-
-		var listeners = this._listeners;
-
-		if ( listeners[ type ] === undefined ) {
-
-			listeners[ type ] = [];
-
-		}
-
-		if ( listeners[ type ].indexOf( listener ) === - 1 ) {
-
-			listeners[ type ].push( listener );
-
-		}
-
-	},
-
-	hasEventListener: function( type, listener ) {
-
-		if ( this._listeners === undefined ) return false;
-
-		var listeners = this._listeners;
-
-		if ( listeners[ type ] !== undefined && listeners[ type ].indexOf( listener ) !== - 1 ) {
-
-			return true;
-
-		}
-
-		return false;
-
-	},
-
-	removeEventListener: function( type, listener ) {
-
-		if ( this._listeners === undefined ) return;
-
-		var listeners = this._listeners;
-		var listenerArray = listeners[ type ];
-
-		if ( listenerArray !== undefined ) {
-
-			var index = listenerArray.indexOf( listener );
-
-			if ( index !== - 1 ) {
-
-				listenerArray.splice( index, 1 );
-
-			}
-
-		}
-
-	},
-
-	dispatchEvent: function( event ) {
-
-		if ( this._listeners === undefined ) return;
-
-		var listeners = this._listeners;
-		var listenerArray = listeners[ event.type ];
-
-		if ( listenerArray !== undefined ) {
-
-			event.target = this;
-
-			var array = [];
-			var length = listenerArray.length;
-
-			for ( var i = 0; i < length; i ++ ) {
-
-				array[ i ] = listenerArray[ i ];
-
-			}
-
-			for ( var i = 0; i < length; i ++ ) {
-
-				array[ i ].call( this, event );
-
-			}
-
-		}
-
-	}
-
-};
-
-SEA3D.EventDispatcher.apply = function( object ) {
-
-	object.addEventListener = SEA3D.EventDispatcher.prototype.addEvenListener;
-	object.hasEventListener = SEA3D.EventDispatcher.prototype.hasEventListener;
-	object.removeEventListener = SEA3D.EventDispatcher.prototype.removeEventListener;
-	object.dispatchEvent = SEA3D.EventDispatcher.prototype.dispatchEvent;
 
 };
