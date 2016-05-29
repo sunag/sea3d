@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{06E62716-C8AC-4DE7-96F4-DD4C15F7F11A}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>test</RootNamespace>
+    <ProjectName>SEA3DLossyCompression</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="o3dgc\o3dgcArithmeticCodec.cpp" />
+    <ClCompile Include="o3dgc\o3dgcDynamicVectorDecoder.cpp" />
+    <ClCompile Include="o3dgc\o3dgcDynamicVectorEncoder.cpp" />
+    <ClCompile Include="o3dgc\o3dgcTools.cpp" />
+    <ClCompile Include="o3dgc\o3dgcTriangleFans.cpp" />
+    <ClCompile Include="SEA3D\ByteArray.cc" />
+    <ClCompile Include="SEA3D\DataTable.cc" />
+    <ClCompile Include="SEA3D\Deflate\adler32.c" />
+    <ClCompile Include="SEA3D\Deflate\crc32.c" />
+    <ClCompile Include="SEA3D\Deflate\deflate.c" />
+    <ClCompile Include="SEA3D\Deflate\infback.c" />
+    <ClCompile Include="SEA3D\Deflate\inffast.c" />
+    <ClCompile Include="SEA3D\Deflate\inflate.c" />
+    <ClCompile Include="SEA3D\Deflate\inftrees.c" />
+    <ClCompile Include="SEA3D\Deflate\trees.c" />
+    <ClCompile Include="SEA3D\Deflate\uncompr.c" />
+    <ClCompile Include="SEA3D\Deflate\zutil.c" />
+    <ClCompile Include="SEA3D\LZMA\lzmadecode.c" />
+    <ClCompile Include="SEA3D\Objects\SEAGeometry.cc" />
+    <ClCompile Include="SEA3D\Objects\SEAGeometryBase.cc" />
+    <ClCompile Include="SEA3D\Objects\SEAObject.cc" />
+    <ClCompile Include="SEA3D\SEA3D.cc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="o3dgc\o3dgcAdjacencyInfo.h" />
+    <ClInclude Include="o3dgc\o3dgcArithmeticCodec.h" />
+    <ClInclude Include="o3dgc\o3dgcBinaryStream.h" />
+    <ClInclude Include="o3dgc\o3dgcCommon.h" />
+    <ClInclude Include="o3dgc\o3dgcDVEncodeParams.h" />
+    <ClInclude Include="o3dgc\o3dgcDynamicVector.h" />
+    <ClInclude Include="o3dgc\o3dgcDynamicVectorDecoder.h" />
+    <ClInclude Include="o3dgc\o3dgcDynamicVectorEncoder.h" />
+    <ClInclude Include="o3dgc\o3dgcFIFO.h" />
+    <ClInclude Include="o3dgc\o3dgcIndexedFaceSet.h" />
+    <ClInclude Include="o3dgc\o3dgcSC3DMCDecoder.h" />
+    <ClInclude Include="o3dgc\o3dgcSC3DMCEncodeParams.h" />
+    <ClInclude Include="o3dgc\o3dgcSC3DMCEncoder.h" />
+    <ClInclude Include="o3dgc\o3dgcTimer.h" />
+    <ClInclude Include="o3dgc\o3dgcTriangleFans.h" />
+    <ClInclude Include="o3dgc\o3dgcTriangleListDecoder.h" />
+    <ClInclude Include="o3dgc\o3dgcTriangleListEncoder.h" />
+    <ClInclude Include="o3dgc\o3dgcVector.h" />
+    <ClInclude Include="SEA3D\ByteArray.h" />
+    <ClInclude Include="SEA3D\DataTable.h" />
+    <ClInclude Include="SEA3D\Deflate\crc32.h" />
+    <ClInclude Include="SEA3D\Deflate\deflate.h" />
+    <ClInclude Include="SEA3D\Deflate\inffast.h" />
+    <ClInclude Include="SEA3D\Deflate\inffixed.h" />
+    <ClInclude Include="SEA3D\Deflate\inflate.h" />
+    <ClInclude Include="SEA3D\Deflate\inftrees.h" />
+    <ClInclude Include="SEA3D\Deflate\trees.h" />
+    <ClInclude Include="SEA3D\Deflate\zconf.h" />
+    <ClInclude Include="SEA3D\Deflate\zlib.h" />
+    <ClInclude Include="SEA3D\Deflate\zutil.h" />
+    <ClInclude Include="SEA3D\LZMA\lzmadecode.h" />
+    <ClInclude Include="SEA3D\Objects\SEAGeometry.h" />
+    <ClInclude Include="SEA3D\Objects\SEAGeometryBase.h" />
+    <ClInclude Include="SEA3D\Objects\SEAObject.h" />
+    <ClInclude Include="SEA3D\SEA3D.h" />
+    <ClInclude Include="SEA3D\Types.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="o3dgc\o3dgcIndexedFaceSet.inl" />
+    <None Include="o3dgc\o3dgcSC3DMCDecoder.inl" />
+    <None Include="o3dgc\o3dgcSC3DMCEncoder.inl" />
+    <None Include="o3dgc\o3dgcTriangleListDecoder.inl" />
+    <None Include="o3dgc\o3dgcTriangleListEncoder.inl" />
+    <None Include="o3dgc\o3dgcVector.inl" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

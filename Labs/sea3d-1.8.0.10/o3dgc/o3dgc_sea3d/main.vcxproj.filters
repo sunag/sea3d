@@ -1,0 +1,228 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="o3dgc\o3dgcArithmeticCodec.cpp">
+      <Filter>o3dgc\common</Filter>
+    </ClCompile>
+    <ClCompile Include="o3dgc\o3dgcTools.cpp">
+      <Filter>o3dgc\common</Filter>
+    </ClCompile>
+    <ClCompile Include="o3dgc\o3dgcTriangleFans.cpp">
+      <Filter>o3dgc\common</Filter>
+    </ClCompile>
+    <ClCompile Include="o3dgc\o3dgcDynamicVectorDecoder.cpp">
+      <Filter>o3dgc\decode</Filter>
+    </ClCompile>
+    <ClCompile Include="o3dgc\o3dgcDynamicVectorEncoder.cpp">
+      <Filter>o3dgc\encode</Filter>
+    </ClCompile>
+    <ClCompile Include="SEA3D\ByteArray.cc">
+      <Filter>SEA3D</Filter>
+    </ClCompile>
+    <ClCompile Include="SEA3D\DataTable.cc">
+      <Filter>SEA3D</Filter>
+    </ClCompile>
+    <ClCompile Include="SEA3D\SEA3D.cc">
+      <Filter>SEA3D</Filter>
+    </ClCompile>
+    <ClCompile Include="SEA3D\Deflate\adler32.c">
+      <Filter>SEA3D\Deflate</Filter>
+    </ClCompile>
+    <ClCompile Include="SEA3D\Deflate\crc32.c">
+      <Filter>SEA3D\Deflate</Filter>
+    </ClCompile>
+    <ClCompile Include="SEA3D\Deflate\deflate.c">
+      <Filter>SEA3D\Deflate</Filter>
+    </ClCompile>
+    <ClCompile Include="SEA3D\Deflate\infback.c">
+      <Filter>SEA3D\Deflate</Filter>
+    </ClCompile>
+    <ClCompile Include="SEA3D\Deflate\inffast.c">
+      <Filter>SEA3D\Deflate</Filter>
+    </ClCompile>
+    <ClCompile Include="SEA3D\Deflate\inflate.c">
+      <Filter>SEA3D\Deflate</Filter>
+    </ClCompile>
+    <ClCompile Include="SEA3D\Deflate\inftrees.c">
+      <Filter>SEA3D\Deflate</Filter>
+    </ClCompile>
+    <ClCompile Include="SEA3D\Deflate\trees.c">
+      <Filter>SEA3D\Deflate</Filter>
+    </ClCompile>
+    <ClCompile Include="SEA3D\Deflate\uncompr.c">
+      <Filter>SEA3D\Deflate</Filter>
+    </ClCompile>
+    <ClCompile Include="SEA3D\Deflate\zutil.c">
+      <Filter>SEA3D\Deflate</Filter>
+    </ClCompile>
+    <ClCompile Include="SEA3D\LZMA\lzmadecode.c">
+      <Filter>SEA3D\LZMA</Filter>
+    </ClCompile>
+    <ClCompile Include="SEA3D\Objects\SEAGeometry.cc">
+      <Filter>SEA3D\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="SEA3D\Objects\SEAGeometryBase.cc">
+      <Filter>SEA3D\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="SEA3D\Objects\SEAObject.cc">
+      <Filter>SEA3D\Objects</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="o3dgc">
+      <UniqueIdentifier>{0b73c613-a621-4d50-9170-83509b1a0ac1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="o3dgc\common">
+      <UniqueIdentifier>{b4190538-0cff-4bcc-be32-d8f4ef0fa60d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="o3dgc\decode">
+      <UniqueIdentifier>{c5236cff-af71-4214-a7a6-0c4b90901f20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="o3dgc\encode">
+      <UniqueIdentifier>{4fbf1960-0811-474e-b1c6-0ccc38259794}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SEA3D">
+      <UniqueIdentifier>{6e0027ee-bc4c-4845-9ce4-99ffd11d1e65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SEA3D\Deflate">
+      <UniqueIdentifier>{759d079b-9be1-4454-8c3e-ecff7b8ff0df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SEA3D\LZMA">
+      <UniqueIdentifier>{00d42054-c4ad-40c3-b86d-907b76ec8a60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SEA3D\Objects">
+      <UniqueIdentifier>{5a209cff-c13e-4db8-9264-c752119646de}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="o3dgc\o3dgcAdjacencyInfo.h">
+      <Filter>o3dgc\common</Filter>
+    </ClInclude>
+    <ClInclude Include="o3dgc\o3dgcArithmeticCodec.h">
+      <Filter>o3dgc\common</Filter>
+    </ClInclude>
+    <ClInclude Include="o3dgc\o3dgcBinaryStream.h">
+      <Filter>o3dgc\common</Filter>
+    </ClInclude>
+    <ClInclude Include="o3dgc\o3dgcCommon.h">
+      <Filter>o3dgc\common</Filter>
+    </ClInclude>
+    <ClInclude Include="o3dgc\o3dgcDVEncodeParams.h">
+      <Filter>o3dgc\common</Filter>
+    </ClInclude>
+    <ClInclude Include="o3dgc\o3dgcDynamicVector.h">
+      <Filter>o3dgc\common</Filter>
+    </ClInclude>
+    <ClInclude Include="o3dgc\o3dgcFIFO.h">
+      <Filter>o3dgc\common</Filter>
+    </ClInclude>
+    <ClInclude Include="o3dgc\o3dgcIndexedFaceSet.h">
+      <Filter>o3dgc\common</Filter>
+    </ClInclude>
+    <ClInclude Include="o3dgc\o3dgcSC3DMCEncodeParams.h">
+      <Filter>o3dgc\common</Filter>
+    </ClInclude>
+    <ClInclude Include="o3dgc\o3dgcTimer.h">
+      <Filter>o3dgc\common</Filter>
+    </ClInclude>
+    <ClInclude Include="o3dgc\o3dgcTriangleFans.h">
+      <Filter>o3dgc\common</Filter>
+    </ClInclude>
+    <ClInclude Include="o3dgc\o3dgcVector.h">
+      <Filter>o3dgc\common</Filter>
+    </ClInclude>
+    <ClInclude Include="o3dgc\o3dgcDynamicVectorDecoder.h">
+      <Filter>o3dgc\decode</Filter>
+    </ClInclude>
+    <ClInclude Include="o3dgc\o3dgcSC3DMCDecoder.h">
+      <Filter>o3dgc\decode</Filter>
+    </ClInclude>
+    <ClInclude Include="o3dgc\o3dgcTriangleListDecoder.h">
+      <Filter>o3dgc\decode</Filter>
+    </ClInclude>
+    <ClInclude Include="o3dgc\o3dgcDynamicVectorEncoder.h">
+      <Filter>o3dgc\encode</Filter>
+    </ClInclude>
+    <ClInclude Include="o3dgc\o3dgcSC3DMCEncoder.h">
+      <Filter>o3dgc\encode</Filter>
+    </ClInclude>
+    <ClInclude Include="o3dgc\o3dgcTriangleListEncoder.h">
+      <Filter>o3dgc\encode</Filter>
+    </ClInclude>
+    <ClInclude Include="SEA3D\ByteArray.h">
+      <Filter>SEA3D</Filter>
+    </ClInclude>
+    <ClInclude Include="SEA3D\DataTable.h">
+      <Filter>SEA3D</Filter>
+    </ClInclude>
+    <ClInclude Include="SEA3D\SEA3D.h">
+      <Filter>SEA3D</Filter>
+    </ClInclude>
+    <ClInclude Include="SEA3D\Types.h">
+      <Filter>SEA3D</Filter>
+    </ClInclude>
+    <ClInclude Include="SEA3D\Deflate\crc32.h">
+      <Filter>SEA3D\Deflate</Filter>
+    </ClInclude>
+    <ClInclude Include="SEA3D\Deflate\deflate.h">
+      <Filter>SEA3D\Deflate</Filter>
+    </ClInclude>
+    <ClInclude Include="SEA3D\Deflate\inffast.h">
+      <Filter>SEA3D\Deflate</Filter>
+    </ClInclude>
+    <ClInclude Include="SEA3D\Deflate\inffixed.h">
+      <Filter>SEA3D\Deflate</Filter>
+    </ClInclude>
+    <ClInclude Include="SEA3D\Deflate\inflate.h">
+      <Filter>SEA3D\Deflate</Filter>
+    </ClInclude>
+    <ClInclude Include="SEA3D\Deflate\inftrees.h">
+      <Filter>SEA3D\Deflate</Filter>
+    </ClInclude>
+    <ClInclude Include="SEA3D\Deflate\trees.h">
+      <Filter>SEA3D\Deflate</Filter>
+    </ClInclude>
+    <ClInclude Include="SEA3D\Deflate\zconf.h">
+      <Filter>SEA3D\Deflate</Filter>
+    </ClInclude>
+    <ClInclude Include="SEA3D\Deflate\zlib.h">
+      <Filter>SEA3D\Deflate</Filter>
+    </ClInclude>
+    <ClInclude Include="SEA3D\Deflate\zutil.h">
+      <Filter>SEA3D\Deflate</Filter>
+    </ClInclude>
+    <ClInclude Include="SEA3D\LZMA\lzmadecode.h">
+      <Filter>SEA3D\LZMA</Filter>
+    </ClInclude>
+    <ClInclude Include="SEA3D\Objects\SEAGeometry.h">
+      <Filter>SEA3D\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="SEA3D\Objects\SEAGeometryBase.h">
+      <Filter>SEA3D\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="SEA3D\Objects\SEAObject.h">
+      <Filter>SEA3D\Objects</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="o3dgc\o3dgcIndexedFaceSet.inl">
+      <Filter>o3dgc\common</Filter>
+    </None>
+    <None Include="o3dgc\o3dgcVector.inl">
+      <Filter>o3dgc\common</Filter>
+    </None>
+    <None Include="o3dgc\o3dgcSC3DMCDecoder.inl">
+      <Filter>o3dgc\decode</Filter>
+    </None>
+    <None Include="o3dgc\o3dgcTriangleListDecoder.inl">
+      <Filter>o3dgc\decode</Filter>
+    </None>
+    <None Include="o3dgc\o3dgcSC3DMCEncoder.inl">
+      <Filter>o3dgc\encode</Filter>
+    </None>
+    <None Include="o3dgc\o3dgcTriangleListEncoder.inl">
+      <Filter>o3dgc\encode</Filter>
+    </None>
+  </ItemGroup>
+</Project>
