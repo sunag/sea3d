@@ -431,7 +431,7 @@ package sunag.sea3d
 			
 		protected function applyAlphaMapTechnique(mat:IPassMaterial, tech:Object):void
 		{
-			mat.addMethod(new AlphaMaskMethod(tech.texture));
+			mat.addMethod(new AlphaMaskMethod(tech.texture.tag));
 			
 			if (mat is ITranslucentMaterial)
 			{
