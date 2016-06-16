@@ -89,7 +89,7 @@ package away3d.materials.methods
 			vo.texturesIndex = textureReg.index;
 			
 			return getTex2DSampleCode(vo, temp, textureReg, _texture, uvReg) +
-				"mul " + targetReg + ", " + targetReg + ", " + temp + ".x\n";
+				"mul " + targetReg + ".w" + ", " + targetReg + ".w" + ", " + temp + ".x\n";
 		}
 	}
 }
