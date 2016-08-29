@@ -2860,7 +2860,8 @@ THREE.SEA3D.prototype.readActions = function( sea ) {
 //
 
 THREE.SEA3D.Event = {
-	LOAD_PROGRESS: "sea3d_progress",
+	PROGRESS: "sea3d_progress",
+	LOAD_PROGRESS: "sea3d_load",
 	DOWNLOAD_PROGRESS: "sea3d_download",
 	COMPLETE: "sea3d_complete",
 	OBJECT_COMPLETE: "sea3d_object",
@@ -2869,58 +2870,66 @@ THREE.SEA3D.Event = {
 	ERROR: "sea3d_error"
 };
 
-THREE.SEA3D.prototype.onProgress = undefined;
+THREE.SEA3D.prototype.onProgress = function( e ) {
 
-THREE.SEA3D.prototype.onComplete = function( event ) {
+	e.status = e.type;
+	e.progress = e.loaded / e.total;
+	e.type = THREE.SEA3D.Event.PROGRESS;
 
-	event.type = THREE.SEA3D.Event.COMPLETE;
-	this.dispatchEvent( event );
-
-};
-
-THREE.SEA3D.prototype.onLoadProgress = function( event ) {
-
-	event.type = THREE.SEA3D.Event.LOAD_PROGRESS;
-	this.dispatchEvent( event );
-
-	if ( this.onProgress ) this.onProgress( event );
+	this.dispatchEvent( e );
 
 };
 
-THREE.SEA3D.prototype.onDownloadProgress = function( event ) {
+THREE.SEA3D.prototype.onLoadProgress = function( e ) {
 
-	event.type = THREE.SEA3D.Event.DOWNLOAD_PROGRESS;
-	this.dispatchEvent( event );
+	e.type = THREE.SEA3D.Event.LOAD_PROGRESS;
+	this.dispatchEvent( e );
 
-	if ( this.onProgress ) this.onProgress( event );
-
-};
-
-THREE.SEA3D.prototype.onCompleteObject = function( event ) {
-
-	event.type = THREE.SEA3D.Event.OBJECT_COMPLETE;
-	this.dispatchEvent( event );
+	this.onProgress( e );
 
 };
 
-THREE.SEA3D.prototype.onParseProgress = function( event ) {
+THREE.SEA3D.prototype.onDownloadProgress = function( e ) {
 
-	event.type = THREE.SEA3D.Event.PARSE_PROGRESS;
-	this.dispatchEvent( event );
+	e.type = THREE.SEA3D.Event.DOWNLOAD_PROGRESS;
+	this.dispatchEvent( e );
 
-};
-
-THREE.SEA3D.prototype.onParseComplete = function( event ) {
-
-	event.type = THREE.SEA3D.Event.PARSE_COMPLETE;
-	this.dispatchEvent( event );
+	this.onProgress( e );
 
 };
 
-THREE.SEA3D.prototype.onError = function( event ) {
+THREE.SEA3D.prototype.onComplete = function( e ) {
 
-	event.type = THREE.SEA3D.Event.ERROR;
-	this.dispatchEvent( event );
+	e.type = THREE.SEA3D.Event.COMPLETE;
+	this.dispatchEvent( e );
+
+};
+
+THREE.SEA3D.prototype.onCompleteObject = function( e ) {
+
+	e.type = THREE.SEA3D.Event.OBJECT_COMPLETE;
+	this.dispatchEvent( e );
+
+};
+
+THREE.SEA3D.prototype.onParseProgress = function( e ) {
+
+	e.type = THREE.SEA3D.Event.PARSE_PROGRESS;
+	this.dispatchEvent( e );
+
+};
+
+THREE.SEA3D.prototype.onParseComplete = function( e ) {
+
+	e.type = THREE.SEA3D.Event.PARSE_COMPLETE;
+	this.dispatchEvent( e );
+
+};
+
+THREE.SEA3D.prototype.onError = function( e ) {
+
+	e.type = THREE.SEA3D.Event.ERROR;
+	this.dispatchEvent( e );
 
 };
 

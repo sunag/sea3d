@@ -3017,6 +3017,7 @@ SEA3D.File.prototype.readState = function() {
 
 	} else {
 
+		this.dispatchProgress();
 		this.dispatchComplete();
 
 	}
@@ -3038,9 +3039,7 @@ SEA3D.File.prototype.read = function( buffer ) {
 
 SEA3D.File.prototype.dispatchCompleteObject = function( obj ) {
 
-	if ( ! this.onCompleteObject ) return;
-
-	this.onCompleteObject( {
+	if ( this.onCompleteObject ) this.onCompleteObject( {
 		file: this,
 		object: obj
 	} );
@@ -3049,9 +3048,7 @@ SEA3D.File.prototype.dispatchCompleteObject = function( obj ) {
 
 SEA3D.File.prototype.dispatchProgress = function() {
 
-	if ( ! this.onProgress ) return;
-
-	this.onProgress( {
+	if ( this.onProgress ) this.onProgress( {
 		file: this,
 		loaded: this.position,
 		total: this.length
@@ -3061,9 +3058,7 @@ SEA3D.File.prototype.dispatchProgress = function() {
 
 SEA3D.File.prototype.dispatchDownloadProgress = function( position, length ) {
 
-	if ( ! this.onDownloadProgress ) return;
-
-	this.onDownloadProgress( {
+	if ( this.onDownloadProgress ) this.onDownloadProgress( {
 		file: this,
 		loaded: position,
 		total: length
