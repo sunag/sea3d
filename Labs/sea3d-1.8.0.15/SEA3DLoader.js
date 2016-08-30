@@ -3155,7 +3155,7 @@ THREE.SEA3D.prototype.load = function( data ) {
 
 		if ( this.config.manager ) this.config.manager.add( this.domain );
 
-		this.onComplete.call( this.file, e );
+		this.onComplete.call( this, e );
 
 	} ).bind( this );
 
