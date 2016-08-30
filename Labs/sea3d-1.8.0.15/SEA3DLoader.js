@@ -1455,8 +1455,7 @@ THREE.SEA3D.prototype.applyDefaultAnimation = function( sea, animatorClass ) {
 
 THREE.SEA3D.prototype.readAnimation = function( sea ) {
 
-	var clips = [],
-		delta = ( 1000 / sea.frameRate ) / 1000;
+	var clips = [], delta = ( 1000 / sea.frameRate ) / 1000;
 
 	for ( var i = 0; i < sea.sequence.length; i ++ ) {
 
@@ -1599,7 +1598,7 @@ THREE.SEA3D.prototype.readAnimation = function( sea ) {
 
 THREE.SEA3D.prototype.readGeometryBuffer = function( sea ) {
 
-	var	geo = new THREE.BufferGeometry();
+	var geo = new THREE.BufferGeometry();
 
 	for ( var i = 0; i < sea.groups.length; i ++ ) {
 
@@ -1758,8 +1757,7 @@ THREE.SEA3D.prototype.readSprite = function( sea ) {
 
 THREE.SEA3D.prototype.readMesh = function( sea ) {
 
-	var i, count, geo = sea.geometry.tag,
-		mesh, mat, skeleton, skeletonAnimation, vertexAnimation, morpher;
+	var i, count, geo = sea.geometry.tag, mesh, mat, skeleton, skeletonAnimation, vertexAnimation, morpher;
 
 	for ( i = 0, count = sea.modifiers ? sea.modifiers.length : 0; i < count; i ++ ) {
 
@@ -1981,8 +1979,7 @@ THREE.SEA3D.prototype.readTexture = function( sea ) {
 
 THREE.SEA3D.prototype.readCubeMap = function( sea ) {
 
-	var faces = this.toFaces( sea.faces ),
-		texture = new THREE.CubeTexture( [] );
+	var faces = this.toFaces( sea.faces ), texture = new THREE.CubeTexture( [] );
 
 	var loaded = 0;
 
@@ -2671,8 +2668,7 @@ THREE.SEA3D.prototype.getSkeletonAnimation = function( sea, skl ) {
 
 	if ( sea.tag ) return sea.tag;
 
-	var animations = [],
-		delta = ( 1000 / sea.frameRate ) / 1000;
+	var animations = [], delta = ( 1000 / sea.frameRate ) / 1000;
 
 	for ( var i = 0; i < sea.sequence.length; i ++ ) {
 
