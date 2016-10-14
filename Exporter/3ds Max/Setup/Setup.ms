@@ -9,7 +9,7 @@ fn getSEA3DStringVersion =
 	v += "." + (substring s (s.count-3) 1)
 	v += "." + (substring s (s.count-2) 1)
 	v += "." + (((substring s (s.count-1) 2) as integer) as string)
-		
+	
 	return v
 )
 

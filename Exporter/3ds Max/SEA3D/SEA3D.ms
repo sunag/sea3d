@@ -235,7 +235,7 @@ global
 --
 
 global skinops_getBoneNameByListID = skinops.getBoneName
-				
+
 if (hasProperty skinops #getBoneNameByListID) do
 	skinops_getBoneNameByListID = skinops.getBoneNameByListID
 
@@ -673,11 +673,6 @@ function error1005 n nobj =
 	append seaErrors ("#1005: Conflicted name. More than one morph with the name \"" + n + "\" was found on the model \"" + nobj + "\".")
 )
 
-function error1011 n = 
-(
-	append seaErrors ("#1011: Material \"" + n + "\" is not compatible.")
-)
-
 function error1012 t n = 
 (
 	append seaErrors ("#1012: " + t + " shader in the \"" + n + "\" is not compatible.")
@@ -835,6 +830,11 @@ function warning2010 n =
 function warning2011 n = 
 (	
 	append seaWarning ("#2011:  \"" + n + "\" instance invalid. The instance may not contain modifiers different order.")
+)
+
+function warning2012 t n = 
+(
+	append seaWarning ("#2012: Material \"" + t + "\" is not compatible in \"" + n + "\".")
 )
 
 function warning2401 n = 
@@ -3901,15 +3901,11 @@ fn compileObject n =
 					
 					if n.material != undefined then
 					(
-						local cmat = compileMaterial n.material seamatnames seamats
+						mats[1] = compileMaterial n.material seamatnames seamats
 						
-						if cmat != undefined then
+						if mats[1] == undefined then
 						(
-							mats[1] = cmat
-						)
-						else
-						(
-							error1011 n.material.name
+							warning2012 n.material.name n.name
 						)
 					)
 					
@@ -4228,7 +4224,7 @@ fn compileObject n =
 					nA.x = roundNum nA.x
 					nA.y = roundNum nA.y
 					nA.z = roundNum nA.z
-									
+					
 					local nB = (normalObj.EditNormalsMod.GetNormal 1) as point3
 					nB.x = roundNum nB.x
 					nB.y = roundNum nB.y
@@ -4350,28 +4346,25 @@ fn compileObject n =
 				else if classof obj.material == MultiMaterial then
 				(
 					for m=1 to obj.material.materiallist.count do
-					(								
+					(
 						local matID = obj.material.materialIDList[m]
 						
 						if (polymats[matID] != undefined) do
 						(
-							local mat = obj.material.materiallist[m]								
-							local cmat = compileMaterial mat seamatnames seamats
+							local mat = obj.material.materiallist[m]
 							
-							if cmat != undefined then
-							(									
-								mats[matID] = cmat
-							)
-							else
+							mats[matID] = compileMaterial mat seamatnames seamats
+							
+							if mats[matID] == undefined then
 							(
-								error1011 mat.name
+								warning2012 mat.name obj.name
 							)
 						)
 					)
 				)
 				else
 				(
-					error1011 obj.material.name
+					warning2012 obj.material.name obj.name
 				)
 			)							
 			
@@ -4492,7 +4485,7 @@ fn compileObject n =
 				if usevertexcolor do
 				(	
 					local vcolor_count = (getnumfaces n.mesh)*3
-										
+					
 					setNumCPVVerts n.mesh vcolor_count true
 					
 					for v=1 to vcolor_count do
@@ -4567,7 +4560,7 @@ fn compileObject n =
 				if smoothing_group then
 				(					
 					selectMod normalNObj normalObj	
-						
+					
 					local numNorms = normalObj.GetNumNormals()
 					
 					for v = 1 to numNorms do
@@ -4635,11 +4628,6 @@ fn compileObject n =
 				local HT = undefined 
 				local indexAt = 1
 				
-				if seaconfig_meshoptimizer do 
-				(
-					HT = dotNetObject "Poonya.Utils.DictSN"					
-				)					
-				
 				local c_vertex = sMesh.c_vertex = #()
 				local c_index = sMesh.c_index = #()
 				local c_weights = sMesh.c_weights = #()
@@ -4651,6 +4639,15 @@ fn compileObject n =
 				-- e_ used for vertex and morph indexes
 				local e_index = sMesh.e_index = #()
 				local e_normal = sMesh.e_normal = #()
+				
+				print "-- vertex count --"
+				print  __vertex.count
+				print "--"
+				
+				if seaconfig_meshoptimizer do 
+				(
+					HT = dotNetObject "Poonya.Utils.DictSN"					
+				)
 				
 				sMesh.maxweight = maxweight
 				
@@ -5180,7 +5177,7 @@ function getMorphAsset sea =
 	
 	local e_index = sea.e_index
 	local e_normal = sea.e_normal
-			
+	
 	local __vertexBase = #()
 	
 	local bigMesh = c_vertex.count	> C_BIG		
@@ -5199,10 +5196,10 @@ function getMorphAsset sea =
 	if containsNormal do header += HEADER_NORMAL
 	
 	-- MORPH
-		
+	
 	local mchs = sea.mchs
 	local mchsValue = sea.mchsValue
-			
+	
 	if sea.skinObj != undefined do sea.skinObj.enabled = false		
 	sea.morphObj.enabled = true
 	
@@ -5275,6 +5272,7 @@ function getMorphAsset sea =
 		for v=1 to vertexcount do
 		(
 			local vert = GetVert obj v
+			
 			append __vertex #(
 				vert.x - __vertexBase[v].x, 
 				vert.z - __vertexBase[v].z, 
@@ -6849,9 +6847,9 @@ function getGeometryAsset sea =
 	local obj = sea.temp
 	
 	asset.Filename = sea.obj.name + EXT_GEOMETRY
-		
+	
 	-- GEOMETRY
-		
+	
 	local c_vertex = sea.c_vertex
 	local c_index = sea.c_index
 	local c_weights = sea.c_weights
@@ -6862,7 +6860,7 @@ function getGeometryAsset sea =
 	
 	local e_index = sea.e_index
 	local e_normal = sea.e_normal
-			
+	
 	local bigMesh = c_vertex.count	> C_BIG		
 	local WriteUInt = undefined
 	
