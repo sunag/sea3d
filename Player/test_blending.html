@@ -88,7 +88,7 @@
 				var radius = 30;
 
 				camera = new THREE.PerspectiveCamera( 45, aspect, 1, 10000 );
-				camera.position.set( 0.0, radius, radius * 3.5 );
+				camera.position.set( 0.0, radius, -radius * 3.5 );
 
 				controls = new THREE.OrbitControls( camera );
 				controls.target.set( 0, radius, 0 );
@@ -133,8 +133,6 @@
 					var mat = new THREE.MeshStandardMaterial({ map:txt, skinning:true, morphTargets:false, envMap:envMap, metalness:0.66, roughness:0.43, normalMap:tn, normalScale:new THREE.Vector2( 1, 1 )})
 					blendMesh = loader.meshes[0];
 
-					console.log(blendMesh.animations, blendMesh)
-
 					reversUV( blendMesh.geometry );
 
 					blendMesh.material = mat;
@@ -160,6 +158,7 @@
 				gui.add(settings, 'crossfade', { min:0.1, max:6 } ).onChange( onShowSkeleton );
 
 				gui.add('button', { name:'play' }).onChange( function(){ onStartAnimation() } );
+				gui.add('button', { name:'stop' }).onChange( function(){ onStopAnimation() } );
 				gui.add('button', { name:'pause' }).onChange( function(){ onPauseAnimation() } );
 				gui.add('button', { name:'step' }).onChange( function(){ onStepAnimation() } );
 				gui.add('button', { name:'idle to walk' }).onChange( function(){ onCrossfade('idle', 'walk') });
@@ -196,7 +195,7 @@
 			function onStartAnimation() {
 
 				//blendMesh.stopAll();
-				//blendMesh.unPauseAll();
+				
 
 				// the blend mesh will combine 1 or more animations
 				for ( var i = 0; i < anims.length; ++i ) {
@@ -204,6 +203,8 @@
 					blendMesh.playw( anims[ i ], settings[ anims[ i ] ] );
 
 				}
+
+				blendMesh.unPauseAll();
 
 				isFrameStepping = false;
 
@@ -218,6 +219,8 @@
 
 			function onPauseAnimation() {
 
+				//blendMesh.pauseAll();
+
 				( isFrameStepping ) ? blendMesh.unPauseAll(): blendMesh.pauseAll();
 				isFrameStepping = false;
 
@@ -228,6 +231,7 @@
 				blendMesh.unPauseAll();
 				isFrameStepping = true;
 				timeToStep = settings.stepSize;
+
 			}
 
 			function onWeightAnimation() {

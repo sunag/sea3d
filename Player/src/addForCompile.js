@@ -1,2 +1,2 @@
 // variable undeclared 
-var THREE, TextDecoder;
+var THREE, Ammo, TextDecoder;

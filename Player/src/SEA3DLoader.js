@@ -530,6 +530,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 		this.relative = false;
 		this.playing = false;
+		this.paused = false;
 
 		this.timeScale = 1;
 
@@ -688,12 +689,14 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	stop : function() {
 
+		if( this.playing ) THREE.SEA3D.AnimationHandler.removeAnimator( this );
+
 		if ( this.currentAnimation ) {
 
 			this.currentAnimationAction.stop();
 
-			THREE.SEA3D.AnimationHandler.removeAnimator( this );
-
+			//THREE.SEA3D.AnimationHandler.removeAnimator( this );
+			
 			this.previousAnimation = this.currentAnimation;
 			this.previousAnimationData = this.currentAnimationData;
 			this.previousAnimationAction = this.currentAnimationAction;
@@ -712,7 +715,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	playw: function( name, weight ) {
 
-		if(!this.playing) THREE.SEA3D.AnimationHandler.addAnimator( this );
+		if( !this.playing && !this.paused ) THREE.SEA3D.AnimationHandler.addAnimator( this );
 
 		var anim = this.animations[ name ] || this.animationsIndex[ name ];
 
@@ -768,6 +771,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 		this.mixer.timeScale = 1;
 
 		this.playing = true;
+		this.paused = false;
 
 		return this;
 
@@ -778,6 +782,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 		this.mixer.timeScale = 0;
 
 		this.playing = false;
+		this.paused = true;
 
 		return this;
 
