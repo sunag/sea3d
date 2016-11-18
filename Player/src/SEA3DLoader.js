@@ -3335,6 +3335,8 @@ THREE.SEA3D.prototype.load = function( data ) {
 
 	this.setTypeRead();
 
+	if(data===undefined) return;
+
 	if ( typeof data == "string" ) this.file.load( data );
 	else this.file.read( data );
 

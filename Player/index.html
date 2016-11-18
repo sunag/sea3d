@@ -13,17 +13,8 @@
 		<meta name="language" content="en-us" />
 		<link rel="shortcut icon" href="http://sunag.github.io/sea3d/favicon.ico" type="image/x-icon" />
 		<style>
-			body {
-				font-family: Monospace;
-				background-color: #171717;
-				color: #ccc;
-				margin: 0px;
-				overflow: hidden;
-				font-size:11px;
-			}
-		
-		
-			 a { font-weight:bold; text-decoration: none; cursor: pointer; }
+			body { font-family: Monospace; background-color: #171717; color: #ccc; margin: 0px; overflow: hidden; font-size:11px; }
+			a { font-weight:bold; text-decoration: none; cursor: pointer; }
 		</style>
 	</head>
 
@@ -36,12 +27,10 @@
 		<script src="js/uil.min.js"></script>
 		<script src="js/Gradient.js"></script>
 
+		<script src="js/seaPlayer.js"></script>
 
-		<!--
-		<script src="js/physics/ammo.js"></script>
-		<script src="js/physics/ammo.three.js"></script>
-		<script src="js/physics/SEA3DAmmoLoader.js"></script>
-		-->
+		<script src="src/ammo.js"></script>
+		<script src="src/ammo.three.js"></script>
 		
 		<script src="js/Detector.js"></script>
 		
@@ -57,53 +46,15 @@
 
 			var g_animation = null, g_morph = null, g_example = null;
 
-			var loader;
+			var isPhysics = false, isAnimations = false;
 
-			// Initialize Three.JS
+			var loader = null;
 
 			init();
-			
-			//animate();
-
-			//
-			// SEA3D Loader
-			//
-
-			loader = new THREE.SEA3D( {
-
-				autoPlay : true, // Auto play animations
-				container : scene // Container to add models
-
-			} );
-
-			loader.onComplete = function( e ) {
-
-				// Get camera from 3ds Max
-				// use loader.get... to get others objects
-
-				var cam = loader.getCamera( "Camera007" );
-				if(cam){
-					camera.position.copy( cam.position );
-				    camera.rotation.copy( cam.rotation );
-				}
-				
-
-				//controls.update();
-
-				loadPic.style.visibility = 'hidden';
-				info.innerHTML = "SEA3D Loaded in " + loader.file.timer.elapsedTime + "ms";
-
-				autoAdd();
-
-				animate();
-
-			};
-
-			loader.load( './assets/mascot.tjs.sea' );
-
-			//
 
 			function init() {
+
+				THREE.AMMO.init(); // init physics engine
 
 				clock = new THREE.Clock();
 
@@ -132,7 +83,7 @@
 
 				controls = new THREE.OrbitControls( camera, container );
 
-				envMap = new THREE.TextureLoader().load( './assets/metal.jpg' );
+				envMap = new THREE.TextureLoader().load( './assets/textures/smooth.jpg' );
                 envMap.mapping = THREE.SphericalReflectionMapping;
 
 				// events
@@ -161,15 +112,20 @@
 
 				initGui();
 
+				// SEA LOADER
+
+				seaPlayer.init( scene, seaEndLoad, clearAll );
+				seaPlayer.load( './assets/mascot.tjs.sea' );
+
 			}
+
+			// BACKGROUND
 
 			function backImage(){
 
                 var c = document.createElement( 'canvas' );
                 var res = 1;
-
-                c.width = 512*res;
-                c.height = 512*res;
+                c.width = c.height = 512*res;
 
                 var ctx = c.getContext( '2d' );
                 var dgrad = new Grad.Radial( 256*res, 1024*res, 512*res, 256*res, 1024*res, 1024*res );     
@@ -178,49 +134,58 @@
                 dgrad.fillRect( ctx, 0, 0, 512*res, 512*res );
 
                 var tx = new THREE.Texture( c );
-                tx.anisotropy = 16;
-                tx.format = THREE.RGBFormat;
                 tx.needsUpdate = true;
-
                 return tx;
 
             };
+
+            // GUI
 
 			function initGui(){
 
 				gui = new UIL.Gui( { width:200, bg:'rgba(23,23,23,0.5)' } );
 				
-
 				gui.add( 'fps', { res:70 } );
-				gui.add('button', { name:'LOAD', fontColor:'#D4B87B', height:30, drag:true, p:0 }).onChange( callbackLoad );
+				gui.add('button', { name:'LOAD', fontColor:'#D4B87B', height:30, drag:true, p:0 }).onChange( seaPlayer.read );
 
 				g_example = gui.add('group', { name:'EXAMPLE' })
-				g_example.add('button', { name:'MASCOT', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ directLoad( './assets/mascot.tjs.sea' );  } );
-				g_example.add('button', { name:'BABE', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ directLoad( './assets/babe.sea' );  } );
-				g_example.add('button', { name:'ANDROID', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ directLoad( './assets/droid.sea' );  } );
-				g_example.add('button', { name:'MECK', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ directLoad( './assets/meck.sea' );  } );
-
+				g_example.add('button', { name:'MASCOT', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( './assets/mascot.tjs.sea' );  } );
+				g_example.add('button', { name:'BABE', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( './assets/babe.sea' );  } );
+				g_example.add('button', { name:'ANDROID', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( './assets/droid.sea' );  } );
+				g_example.add('button', { name:'MECK', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( './assets/meck.sea' );  } );
+				g_example.add('button', { name:'PHYSICS', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( './assets/physics.tjs.sea' );  } );
 				g_example.open();
 
 			}
 
-			function directLoad ( url ) {
+			function addAnimator( o ){
 
-				clearAll();
-				loader.load( url );
+				isAnimations = true;
 
-			}
-
-			function callbackLoad( response, fname, type ) {
-
-				if( type !== 'sea' ){ info.innerHTML = "is not SEA3D file ?!"; return; }
-
-				clearAll();
-				loader.file.read( response );
+				if( g_animation === null ) g_animation = gui.add('group', { name:'ANIMATIONS' });
+				o.material.skinning = true;
+				for(var a in o.animations ) g_animation.add('button', { name:a, p:0 }).onChange( function(n){ o.play(n);  } );
 				
+				g_animation.open();
+
 			}
+
+			function addMorphs( o ){
+
+				if( g_morph === null ) g_morph = gui.add('group', { name:'MORPHS' });
+				o.material.morphTargets = true;
+				for(var m in o.morphTargetDictionary ) g_morph.add('slide', { name:m, min:0, max:1, value:o.morphTargetDictionary[m] }).onChange( function(v){ o.setWeight( this.txt, v ); } );
+
+				g_morph.open();
+
+			}
+
+			// CLEAR
 
 			function clearAll() {
+
+				isPhysics = false;
+				isAnimations = false;
 
 				loadPic.style.visibility = 'block';
 
@@ -240,7 +205,6 @@
 
 				}
 
-
 			}
 
 			function clear( obj, parent ) {
@@ -251,36 +215,16 @@
 
 			}
 
-			function addAnimator( o ){
+			// SEA FILE COMPLETE
 
-				if( g_animation === null ) g_animation = gui.add('group', { name:'ANIMATIONS' });
+			function seaEndLoad() {
 
-				o.material.skinning = true;
+				loader = seaPlayer.getLoader();
 
-				for(var a in o.animations ){
-					g_animation.add('button', { name:a, p:0 }).onChange( function(n){ o.play(n);  } );
-				}
+				//console.log( loader )
 
-				g_animation.open();
-
-			}
-
-			function addMorphs( o ){
-
-				if( g_morph === null ) g_morph = gui.add('group', { name:'MORPHS' });
-
-				o.material.morphTargets = true;
-
-				for(var a in o.morphTargetDictionary ){
-
-					var m = a;
-					g_morph.add('slide', { name:m, min:0, max:1, value:o.morphTargetDictionary[m] }).onChange( function(v){ o.setWeight( this.txt, v ); } );
-				}
-
-				g_morph.open();
-			}
-
-			function autoAdd(){
+				loadPic.style.visibility = 'hidden';
+				info.innerHTML = "SEA3D Loaded in " + loader.file.timer.elapsedTime + "ms";
 
 				var o, b, v;
 				var bx = new THREE.Box3();
@@ -288,12 +232,25 @@
 				var centers = [];
 				var v1 = new THREE.Vector3();
 				var v2 = new THREE.Vector3();
+				var centroid = new THREE.Vector3();
+
+				var needComputeCentroid = true;
+
+				if(loader.rigidBodies) isPhysics = true;
+
+				if(loader.cameras){
+					var cam = loader.getCamera( loader.cameras[0].name );
+					camera.position.copy( cam.position );
+				    camera.rotation.copy( cam.rotation );
+				    needComputeCentroid = false;
+				}
 
 				for (var i = 0, l = scene.children.length; i < l ; i++) {
 
 					o = scene.children[i];
 
 					if(o.material){
+						if(o.material.envMap === null )o.material.envMap = envMap;
 						if(o.material.type === 'MeshBasicMaterial') o.material = new THREE.MeshStandardMaterial( {envMap:envMap} );
 					}
 
@@ -302,7 +259,7 @@
 
 				    if(o.morphTargetDictionary) addMorphs( o );
 					
-					if(o.geometry){ 
+					if(needComputeCentroid && o.geometry){ 
 
 						if( ! o.geometry.boundingBox ) o.geometry.computeBoundingBox();
 						b = o.geometry.boundingBox;
@@ -319,31 +276,44 @@
 
 				}
 
-				var sphere = bx.getBoundingSphere();
-				var centroid = sphere.center;
+				if( needComputeCentroid ){
 
-				camera.position.copy( centroid );
-				controls.target.copy( centroid );
+					var sphere = bx.getBoundingSphere();
+					centroid.copy( sphere.center );
 
-				var fov = 45;
-				var vFOV = fov * (Math.PI / 180); // convert to radians
-				camera.position.z = - (sphere.radius * 2.5) / (2 * Math.tan(vFOV / 2) );
+					camera.position.copy( centroid );
+					controls.target.copy( centroid );
+
+					var fov = 45;
+					var vFOV = fov * (Math.PI / 180); // convert to radians
+					camera.position.z = - (sphere.radius * 2.5) / (2 * Math.tan(vFOV / 2) );
+				
+				}
+
 				controls.update();
 
 				// extra light
 
-				var light = new THREE.DirectionalLight( 0xffffff, 1.6 );
-	            light.position.copy(centroid).add( new THREE.Vector3(1,10,6) );
-	            light.lookAt( centroid );
-	            scene.add( light );
+				if( !loader.lights ){
 
-				var hemiLight = new THREE.HemisphereLight( 0xddeeff, 0x0f0e0d, 1 );
-				hemiLight.color.setHSL( 0.6, 1, 0.6 );
-				hemiLight.groundColor.setHSL( 0.095, 1, 0.75 );
-				hemiLight.position.copy( centroid );
-                scene.add(  hemiLight );
+					var light = new THREE.DirectionalLight( 0xffffff, 1.6 );
+		            light.position.copy(centroid).add( new THREE.Vector3(1,10,6) );
+		            light.lookAt( centroid );
+		            scene.add( light );
+
+					var hemiLight = new THREE.HemisphereLight( 0xddeeff, 0x0f0e0d, 1 );
+					hemiLight.color.setHSL( 0.6, 1, 0.6 );
+					hemiLight.groundColor.setHSL( 0.095, 1, 0.75 );
+					hemiLight.position.copy( centroid );
+	                scene.add(  hemiLight );
+
+				}
+
+                animate();
 
 			}
+
+			// RESIZE
 
 			function onWindowResize() {
 
@@ -353,16 +323,19 @@
 
 			}
 
-			//
+			// RENDER
 
 			function animate() {
 
-				var delta = clock.getDelta();
-
 				req = requestAnimationFrame( animate );
 
+				var delta = clock.getDelta();
+
+				// Update sea3d physics
+				if( isPhysics ) THREE.AMMO.update( delta );
+
 				// Update sea3d Animations
-				THREE.SEA3D.AnimationHandler.update( delta );
+				if( isAnimations ) THREE.SEA3D.AnimationHandler.update( delta );
 
 				renderer.render( scene, camera );
 

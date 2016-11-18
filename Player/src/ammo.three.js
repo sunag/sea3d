@@ -11,6 +11,7 @@
 'use strict';
 
 THREE.AMMO = {
+	world:null,
 	rigidBodies : [],
 	rigidBodiesTarget : [],
 	rigidBodiesOffset : [],
