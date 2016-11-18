@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>SEA3D File Format - WebGL</title>
+		<title>SEA3D Player</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<meta property="og:image" content="http://sunag.github.io/sea3d/Media/Mascot.jpg"/>
@@ -83,7 +83,7 @@
 
 				controls = new THREE.OrbitControls( camera, container );
 
-				envMap = new THREE.TextureLoader().load( './assets/textures/smooth.jpg' );
+				envMap = new THREE.TextureLoader().load( './assets/textures/metal.jpg' );
                 envMap.mapping = THREE.SphericalReflectionMapping;
 
 				// events
@@ -150,7 +150,7 @@
 
 				g_example = gui.add('group', { name:'EXAMPLE' })
 				g_example.add('button', { name:'MASCOT', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( './assets/mascot.tjs.sea' );  } );
-				g_example.add('button', { name:'BABE', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( './assets/babe.sea' );  } );
+				g_example.add('button', { name:'BABE', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( './assets/babe.tjs.sea' );  } );
 				g_example.add('button', { name:'ANDROID', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( './assets/droid.sea' );  } );
 				g_example.add('button', { name:'MECK', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( './assets/meck.sea' );  } );
 				g_example.add('button', { name:'PHYSICS', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( './assets/physics.tjs.sea' );  } );
@@ -187,7 +187,7 @@
 				isPhysics = false;
 				isAnimations = false;
 
-				loadPic.style.visibility = 'block';
+				loadPic.style.display = 'block';
 
 				if( g_animation !== null ) { g_animation.clear(); g_animation = null; }
 				if( g_morph !== null ) { g_morph.clear(); g_morph = null; }
@@ -223,7 +223,7 @@
 
 				//console.log( loader )
 
-				loadPic.style.visibility = 'hidden';
+				loadPic.style.display = 'none';
 				info.innerHTML = "SEA3D Loaded in " + loader.file.timer.elapsedTime + "ms";
 
 				var o, b, v;
@@ -297,7 +297,7 @@
 				if( !loader.lights ){
 
 					var light = new THREE.DirectionalLight( 0xffffff, 1.6 );
-		            light.position.copy(centroid).add( new THREE.Vector3(1,10,6) );
+		            light.position.copy(centroid).add( new THREE.Vector3(3,10,6).multiplyScalar( 100 ) );
 		            light.lookAt( centroid );
 		            scene.add( light );
 
