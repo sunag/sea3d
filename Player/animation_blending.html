@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>animation blending</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				color: #fff;
+				font-family:Monospace;
+				font-size:13px;
+				text-align:left;
+
+				background-color: #fff;
+				margin: 0px;
+				overflow: hidden;
+			}
+
+			#info {
+				position: absolute;
+				top: 0px; width: 100%;
+				padding: 5px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="container"></div>
+		<div id="info">
+			<a href="http://threejs.org" target="_blank">three.js</a> - <a href="https://github.com/sunag/sea3d" target="_blank">sea3d</a><br>Skeletal Animation Blending.
+		</div>
+
+		<script src="build/three.min.js"></script>
+		<script src="build/sea.js"></script>
+
+		<script src="js/uil.min.js"></script>
+
+		<script src="js/Detector.js"></script>
+		<script src="js/controls/OrbitControls.js"></script>
+
+		<script>
+
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+			var anims = ['idle', 'walk', 'run'];
+
+			var settings = {
+
+				"Skeleton": false,
+
+				"timeScale": 1.0,
+				"stepSize": 0.016,
+				"crossfade": 3.5,
+
+				"idle": 0.33,
+				"walk": 0.33,
+				"run": 0.33
+
+			};
+
+			var container;
+
+			var blendMesh, helper, camera, scene, renderer, controls;
+
+			var clock = new THREE.Clock();
+			var gui = null;
+
+			var isFrameStepping = false;
+			var timeToStep = 0;
+
+			init();
+
+			function init() {
+
+				container = document.getElementById( 'container' );
+
+				scene = new THREE.Scene();
+				scene.add ( new THREE.AmbientLight( 0xffffff ) );
+
+				renderer = new THREE.WebGLRenderer( { antialias: true, alpha: false } );
+				renderer.setClearColor( 0x777777 );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.autoClear = true;
+
+				container.appendChild( renderer.domElement );
+
+				var aspect = window.innerWidth / window.innerHeight;
+				var radius = 30;
+
+				camera = new THREE.PerspectiveCamera( 45, aspect, 1, 10000 );
+				camera.position.set( 0.0, radius, radius * 3.5 );
+
+				controls = new THREE.OrbitControls( camera );
+				controls.target.set( 0, radius, 0 );
+				controls.update();
+
+				var ambient = new THREE.AmbientLight( 0x282824 );
+
+	            var light = new THREE.DirectionalLight( 0xffffff, 1 );
+	            light.position.set(2,10,6).multiplyScalar( 10 );
+	            light.lookAt(new THREE.Vector3(0,0,0));
+
+
+	            var point = new THREE.PointLight( 0x3344EE, 1, 200);
+	            point.position.set( -2,-10,-6 ).multiplyScalar( 10 );
+
+	            scene.add( ambient );
+	            scene.add( light );
+	            scene.add( point );
+
+				//
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
+				initGUI();
+
+
+				loader = new THREE.SEA3D({ autoPlay : false  });
+
+				loader.onComplete = function( e ) {
+
+					var envMap = new THREE.TextureLoader().load( 'assets/textures/metal.jpg' );
+                    envMap.mapping = THREE.SphericalReflectionMapping;
+
+					var txt =  new THREE.TextureLoader().load( 'assets/textures/dva.png' );
+					txt.wrapS = THREE.MirroredRepeatWrapping;
+					txt.flipY = false;
+
+					var tn =  new THREE.TextureLoader().load( 'assets/textures/dva_n.png' );
+					tn.wrapS = THREE.MirroredRepeatWrapping;
+					tn.flipY = false;
+
+					var mat = new THREE.MeshStandardMaterial({ map:txt, skinning:true, morphTargets:false, envMap:envMap, metalness:0.66, roughness:0.43, normalMap:tn, normalScale:new THREE.Vector2( 1, 1 )})
+					blendMesh = loader.meshes[0];
+
+					console.log(blendMesh.animations, blendMesh)
+
+					reversUV( blendMesh.geometry );
+
+					blendMesh.material = mat;
+
+					scene.add( blendMesh );
+
+					start();
+
+				}
+
+				loader.load( 'assets/dva.sea' );
+
+			}
+
+			function initGUI(){
+
+				gui = new UIL.Gui( { width:300, bg:'rgba(44,44,38,0.1)' } );
+
+				gui.add(settings, 'Skeleton', { type:'Bool' } ).onChange( onShowSkeleton );
+
+				gui.add(settings, 'timeScale', { min:-1, max:1 } ).onChange( onShowSkeleton );
+				gui.add(settings, 'stepSize', { min:0.01, max:0.1 } ).onChange( onStepAnimation );
+				gui.add(settings, 'crossfade', { min:0.1, max:6 } ).onChange( onShowSkeleton );
+
+				gui.add('button', { name:'play' }).onChange( function(){ onStartAnimation() } );
+				gui.add('button', { name:'pause' }).onChange( function(){ onPauseAnimation() } );
+				gui.add('button', { name:'step' }).onChange( function(){ onStepAnimation() } );
+				gui.add('button', { name:'idle to walk' }).onChange( function(){ onCrossfade('idle', 'walk') });
+				gui.add('button', { name:'walk to run' }).onChange( function(){ onCrossfade('walk', 'run') });
+				gui.add('button', { name:'warp walk to run' }).onChange( function(){ onWarp('walk', 'run') } );
+
+
+				gui.add(settings, 'idle', { min:0, max:1 } ).onChange( onWeightAnimation ).listen();
+				gui.add(settings, 'walk', { min:0, max:1 } ).onChange( onWeightAnimation ).listen();
+				gui.add(settings, 'run', { min:0, max:1 } ).onChange( onWeightAnimation ).listen();
+
+			};
+
+			// special mid revers for symetrics character
+			// correct inversion of normal map
+			function reversUV( geometry ){
+
+			    var uv = geometry.attributes.uv.array;
+			    var i = uv.length * 0.25;
+			    while( i-- ) uv[ i * 2 ] *= -1;
+			    geometry.attributes.uv.needsUpdate = true;
+
+			};
+
+			function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			function onStartAnimation() {
+
+				//blendMesh.stopAll();
+				//blendMesh.unPauseAll();
+
+				// the blend mesh will combine 1 or more animations
+				for ( var i = 0; i < anims.length; ++i ) {
+
+					blendMesh.playw( anims[ i ], settings[ anims[ i ] ] );
+
+				}
+
+				isFrameStepping = false;
+
+			}
+
+			function onStopAnimation() {
+
+				blendMesh.stopAll();
+				isFrameStepping = false;
+
+			}
+
+			function onPauseAnimation() {
+
+				( isFrameStepping ) ? blendMesh.unPauseAll(): blendMesh.pauseAll();
+				isFrameStepping = false;
+
+			}
+
+			function onStepAnimation() {
+
+				blendMesh.unPauseAll();
+				isFrameStepping = true;
+				timeToStep = settings.stepSize;
+			}
+
+			function onWeightAnimation() {
+
+				var sum = settings.idle + settings.walk + settings.run;
+
+				settings.idle /= sum;
+				settings.walk /= sum;
+				settings.run /= sum;
+
+				for ( var i = 0; i < anims.length; ++i ) {
+
+					blendMesh.setWeight( anims[ i ], settings[ anims[ i ] ] );
+
+				}
+
+			}
+
+			function onCrossfade( a, b ) {
+
+				//blendMesh.stopAll();
+				blendMesh.crossFade( a, b, settings.crossfade );
+
+				isFrameStepping = false;
+
+			}
+
+			function onWarp( a, b ) {
+
+				//blendMesh.stopAll();
+				blendMesh.crossFade( a, b, settings.crossfade, true );
+				isFrameStepping = false;
+
+			}
+
+			function onShowSkeleton( b ) {
+
+				helper.visible = b;
+
+			}
+
+			function start() {
+
+				// Set default weights
+				blendMesh.setWeight( 'idle', 1 / 3 );
+				blendMesh.setWeight( 'walk', 1 / 3 );
+				blendMesh.setWeight( 'run', 1 / 3 );
+
+				// Create the debug visualization
+
+				helper = new THREE.SkeletonHelper( blendMesh );
+				helper.visible = false;
+				scene.add( helper );
+				
+				animate();
+
+			}
+
+			function animate() {
+
+				requestAnimationFrame( animate, renderer.domElement );
+
+
+				// step forward in time based on whether we're stepping and scale
+
+				var scale = settings.timeScale;
+				var delta = clock.getDelta();
+				var stepSize = (!isFrameStepping) ? delta * scale: timeToStep;
+
+                THREE.SEA3D.AnimationHandler.update( stepSize );
+
+                helper.update();
+
+				renderer.render( scene, camera );
+	
+
+				// if we are stepping, consume time
+				// ( will equal step size next time a single step is desired )
+
+				timeToStep = 0;
+
+			}
+
+		</script>
+
+	</body>
+</html>
