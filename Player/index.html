@@ -26,6 +26,7 @@
 		<script src="js/controls/OrbitControls.js"></script>
 		<script src="js/uil.min.js"></script>
 		<script src="js/Gradient.js"></script>
+		<script src="js/ShaderShadow.js"></script>
 
 		<script src="js/seaPlayer.js"></script>
 
@@ -78,6 +79,11 @@
 				renderer.toneMapping = THREE.Uncharted2ToneMapping;
                 renderer.toneMappingExposure = 3.0;
                 renderer.toneMappingWhitePoint = 5.0;
+
+                renderer.shadowMap.enabled = true;
+				renderer.shadowMap.soft = true;
+			    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+			    renderer.shadowMap.renderReverseSided = false;
 
 				container.appendChild( renderer.domElement );
 
@@ -233,6 +239,7 @@
 				var v1 = new THREE.Vector3();
 				var v2 = new THREE.Vector3();
 				var centroid = new THREE.Vector3();
+				var radius = 100;
 
 				var needComputeCentroid = true;
 
@@ -258,6 +265,11 @@
 				    if(o.animations) addAnimator( o );
 
 				    if(o.morphTargetDictionary) addMorphs( o );
+
+				    if(o.geometry){
+				    	o.castShadow = true;
+				    	o.receiveShadow = true;
+				    }
 					
 					if(needComputeCentroid && o.geometry){ 
 
@@ -284,9 +296,11 @@
 					camera.position.copy( centroid );
 					controls.target.copy( centroid );
 
+					radius = sphere.radius;
+
 					var fov = 45;
 					var vFOV = fov * (Math.PI / 180); // convert to radians
-					camera.position.z = (sphere.radius * 2.5) / (2 * Math.tan(vFOV / 2) );
+					camera.position.z = (radius * 2.5) / (2 * Math.tan(vFOV / 2) );
 				
 				}
 
@@ -296,16 +310,42 @@
 
 				if( !loader.lights ){
 
-					var light = new THREE.DirectionalLight( 0xffffff, 1.6 );
-		            light.position.copy(centroid).add( new THREE.Vector3(3,10,6).multiplyScalar( 100 ) );
+					var light = new THREE.DirectionalLight( 0xffffff, 1.3 );
+		            light.position.copy(centroid).add( new THREE.Vector3(-1,2,0.5).multiplyScalar( radius ) );
 		            light.lookAt( centroid );
 		            scene.add( light );
+
+		            var distance = centroid.clone().distanceTo(light.position);
+
+					light.castShadow = true;
+
+					var d = radius * 2;
+
+					var camShadow = new THREE.OrthographicCamera( d, -d, d, -d,  distance - d, distance + d );
+					light.shadow = new THREE.LightShadow( camShadow );
+
+					//var lightHelper = new THREE.CameraHelper( camShadow );
+					//scene.add( lightHelper );
+
+					light.shadow.mapSize.width = 1024;
+					light.shadow.mapSize.height = 1024;
+					light.shadow.bias = 0.0001;
 
 					var hemiLight = new THREE.HemisphereLight( 0xddeeff, 0x0f0e0d, 1 );
 					hemiLight.color.setHSL( 0.6, 1, 0.6 );
 					hemiLight.groundColor.setHSL( 0.095, 1, 0.75 );
 					hemiLight.position.copy( centroid );
 	                scene.add(  hemiLight );
+
+	                // extra plane shadow
+	                var planemat = new THREE.ShaderMaterial( THREE.ShaderShadow );
+	                var plane = new THREE.Mesh( new THREE.PlaneBufferGeometry( d*2, d*2, 1, 1 ), planemat );
+			        plane.geometry.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI*0.5));
+			        plane.castShadow = false;
+				    plane.receiveShadow = true;
+			        scene.add( plane );
+			    
+
 
 				}
 
