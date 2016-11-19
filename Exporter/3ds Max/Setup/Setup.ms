@@ -145,7 +145,7 @@ rollout SEA3DInstaller "" width:830 height:380
 			msg += "2. Toolbars.\n"
 			msg += "3. Select the category \"Sunag Entertainment\".\n"
 			msg += "4. Drag SEA3D icons to the toolbar of your choice."
-							
+			
 			msgBox msg
 			
 			fileIn (getSEA3DFolder() + "SEA3D.ms")		

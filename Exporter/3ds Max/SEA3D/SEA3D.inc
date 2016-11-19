@@ -6,11 +6,8 @@
 --
 
 global 	
-	sea_rawversion = 17010, --VVSSBB
-	sea_version = 17000, --VVSSBB
-	
-	seaconfig = undefined, 
-	seaconfig_file = undefined
+	sea_rawversion = 18001, --VVSSBB ( Exporter version )
+	sea_version = 18000 --VVSSBB
 
 global
 	NODE_CONFIG = "sea3d-config"
@@ -110,7 +107,7 @@ fn msgBox str =
 --	DLL
 --
 
-function LoadSEADLL =
+fn LoadSEADLL =
 (
 	seaconfigDLLPath = getSourceFolder() + "SEA3D.dll"
 
@@ -125,28 +122,4 @@ function LoadSEADLL =
 	)
 
 	return false
-)
-
---
---	Config
---
-
-seaconfig_file = getSourceFolder() + "SEA3D.config"
-
-function LoadSEAConfig =
-(
-	seaconfig = dotNetObject "Poonya.Utils.Hashmap"	
-	
-	if (seaconfig.ContainsFile seaconfig_file) do
-	(
-		seaconfig.Load seaconfig_file
-		return true
-	)
-	
-	return false
-)
-
-fn SaveSEA3DConfig =
-(
-	seaconfig.Save seaconfig_file
 )

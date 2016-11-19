@@ -1,5 +1,5 @@
 -- SEA3D Exporter (Sunag Entertainment Assets 3D)
--- Copyright (C) 2015 Sunag Entertainment
+-- Copyright (C) Sunag Entertainment
 
 -- SEA3D - A file format for games
 -- https://github.com/sunag/sea3d
@@ -243,14 +243,10 @@ if (hasProperty skinops #getBoneNameByListID) do
 --	Config
 --
 
-if sea_sounds == undefined or sea_sounds_names == undefined then
+fn CreateSEAConfig =
 (
-	global sea_sounds = #(), sea_sounds_names = #()
-)
-
-if (LoadSEAConfig() == false) then
-(
-	-- Creat Default Config
+	local seaconfig = dotNetObject "Poonya.Utils.Hashmap"	
+	
 	seaconfig.AddString "compress" "deflate"	
 	seaconfig.AddString "export" "visible"
 	seaconfig.AddFloat "mindiff" 0.01
@@ -313,7 +309,7 @@ if (LoadSEAConfig() == false) then
 	seaconfig.AddString "bakeext" EXT_PNG
 	seaconfig.AddString "bakeoutput" "completemap"
 	seaconfig.AddBoolean "relativesize" false
-	seaconfig.AddBoolean "meshoptimizer" true	
+	seaconfig.AddBoolean "meshoptimizer" false	
 	seaconfig.AddBoolean "joinvertices" false	
 	seaconfig.AddBoolean "forcelights" false
 	seaconfig.AddBoolean "fileinfo" false
@@ -325,10 +321,84 @@ if (LoadSEAConfig() == false) then
 	seaconfig.AddFloat "fog-max" 6000.0
 	seaconfig.AddColor "fog-color" 0 0 255	
 	
-	SaveSEA3DConfig()
+	return seaconfig
 )
 
-fn LoadSEA3DExporterConfig seaconfig =
+fn SetSEAConfig seaconfig =
+(
+	seaconfig.AddString "compress" seaconfig_compress	
+	seaconfig.AddString "export" seaconfig_export
+	seaconfig.AddFloat "mindiff" seaconfig_mindiff
+	seaconfig.AddBoolean "exceptionprotection" seaconfig_exceptionprotection
+	seaconfig.AddBoolean "sprite" seaconfig_sprite
+	seaconfig.AddBoolean "sounds" seaconfig_sounds
+	seaconfig.AddBoolean "all_sounds" seaconfig_all_sounds
+	seaconfig.AddBoolean "attrib" seaconfig_attrib
+	seaconfig.AddBoolean "animation" seaconfig_animation	
+	seaconfig.AddBoolean "force_animation" seaconfig_force_animation
+	seaconfig.AddBoolean "geometry" seaconfig_geometry
+	seaconfig.AddBoolean "skeleton" seaconfig_skeleton
+	seaconfig.AddBoolean "material" seaconfig_material
+	seaconfig.AddBoolean "rtt" seaconfig_rtt
+	seaconfig.AddBoolean "rtt_target" seaconfig_rtt_target
+	seaconfig.AddBoolean "atf" seaconfig_atf
+	seaconfig.AddBoolean "atf_auto" seaconfig_atf_auto
+	seaconfig.AddBoolean "atf_force" seaconfig_atf_force
+	seaconfig.AddBoolean "atf_jpegxr" seaconfig_atf_jpegxr
+	seaconfig.AddString "atf_compress" seaconfig_atf_compress
+	seaconfig.AddBoolean "materialcolor" seaconfig_materialcolor
+	seaconfig.AddBoolean "texture" seaconfig_texture
+	seaconfig.AddBoolean "textureanimationtakes" seaconfig_textureanimationtakes
+	seaconfig.AddBoolean "camera" seaconfig_camera
+	seaconfig.AddBoolean "cameratarget" seaconfig_cameratarget
+	seaconfig.AddBoolean "light" seaconfig_light
+	seaconfig.AddBoolean "lighttarget" seaconfig_lighttarget
+	seaconfig.AddBoolean "spline" seaconfig_spline
+	seaconfig.AddBoolean "dummy" seaconfig_dummy
+	seaconfig.AddBoolean "multiplechannel" seaconfig_multiplechannel
+	seaconfig.AddBoolean "uv" seaconfig_uv
+	seaconfig.AddBoolean "normal" seaconfig_normal
+	seaconfig.AddBoolean "tangent" seaconfig_tangent
+	seaconfig.AddBoolean "sg" seaconfig_sg
+	seaconfig.AddBoolean "vertexcolor" seaconfig_vertexcolor
+	seaconfig.AddBoolean "env" seaconfig_env
+	seaconfig.AddBoolean "morph" seaconfig_morph
+	seaconfig.AddBoolean "vertexanimation" seaconfig_vertexanimation
+	seaconfig.AddBoolean "warning" seaconfig_warning
+	seaconfig.AddBoolean "auto_rename" seaconfig_auto_rename
+	seaconfig.AddBoolean "positive_scale" seaconfig_positive_scale
+	seaconfig.AddBoolean "parent" seaconfig_parent
+	seaconfig.AddBoolean "bindoffset" seaconfig_bindoffset
+	seaconfig.AddBoolean "snapshot" seaconfig_snapshot
+	seaconfig.AddBoolean "instanceanimation" seaconfig_instanceanimation
+	seaconfig.AddInteger "bindframe" seaconfig_bindframe
+	seaconfig.AddInteger "splinestep" seaconfig_splinestep
+	seaconfig.AddBoolean "envmap" seaconfig_envmap
+	seaconfig.AddBoolean "instances" seaconfig_instances
+	seaconfig.AddBoolean "sharematerials" seaconfig_sharematerials
+	seaconfig.AddBoolean "allstatic" seaconfig_allstatic
+	seaconfig.AddBoolean "baketextures" seaconfig_baketextures
+	seaconfig.AddBoolean "renderall" seaconfig_renderall
+	seaconfig.AddBoolean "newmapping" seaconfig_newmapping
+	seaconfig.AddInteger "bakesize" seaconfig_bakesize
+	seaconfig.AddString "bakeoutput" seaconfig_bakeoutput	 
+	seaconfig.AddInteger "minbakesize" seaconfig_minbakesize
+	seaconfig.AddInteger "bakequality" seaconfig_bakequality
+	seaconfig.AddString "bakeext" seaconfig_bakeext
+	seaconfig.AddBoolean "relativesize" seaconfig_relativesize	
+	seaconfig.AddBoolean "meshoptimizer" seaconfig_meshoptimizer
+	seaconfig.AddBoolean "joinvertices" seaconfig_joinvertices
+	seaconfig.AddBoolean "fileinfo" seaconfig_fileinfo[1]
+	seaconfig.AddString "fileinfo-name" seaconfig_fileinfo[2]
+	seaconfig.AddString "fileinfo-author" seaconfig_fileinfo[3]
+	seaconfig.AddString "fileinfo-website" seaconfig_fileinfo[4]
+	seaconfig.AddBoolean "fog" seaconfig_fog[1]
+	seaconfig.AddColor "fog-color" seaconfig_fog[2].r seaconfig_fog[2].g seaconfig_fog[2].b				
+	seaconfig.AddFloat "fog-min" seaconfig_fog[3]
+	seaconfig.AddFloat "fog-max" seaconfig_fog[4]	
+)
+
+fn GetSEAConfig seaconfig =
 (
 	global
 	seaconfig_compress = seaconfig.GetString "compress", 
@@ -369,7 +439,6 @@ fn LoadSEA3DExporterConfig seaconfig =
 	seaconfig_vertexcolor = seaconfig.GetBoolean "vertexcolor",
 	seaconfig_env = seaconfig.GetBoolean "env",
 	seaconfig_morph = seaconfig.GetBoolean "morph",
-	seaconfig_lossygeometry = seaconfig.GetInteger "lossygeometry",
 	seaconfig_vertexanimation = seaconfig.GetBoolean "vertexanimation",
 	seaconfig_warning = seaconfig.GetBoolean "warning",
 	seaconfig_auto_rename = seaconfig.GetBoolean "auto_rename",
@@ -380,7 +449,6 @@ fn LoadSEA3DExporterConfig seaconfig =
 	seaconfig_instanceanimation = seaconfig.GetBoolean "instanceanimation",
 	seaconfig_bindframe = seaconfig.GetInteger "bindframe",	
 	seaconfig_splinestep = seaconfig.GetInteger "splinestep",
-	seaconfig_animationtype = seaconfig.GetInteger "animationtype",
 	seaconfig_envmap = seaconfig.GetBoolean "envmap",
 	seaconfig_instances = seaconfig.GetBoolean "instances",
 	seaconfig_sharematerials = seaconfig.GetBoolean "sharematerials",
@@ -422,82 +490,49 @@ fn LoadSEA3DExporterConfigFromDummy target: =
 	)
 )
 
-LoadSEA3DExporterConfig seaconfig
-
-fn SaveSEA3DExporterConfig seaconfig =
+fn ReadSEAConfig filename =
 (
-	seaconfig.AddString "compress" seaconfig_compress	
-	seaconfig.AddString "export" seaconfig_export
-	seaconfig.AddFloat "mindiff" seaconfig_mindiff
-	seaconfig.AddBoolean "exceptionprotection" seaconfig_exceptionprotection
-	seaconfig.AddBoolean "sprite" seaconfig_sprite
-	seaconfig.AddBoolean "sounds" seaconfig_sounds
-	seaconfig.AddBoolean "all_sounds" seaconfig_all_sounds
-	seaconfig.AddBoolean "attrib" seaconfig_attrib
-	seaconfig.AddBoolean "animation" seaconfig_animation	
-	seaconfig.AddBoolean "force_animation" seaconfig_force_animation
-	seaconfig.AddBoolean "geometry" seaconfig_geometry
-	seaconfig.AddBoolean "skeleton" seaconfig_skeleton
-	seaconfig.AddBoolean "material" seaconfig_material
-	seaconfig.AddBoolean "rtt" seaconfig_rtt
-	seaconfig.AddBoolean "rtt_target" seaconfig_rtt_target
-	seaconfig.AddBoolean "atf" seaconfig_atf
-	seaconfig.AddBoolean "atf_auto" seaconfig_atf_auto
-	seaconfig.AddBoolean "atf_force" seaconfig_atf_force
-	seaconfig.AddBoolean "atf_jpegxr" seaconfig_atf_jpegxr
-	seaconfig.AddString "atf_compress" seaconfig_atf_compress
-	seaconfig.AddBoolean "materialcolor" seaconfig_materialcolor
-	seaconfig.AddBoolean "texture" seaconfig_texture
-	seaconfig.AddBoolean "textureanimationtakes" seaconfig_textureanimationtakes
-	seaconfig.AddBoolean "camera" seaconfig_camera
-	seaconfig.AddBoolean "cameratarget" seaconfig_cameratarget
-	seaconfig.AddBoolean "light" seaconfig_light
-	seaconfig.AddBoolean "lighttarget" seaconfig_lighttarget
-	seaconfig.AddBoolean "spline" seaconfig_spline
-	seaconfig.AddBoolean "dummy" seaconfig_dummy
-	seaconfig.AddBoolean "multiplechannel" seaconfig_multiplechannel
-	seaconfig.AddBoolean "uv" seaconfig_uv
-	seaconfig.AddBoolean "normal" seaconfig_normal
-	seaconfig.AddBoolean "tangent" seaconfig_tangent
-	seaconfig.AddBoolean "sg" seaconfig_sg
-	seaconfig.AddBoolean "vertexcolor" seaconfig_vertexcolor
-	seaconfig.AddBoolean "env" seaconfig_env
-	seaconfig.AddBoolean "morph" seaconfig_morph
-	seaconfig.AddInteger "lossygeometry" seaconfig_lossygeometry
-	seaconfig.AddBoolean "vertexanimation" seaconfig_vertexanimation
-	seaconfig.AddBoolean "warning" seaconfig_warning
-	seaconfig.AddBoolean "auto_rename" seaconfig_auto_rename
-	seaconfig.AddBoolean "positive_scale" seaconfig_positive_scale
-	seaconfig.AddBoolean "parent" seaconfig_parent
-	seaconfig.AddBoolean "bindoffset" seaconfig_bindoffset
-	seaconfig.AddBoolean "snapshot" seaconfig_snapshot
-	seaconfig.AddBoolean "instanceanimation" seaconfig_instanceanimation
-	seaconfig.AddInteger "bindframe" seaconfig_bindframe
-	seaconfig.AddInteger "splinestep" seaconfig_splinestep
-	seaconfig.AddInteger "animationtype" seaconfig_animationtype
-	seaconfig.AddBoolean "envmap" seaconfig_envmap
-	seaconfig.AddBoolean "instances" seaconfig_instances
-	seaconfig.AddBoolean "sharematerials" seaconfig_sharematerials
-	seaconfig.AddBoolean "allstatic" seaconfig_allstatic
-	seaconfig.AddBoolean "baketextures" seaconfig_baketextures
-	seaconfig.AddBoolean "renderall" seaconfig_renderall
-	seaconfig.AddBoolean "newmapping" seaconfig_newmapping
-	seaconfig.AddInteger "bakesize" seaconfig_bakesize
-	seaconfig.AddString "bakeoutput" seaconfig_bakeoutput	 
-	seaconfig.AddInteger "minbakesize" seaconfig_minbakesize
-	seaconfig.AddInteger "bakequality" seaconfig_bakequality
-	seaconfig.AddString "bakeext" seaconfig_bakeext
-	seaconfig.AddBoolean "relativesize" seaconfig_relativesize	
-	seaconfig.AddBoolean "meshoptimizer" seaconfig_meshoptimizer
-	seaconfig.AddBoolean "joinvertices" seaconfig_joinvertices
-	seaconfig.AddBoolean "fileinfo" seaconfig_fileinfo[1]
-	seaconfig.AddString "fileinfo-name" seaconfig_fileinfo[2]
-	seaconfig.AddString "fileinfo-author" seaconfig_fileinfo[3]
-	seaconfig.AddString "fileinfo-website" seaconfig_fileinfo[4]
-	seaconfig.AddBoolean "fog" seaconfig_fog[1]
-	seaconfig.AddColor "fog-color" seaconfig_fog[2].r seaconfig_fog[2].g seaconfig_fog[2].b				
-	seaconfig.AddFloat "fog-min" seaconfig_fog[3]
-	seaconfig.AddFloat "fog-max" seaconfig_fog[4]	
+	local seapath = getSourceFolder() + filename
+	local seaconfig = dotNetObject "Poonya.Utils.Hashmap"	
+	
+	if (seaconfig.ContainsFile seapath) do
+	(
+		seaconfig.Load seapath
+		
+		return seaconfig
+	)
+	
+	return undefined
+)
+
+fn WriteSEAConfig seaconfig filename =
+(
+	local seapath = getSourceFolder() + filename
+	
+	seaconfig.Save seapath
+)
+
+fn GetSEAConfigList =
+(
+	return ( getFiles (getSourceFolder() + "*.config") )
+)
+
+--
+--	Create Config
+--
+
+global seaconfig, seaconfig_selected
+
+seaconfig = ReadSEAConfig "Default.config"
+
+if seaconfig == undefined then seaconfig = CreateSEAConfig()
+else seaconfig_selected = "Default"
+
+GetSEAConfig seaconfig
+
+if sea_sounds == undefined or sea_sounds_names == undefined then
+(
+	global sea_sounds = #(), sea_sounds_names = #()
 )
 
 --
@@ -505,6 +540,8 @@ fn SaveSEA3DExporterConfig seaconfig =
 --
 
 global sea_floater, 
+sea_listeners = #(),
+sea_changes = #(),
 seaTimeRange = #(animationRange.start.frame as integer,animationRange.end.frame as integer,0 as integer,framerate),
 seaUnits = #(#Generic, #Centimeters),
 seaao = #(32,color 255 255 255,color 0 0 0,1.0,50.0,0.5),
@@ -597,9 +634,8 @@ seaCompatibleMeshList = #(
 	Prism	
 	)
 
-global 
-seaevent_anm = undefined
-	
+global seaevent_anm = undefined
+
 rollout _SEAListener "SEA3D Listener" width:500 height:300
 (
     dotNetControl dncText "System.Windows.Forms.Textbox" width:490 height:290 align:#center
@@ -1287,6 +1323,38 @@ global
 	seastarttime = undefined,
 	seaupdatetime = undefined
 
+fn seatime t =
+(
+	set time t
+	sliderTime = t
+)
+
+fn seaupdatewindow = 
+(
+	windows.processPostedMessages()
+)
+
+fn seadispatchChange changes: dispatch: = 
+(
+	seabuild = false
+	
+	if changes != false then
+	(
+		for i=1 to sea_changes.count do
+		(
+			sea_changes[i]()
+		)
+	)
+	
+	if dispatch == true then
+	(
+		for i=1 to sea_listeners.count do
+		(
+			sea_listeners[i]()
+		)
+	)
+)
+
 fn seaprogressStart c name: =
 (
 	seastarttime = timeStamp()
@@ -1294,9 +1362,6 @@ fn seaprogressStart c name: =
 	
 	seaprogressbar.value = 0
 	seaprogressbar.color = c
-	
-	--if n == unsupplied then n = "SEA3D"
-	--progressStart "SEA3D"	
 )
 
 fn seaprogressUpdate p =
@@ -1304,13 +1369,10 @@ fn seaprogressUpdate p =
 	local actime = timeStamp()
 	
 	seaprogressbar.value = p
-	--progressUpdate p
 	
 	if actime - seastarttime > 5000 and actime - seaupdatetime > 1000 then
 	(
-		-- show progress in display (unfreezes the screen)
-		progressStart "SEA3D"
-		progressEnd()
+		seaupdatewindow()
 		
 		seaupdatetime = actime
 	)
@@ -1319,7 +1381,6 @@ fn seaprogressUpdate p =
 fn seaprogressEnd =
 (
 	seaprogressbar.value = 0
-	--progressEnd ()
 )
 
 --
@@ -1919,7 +1980,7 @@ fn rotateMatrix t offset =
 fn getInstanceIndex n returnnode: =
 (
 	InstanceMgr.GetInstances n &instances	
-		
+	
 	for j=1 to instances.count do		
 	(
 		local inst = instances[j]
@@ -2329,35 +2390,28 @@ function containsDifference val0 val1 =
 
 function containsPosition obj =
 (
-	if seaconfig_animationtype == 2 then
+	seatime seaTimeRange[1]		
+	
+	local p = undefined
+	
+	if seauseparent do p = realParent obj
+		
+	local value = obj.transform
+	
+	if p != undefined then
+		value *= inverse p.transform
+	
+	for t = seaTimeRange[1] to seaTimeRange[2] do
 	(
-		set time seaTimeRange[1]		
+		seatime t		
 		
-		local p = undefined
-		
-		if seauseparent do p = realParent obj
-			
-		local value = obj.transform
+		local trans = obj.transform
 		
 		if p != undefined then
-			value *= inverse p.transform
+			trans *= inverse p.transform
 		
-		for t = seaTimeRange[1] to seaTimeRange[2] do
-		(
-			set time t		
-			
-			local trans = obj.transform
-			
-			if p != undefined then
-				trans *= inverse p.transform
-			
-			if (containsDifference value.position trans.position) then
-				return true			
-		)
-	)	
-	else
-	(
-		return obj.position.isAnimated
+		if (containsDifference value.position trans.position) then
+			return true			
 	)
 	
 	return false
@@ -2365,35 +2419,28 @@ function containsPosition obj =
 
 function containsRotation obj =
 (
-	if seaconfig_animationtype == 2 then
+	seatime seaTimeRange[1]		
+	
+	local p = undefined 
+	
+	if seauseparent do p = realParent obj
+	
+	local value = obj.transform
+	
+	if p != undefined then
+		value *= inverse p.transform
+	
+	for t = seaTimeRange[1] to seaTimeRange[2] do
 	(
-		set time seaTimeRange[1]		
+		seatime t		
 		
-		local p = undefined 
-		
-		if seauseparent do p = realParent obj
-			
-		local value = obj.transform
+		local trans = obj.transform
 		
 		if p != undefined then
-			value *= inverse p.transform
+			trans *= inverse p.transform
 		
-		for t = seaTimeRange[1] to seaTimeRange[2] do
-		(
-			set time t		
-			
-			local trans = obj.transform
-			
-			if p != undefined then
-				trans *= inverse p.transform
-			
-			if value.rotation != trans.rotation then
-				return true			
-		)
-	)	
-	else
-	(
-		return obj.rotation.isAnimated
+		if value.rotation != trans.rotation then
+			return true			
 	)
 	
 	return false
@@ -2401,35 +2448,28 @@ function containsRotation obj =
 
 function containsScale obj =
 (
-	if seaconfig_animationtype == 2 then
+	seatime seaTimeRange[1]		
+	
+	local p = undefined 
+	
+	if seauseparent do p = realParent obj
+		
+	local value = obj.transform
+	
+	if p != undefined then
+		value *= inverse p.transform
+	
+	for t = seaTimeRange[1] to seaTimeRange[2] do
 	(
-		set time seaTimeRange[1]		
+		seatime t		
 		
-		local p = undefined 
-		
-		if seauseparent do p = realParent obj
-			
-		local value = obj.transform
+		local trans = obj.transform
 		
 		if p != undefined then
-			value *= inverse p.transform
+			trans *= inverse p.transform
 		
-		for t = seaTimeRange[1] to seaTimeRange[2] do
-		(
-			set time t		
-			
-			local trans = obj.transform
-			
-			if p != undefined then
-				trans *= inverse p.transform
-			
-			if (containsDifference value.scale trans.scale) then
-				return true			
-		)
-	)	
-	else
-	(
-		return obj.scale.isAnimated
+		if (containsDifference value.scale trans.scale) then
+			return true			
 	)
 	
 	return false
@@ -2572,9 +2612,6 @@ function seaDispose =
 	seaAssetList = 
 	seaAssetNames = 
 	seaModifierList = undefined
-				
-	units.DisplayType = seaUnits[1]
-	units.MetricType = seaUnits[2]
 	
 	gc()
 )
@@ -3928,7 +3965,7 @@ fn compileObject n =
 				instanceIndex = getInstanceIndex n
 			else
 				instanceIndex = 0
-			
+			 
 			local skinAt = 0
 			local morphAt = 0					
 			local smoothAt = 0
@@ -4085,7 +4122,7 @@ fn compileObject n =
 					vertexAnm = true										
 				)
 				
-				smoothing_group = tag.m_sgparam				
+				smoothing_group = tag.m_sgparam			
 			)
 			else
 			(
@@ -4157,7 +4194,7 @@ fn compileObject n =
 			)
 			
 			-- Initial config
-			set time seaTimeRange[1]		
+			seatime seaTimeRange[1]		
 			
 			-- Convert to compatible format
 			local isMeshAnimated = skinObj != undefined or morphObj != undefined or vertexAnm
@@ -4200,9 +4237,8 @@ fn compileObject n =
 			local removeTrans = seaconfig_snapshot == false and skinObj == undefined
 				
 			if smoothing_group then
-			(				
-				local normalNObj = copy obj
-				
+			(
+				normalNObj = copy obj
 				normalNObj.renderable = false
 				
 				if removeTrans do 
@@ -4211,8 +4247,8 @@ fn compileObject n =
 					removeObjectTransform normalNObj					
 				)
 				
-				normalObj = Edit_Normals()			
-				normalObj.name = "SEA3D Normals"							
+				normalObj = Edit_Normals()
+				normalObj.name = "SEA3D Normals"	
 				
 				addModifier normalNObj normalObj
 				
@@ -4230,10 +4266,9 @@ fn compileObject n =
 					nB.y = roundNum nB.y
 					nB.z = roundNum nB.z
 					
-					local needXForm = 
-						nA.x != nB.x or nA.y != nB.y or nA.z != nB.z
+					local needXForm = nA.x != nB.x or nA.y != nB.y or nA.z != nB.z
 					
-					if needXForm and skinObj == undefined then
+					if needXForm and skinObj == undefined and vertexAnm == false then
 					(
 						deleteModifier normalNObj normalObj
 						resetXForm normalNObj			
@@ -4256,7 +4291,7 @@ fn compileObject n =
 			(
 				selectMod obj skinObj													
 				
-				-- skeleton				
+				-- skeleton
 				numbones = skinops.getnumberbones skinObj
 				
 				-- sort dependencies
@@ -4302,7 +4337,7 @@ fn compileObject n =
 				-- bind position
 				if seaconfig_bindoffset then 
 				(
-					set time seaconfig_bindframe
+					seatime seaconfig_bindframe
 					
 					local matRelative = boneList[1].transform
 
@@ -4390,7 +4425,8 @@ fn compileObject n =
 			
 			if instanceIndex > 0 then
 			(
-				if (n != obj) then ( delete obj )
+				if n != obj do delete obj
+				if normalNObj != undefined do delete normalNObj
 				local hmesh = seaObjectList[instanceIndex]
 				sMesh.instanceOf = hmesh
 				append hmesh.instances sMesh
@@ -4558,7 +4594,7 @@ fn compileObject n =
 				
 				-- Get Normal		
 				if smoothing_group then
-				(					
+				(
 					selectMod normalNObj normalObj	
 					
 					local numNorms = normalObj.GetNumNormals()
@@ -4628,6 +4664,11 @@ fn compileObject n =
 				local HT = undefined 
 				local indexAt = 1
 				
+				if seaconfig_meshoptimizer do 
+				(
+					HT = dotNetObject "Poonya.Utils.DictSN"					
+				)
+				
 				local c_vertex = sMesh.c_vertex = #()
 				local c_index = sMesh.c_index = #()
 				local c_weights = sMesh.c_weights = #()
@@ -4639,15 +4680,6 @@ fn compileObject n =
 				-- e_ used for vertex and morph indexes
 				local e_index = sMesh.e_index = #()
 				local e_normal = sMesh.e_normal = #()
-				
-				print "-- vertex count --"
-				print  __vertex.count
-				print "--"
-				
-				if seaconfig_meshoptimizer do 
-				(
-					HT = dotNetObject "Poonya.Utils.DictSN"					
-				)
 				
 				sMesh.maxweight = maxweight
 				
@@ -4917,6 +4949,8 @@ fn compileObjects list =
 	(
 		seaprogressUpdate (((float i) / (float list.count)) * 100.0)
 		
+		if seabuild == false do return 0
+		
 		local n =  list[i]
 		
 		if seaconfig_exceptionprotection then
@@ -5113,12 +5147,14 @@ function getMorphAnimationAsset sea =
 	(
 		local m = mchs[ch]
 		
-		set time seaTimeRange[1]		
+		seatime seaTimeRange[1]		
+		
 		local f_value = (WM3_MC_GetValue obj m)
 		
 		for t = seaTimeRange[1] to seaTimeRange[2] do
 		(
-			set time t				 			
+			seatime t				 			
+			
 			if f_value != (WM3_MC_GetValue obj m) do
 			(			
 				append mchsAnim mchs[ch]
@@ -5152,7 +5188,8 @@ function getMorphAnimationAsset sea =
 		
 		for t = seaTimeRange[1] to seaTimeRange[2] do
 		(
-			set time t
+			seatime t
+			
 			data.WriteFloat ((WM3_MC_GetValue obj m) / 100.0)
 		)		
 	)
@@ -5227,7 +5264,7 @@ function getMorphAsset sea =
 	if containsNormal do 
 	(
 		local  __normalBase = #()
-			
+		
 		if sea.smoothing_group then
 		(							
 			selectMod normalNObj normalObj	
@@ -5354,18 +5391,26 @@ function getVertexAnimationAsset sea =
 	local e_index = sea.e_index
 	local e_normal = sea.e_normal
 	local useNormal = sea.useNormal()
-	local normalObj = undefined
 	local vertexcount = getnumverts obj
 	local normalObj = sea.normalObj
-	local normalNObj = sea.normalObj
+	local normalNObj = sea.normalNObj
+	local normalObjAnm = undefined
 	
 	if seaconfig_snapshot == false then
 		removeObjectTransform obj
 	
+	if useNormal and sea.smoothing_group do
+	(
+		normalObjAnm = Edit_Normals()
+		normalObjAnm.name = "SEA3D Normals Animated"	
+		
+		addModifier obj normalObjAnm
+	)
+	
 	selectMod obj undefined
 	
 	-- VERTEX ANIMATION
-	set time seaTimeRange[1]
+	seatime seaTimeRange[1]
 	
 	local asset = newAsset()
 	local data = asset.Data	
@@ -5394,7 +5439,7 @@ function getVertexAnimationAsset sea =
 	
 	for t = seaTimeRange[1] to seaTimeRange[2] do
 	(
-		set time t
+		seatime t
 		
 		local __vertex = #()
 		
@@ -5419,15 +5464,15 @@ function getVertexAnimationAsset sea =
 		(
 			local  __normal = #()
 			
-			if sea.smoothing_group then
-			(							
-				selectMod normalNObj normalObj	
+			if normalObjAnm != undefined then
+			(
+				selectMod obj normalObjAnm	
 				
-				local numNorms = normalObj.GetNumNormals()
+				local numNorms = normalObjAnm.GetNumNormals()
 				
 				for v = 1 to numNorms do
 				(
-					local normal = normalObj.EditNormalsMod.GetNormal v
+					local normal = normalObjAnm.EditNormalsMod.GetNormal v
 					normal = normalize normal as point3					
 					append __normal #(
 						normal.x, 
@@ -5435,8 +5480,6 @@ function getVertexAnimationAsset sea =
 						normal.y
 					)						
 				)
-				
-				selectMod obj sea.morphObj
 			)
 			else
 			(
@@ -5463,6 +5506,11 @@ function getVertexAnimationAsset sea =
 	
 	closeAnimation()
 	
+	if normalObjAnm != undefined do
+	(
+		deleteModifier obj normalObjAnm
+	)
+	
 	return asset
 )
 
@@ -5476,7 +5524,7 @@ function getSkeletonAnimationAsset sea =
 	asset.Filename = sea.obj.name + EXT_SKELETON_ANIMATION
 	
 	-- SKELETON ANIMATION
-	set time seaTimeRange[1]
+	seatime seaTimeRange[1]
 	
 	writeAnimationHead data sequence:(getSequenceData sea.obj)			
 	
@@ -5486,7 +5534,8 @@ function getSkeletonAnimationAsset sea =
 	
 	for t = seaTimeRange[1] to seaTimeRange[2] do
 	(
-		set time t			
+		seatime t
+		
 		for i = 1 to numbones do
 		(
 			writeBone data sea.boneList[i] SEA_QUATERNION parent:sea.boneParentList[i] bindpos:sea.bindpos 
@@ -5567,7 +5616,7 @@ function processAnimation obj data tokenList offsetRotation: loader: type: =
 		(
 			if parent == undefined then 
 			(	
-				set time seaconfig_bindframe							
+				seatime seaconfig_bindframe							
 				
 				transform = obj.transform
 				
@@ -5603,7 +5652,8 @@ function processAnimation obj data tokenList offsetRotation: loader: type: =
 			
 			for t = seaTimeRange[1] to seaTimeRange[2] do
 			(
-				set time t		
+				seatime t
+				
 				processToken data obj token p:parent t:transform tp:transform_parent offsetRotation:offsetRotation
 			)
 		)
@@ -5621,7 +5671,8 @@ function processAnimation obj data tokenList offsetRotation: loader: type: =
 		-- Body
 		for t = seaTimeRange[1] to seaTimeRange[2] do
 		(
-			set time t		
+			seatime t
+			
 			for i=1 to tokenList.count do
 			(
 				processToken data obj tokenList[i] p:parent t:transform tp:transform_parent offsetRotation:offsetRotation 
@@ -6225,7 +6276,7 @@ function getCompositeAsset sea =
 		local opacity = (sea.opacity[i]/100.0)
 		local nm = sea.name[i]									
 		
-		set time seaTimeRange[1]
+		seatime seaTimeRange[1]
 		
 		local useName = nm != undefined
 		local useTexture = tex != undefined
@@ -6312,7 +6363,7 @@ function getMaterialAsset sea blendtype: receiveShadows: receiveLights: =
 	-- MATERIAL
 	asset.Filename = sea.obj.name + EXT_MATERIAL
 	
-	set time seaTimeRange[1]
+	seatime seaTimeRange[1]
 	
 	local ext_attrib = 0
 	
@@ -6551,7 +6602,8 @@ function getSkeletonLocalAsset sea =
 	
 	-- SKELETON
 	local oldTime = currentTime.frame
-	set time seaconfig_bindframe
+	
+	seatime seaconfig_bindframe
 	
 	local numbones = sea.boneList.count					
 	
@@ -6567,7 +6619,7 @@ function getSkeletonLocalAsset sea =
 		Write3D data [1,1,1]
 	)
 	
-	set time oldTime
+	seatime oldTime
 	
 	returnasset
 )
@@ -6581,7 +6633,8 @@ function getSkeletonAsset sea =
 	
 	-- SKELETON
 	local oldTime = currentTime.frame
-	set time seaconfig_bindframe
+	
+	seatime seaconfig_bindframe
 	
 	local numbones = sea.boneList.count					
 	
@@ -6598,244 +6651,7 @@ function getSkeletonAsset sea =
 			writeBone data sea.boneList[i] SEA_INV_MATRIX parent:sea.boneParentList[1] bindpos:sea.bindpos
 	)
 	
-	set time oldTime
-	
-	return asset
-)
-
-function getGeometryDeltaAsset sea =
-(
-	local asset = newAsset()
-	local data = asset.Data
-	local obj = sea.temp
-	
-	asset.Filename = sea.obj.name + EXT_GEOMETRY_DELTA
-		
-	-- GEOMETRY
-		
-	local c_vertex = sea.c_vertex
-	local c_index = sea.c_index
-	local c_weights = sea.c_weights
-	local c_normal = sea.c_normal
-	local c_uv = sea.c_uv
-	local c_color = sea.c_color
-	local c_tangent = sea.c_tangent
-	
-	local e_index = sea.e_index
-	local e_normal = sea.e_normal
-	
-	local header = 0			
-	
-	-- DELTA
-	local maxval, dvalue
-	local valX, valY, valZ
-	local WriteNumber
-	
-	if seaconfig_lossygeometry == 2 then
-	(
-		header += HEADER_QCOMPRESSION_LOW				
-		dvalue = 0xFFFF / 2
-		WriteNumber = data.WriteUInt16
-	)
-	else if seaconfig_lossygeometry == 3 then
-	(
-		header += HEADER_QCOMPRESSION_HIGH		
-		dvalue = 0xFF / 2
-		WriteNumber = data.WriteByte		
-	)
-	
-	local containsUV = c_uv.count > 0
-	local containsNormal = c_normal.count > 0
-	local containsTangent = c_tangent.count > 0
-	local containsJoints = c_weights.count > 0
-	local containsColor = c_color.count > 0
-	
-	if containsUV do header += HEADER_UV
-	if containsNormal do header += HEADER_NORMAL
-	if containsTangent do header += HEADER_TANGENT
-	if containsJoints do header += HEADER_JOINTS
-	if containsColor do header += HEADER_COLOR
-			
-	-- HEADER
-	data.WriteUInt16 header
-	
-	-- VERTEX COUNT	
-	data.WriteUInteger c_vertex.count		
-	
-	-- NORMAL
-	if containsNormal then 
-	(		
-		maxval = 0
-		
-		for v=1 to c_normal.count do
-		(
-			valX = abs c_normal[v][1]
-			valY = abs c_normal[v][2]
-			valZ = abs c_normal[v][3]
-			
-			if valX > maxval do maxval = valX
-			if valY > maxval do maxval = valY
-			if valZ > maxval do maxval = valZ
-		)
-		
-		data.WriteFloat maxval
-		
-		for v=1 to c_normal.count do
-		(
-			WriteNumber (((c_normal[v][1] / maxval) * dvalue) as integer)
-			WriteNumber (((c_normal[v][2] / maxval) * dvalue) as integer)
-			WriteNumber (((c_normal[v][3] / maxval) * dvalue) as integer)
-		)
-	)
-	
-	-- TANGENT
-	if containsTangent then 
-	(
-		maxval = 0
-		
-		for v=1 to c_tangent.count do
-		(
-			valX = abs c_tangent[v][1]
-			valY = abs c_tangent[v][2]
-			valZ = abs c_tangent[v][3]
-			
-			if valX > maxval do maxval = valX
-			if valY > maxval do maxval = valY
-			if valZ > maxval do maxval = valZ
-		)
-		
-		data.WriteFloat maxval
-		
-		for v=1 to c_tangent.count do
-		(
-			WriteNumber (((c_tangent[v][1] / maxval) * dvalue) as integer)
-			WriteNumber (((c_tangent[v][2] / maxval) * dvalue) as integer)
-			WriteNumber (((c_tangent[v][3] / maxval) * dvalue) as integer)
-		)
-	)
-	
-	-- UV'S
-	if containsUV then
-	(
-		data.WriteByte c_uv.count
-		for c=1 to c_uv.count do
-		(			
-			maxval = 0
-		
-			for v=1 to c_uv[c].count do
-			(
-				valX = abs c_uv[c][v][1]
-				valY = abs c_uv[c][v][2]
-				
-				if valX > maxval do maxval = valX
-				if valY > maxval do maxval = valY
-			)
-			
-			data.WriteFloat maxval
-			
-			for v=1 to c_uv[c].count do
-			(
-				WriteNumber (((c_uv[c][v][1] / maxval) * dvalue) as integer)
-				WriteNumber (((c_uv[c][v][2] / maxval) * dvalue) as integer)								
-			)
-		)
-	)
-	
-	-- JOINTS / WEIGHTS
-	if containsJoints then 
-	(
-		local maxweight = sea.maxweight
-		
-		data.WriteByte maxweight
-		
-		for v = 1 to c_weights.count do
-		(
-			local w = 0
-			
-			while w < c_weights[v].count do
-			(
-				data.WriteUInteger c_weights[v][w+1][1]					
-				w += 1
-			)
-			
-			while w < maxweight do
-			(
-				data.WriteUInteger 0					
-				w += 1
-			)											
-		)
-		
-		for v = 1 to c_weights.count do
-		(
-			local w = 0
-			
-			while w < c_weights[v].count do
-			(
-				WriteNumber ((c_weights[v][w+1][2] * dvalue) as integer)
-				w += 1
-			)
-			
-			while w < maxweight do
-			(
-				WriteNumber (0 as integer)
-				w += 1
-			)											
-		)
-	)
-	
-	-- COLOR
-	if containsColor then
-	(
-		-- CHANNEL COUNT
-		local colorAttrib = 1
-		
-		colorAttrib += HEADER_COLOR3
-		
-		data.WriteByte colorAttrib
-		
-		for v=1 to c_color.count do
-		(
-			data.WriteByte c_color[v][1]
-			data.WriteByte c_color[v][2]
-			data.WriteByte c_color[v][3]
-		)
-	)
-	
-	-- VERTEX
-	maxval = 0
-	
-	for v=1 to c_vertex.count do
-	(
-		valX = abs c_vertex[v][1]
-		valY = abs c_vertex[v][2]
-		valZ = abs c_vertex[v][3]
-		
-		if valX > maxval do maxval = valX
-		if valY > maxval do maxval = valY
-		if valZ > maxval do maxval = valZ
-	)
-		
-	data.WriteFloat maxval
-	
-	for v=1 to c_vertex.count do
-	(
-		WriteNumber (((c_vertex[v][1] / maxval) * dvalue) as integer)
-		WriteNumber (((c_vertex[v][2] / maxval) * dvalue) as integer)
-		WriteNumber (((c_vertex[v][3] / maxval) * dvalue) as integer)
-	)
-	
-	-- INDEX
-	data.WriteByte c_index.count		
-	for m = 1 to c_index.count do
-	(
-		local _index = c_index[m]
-				
-		data.WriteUInteger (_index.count/3)
-		for f = 1 to _index.count do 
-		(
-			data.WriteUInteger (_index[f]-1)
-		)		
-	)
+	seatime oldTime
 	
 	return asset
 )
@@ -7023,7 +6839,7 @@ function getMeshAsset sea =
 	local body = newNode()
 	
 	-- MESH
-	set time seaTimeRange[1]
+	seatime seaTimeRange[1]
 	
 	-- GET PROPERTIES
 	local isStatic = sea.isStatic()
@@ -7052,7 +6868,7 @@ function getMeshAsset sea =
 	)
 	
 	local animationList = #()
-			
+	
 	-- SEARCH UVW ANIMATION
 	if sea.mats != undefined then
 	(
@@ -7220,7 +7036,7 @@ function getCameraAsset sea =
 	writeObject3D body sea &header
 	
 	-- CAMERA
-	set time seaTimeRange[1]
+	seatime seaTimeRange[1]
 	
 	writeMatrix body obj offset:[-90,0,0]
 	
@@ -7267,7 +7083,7 @@ function getLightAsset sea =
 	writeObject3D body sea &header
 	
 	-- LIGHT
-	set time seaTimeRange[1]
+	seatime seaTimeRange[1]
 	
 	-- SHADOW
 	if obj.baseObject.castShadows then
@@ -7342,7 +7158,7 @@ function getDummyAsset sea =
 	writeObject3D body sea &header
 	
 	-- DUMMY
-	set time seaTimeRange[1]
+	seatime seaTimeRange[1]
 	
 	writeMatrix body obj
 	
@@ -7374,7 +7190,7 @@ function getSprite3DAsset sea =
 	-- OBJECT3D
 	writeObject3D body sea &header
 	
-	set time seaTimeRange[1]
+	seatime seaTimeRange[1]
 	
 	if sea.mats_index != undefined do
 	(
@@ -7403,7 +7219,7 @@ function getSound3DAsset sea =
 	asset.Filename = sea.obj.name + EXT_SOUND_POINT
 	
 	-- SOUND3D
-	set time seaTimeRange[1]
+	seatime seaTimeRange[1]
 	
 	local header = 0x0000	
 	local body = newNode()
@@ -7736,9 +7552,7 @@ function exportSEAObjects =
 			
 			if seaconfig_geometry then
 			(								
-				if seaconfig_lossygeometry == 1 then sea.geo_index = appendAsset (getGeometryAsset sea)
-				else sea.geo_index = appendAsset (getGeometryDeltaAsset sea)
-				
+				sea.geo_index = appendAsset (getGeometryAsset sea)
 				sea.asset = appendAsset (getMeshAsset sea) type:EXT_SCENE_OBJECT
 			)
 					
@@ -7907,9 +7721,9 @@ fn exportList list =
 			exportSEAObjects()
 		)
 	)
-		
+	
 	seaconfig_animation = anm
-		
+	
 	if seaconfig_warning == false do
 	(
 		seaWarning.count = 0
@@ -7924,8 +7738,10 @@ fn exportList list =
 	set coordsys oc								
 )
 
-fn exportSEA3DCore = 
+fn buildSEA3D = 
 (
+	seabuild = true
+	
 	seaBitmapList = #()
 	seaCubeList = #()
 	seaTextureList = #()
@@ -7963,18 +7779,28 @@ fn exportSEA3DCore =
 		selectMore sel
 	)
 	
-	if sea3d.Objects.Count > 0 then
+	if seabuild == false then
 	(
-		sea3d.CompressAlgorithm = seaconfig_compress				
-		sea3d.Save()
+		seaError = "Export canceled."
 	)
-	else
+	else 
 	(
-		seaError = "No object was exported."
+		if sea3d.Objects.Count > 0 then
+		(
+			sea3d.CompressAlgorithm = seaconfig_compress				
+			
+			return sea3d
+		)
+		else
+		(
+			seaError = "No object was exported."
+		)
 	)
+	
+	return undefined
 )
 
-fn exportSEA3D =
+fn exportSEA3D filename =
 (
 	seaError = undefined
 	seaErrors = #()
@@ -7989,24 +7815,44 @@ fn exportSEA3D =
 	seaUnits[1] = units.DisplayType
 	seaUnits[2] = units.MetricType
 	
+	local WM_SETREDRAW=0xB
+	local commandHWND = windows.getChildHWND #max "Command Panel"
+	
+	local sea3d = undefined
+	
+	windows.sendmessage commandHWND[1]  WM_SETREDRAW 0 0
+	
 	units.DisplayType = #Generic
 	units.MetricType = #Centimeters
 	
-	if seaconfig_exceptionprotection then
+	with redraw off
 	(
-		try (
-			exportSEA3DCore()
+		if seaconfig_exceptionprotection then
+		(
+			try (
+				sea3d = buildSEA3D()
+			)
+			catch(seaerror = getCurrentException())
 		)
-		catch(seaerror = getCurrentException())
+		else
+		(
+			sea3d = buildSEA3D()
+		)
+			
+		seaDispose()
 	)
-	else
-	(
-		exportSEA3DCore()
-	)
-		
-	seaDispose()
 	
-	if (seaError != undefined) then
+	units.DisplayType = seaUnits[1]
+	units.MetricType = seaUnits[2]
+	
+	windows.sendmessage commandHWND[1]  WM_SETREDRAW 1 0
+	
+	if sea3d != undefined then
+	(
+		sea3d.Save filename
+	)
+	
+	if seaError != undefined then
 	(
 		msgBox seaError
 	)
@@ -8020,48 +7866,51 @@ rollout _SEA "SEA3D"
 (		
 	radiobuttons compressItem "Compression Algorithm" pos:[7,4] default:2 labels:#("None", "Deflate", "Lzma") 		
 	radiobuttons exportItem "Export" pos:[7,40] default:2 labels:#("All", "Visible", "Selected")		
-			
-	progressBar progress pos:[7,88] width:200 height:14 align:#center
 	
-	--button uploadButton "Upload" pos:[104,106] 				
-	button exportButton "Export" pos:[159,106] 		
+	label presetSample "Presets" pos:[7,75]	
+	dropdownlist presetSettings width:134 pos:[7,92] 
+	button presetSave "Save" pos:[157,92] width:50
+	button presetFolder ":" pos:[144,92] width:10 caption:"Open presets folder." 
 	
-	hyperLink __url "sea3d.poonya.com/exporter/" address:("http://sea3d.poonya.com/exporter/?p=3dsmax&v="+(sea_rawversion as string)) align:#center visitedColor:(color 255 255 255) 
-	label __copyright "SEA3D 1.7 © Sunag Entertainment 2015" align:#center
+	progressBar progress pos:[7,128] width:200 height:14 align:#center
 	
-	on compressItem changed s do
+	button exportButton "Export" pos:[157,150] width:50
+	button cancelButton "Cancel" pos:[157,150] width:50
+	--checkbutton  syncButton "Sync" pos:[92,150] width:60
+	
+	hyperLink __url "sea3d.poonya.com/exporter" address:("http://sea3d.poonya.com/exporter/?p=3dsmax&v="+(sea_rawversion as string)) align:#center visitedColor:(color 255 255 255) pos:[40,180]
+	label __copyright "SEA3D 1.8 © Sunag Entertainment" align:#center
+	
+	fn reload =
 	(
-		if s == 1 then seaconfig_compress = "none"		
-		else if s == 2 then seaconfig_compress = "deflate"
-		else if s == 3 then seaconfig_compress = "lzma"
+		local presets = GetSEAConfigList()
+		local items = #()
+		
+		for i=1 to presets.count do
+		(
+			append items (getFilenameFile presets[i])
+		)
+		
+		presetSettings.items = items
+		
+		if (findItem items seaconfig_selected) == 0 do seaconfig_selected = undefined
+		
+		if seaconfig_selected != undefined do presetSettings.selection = findItem items seaconfig_selected
+	)
+		
+	fn enabledExport val =
+	(
+		exportButton.visible = val
+		
+		if val do cancelButton.enabled = true
+		
+		cancelButton.visible = val == false
+		
+		seaupdatewindow()
 	)
 	
-	on exportItem changed s do
+	fn onchange =
 	(
-		if s == 1 then seaconfig_export = "all"
-		else if s == 2 then seaconfig_export = "visible"
-		else if s == 3 then seaconfig_export = "selected"
-	)	
-	
-	--fn WorkThread sender e =
-	--(
-	--	exportSEA3D()
-	--)
-	
-	on exportButton pressed do
-	(
-		--MainThread = dotnetobject "CSharpUtilities.SynchronizingBackgroundWorker"
-		--MainThread.WorkerSupportsCancellation = true		
-		--dotNet.addEventHandler MainThread "DoWork" WorkThread		
-		--MainThread.RunWorkerAsync()
-		
-		exportSEA3D()
-	)
-	
-	on _SEA open do
-	(
-		seaprogressbar = progress
-		
 		if seaconfig_compress == "none" then compressItem.state = 1
 		else if seaconfig_compress == "deflate" then compressItem.state = 2
 		else if seaconfig_compress == "lzma" then compressItem.state = 3
@@ -8070,19 +7919,97 @@ rollout _SEA "SEA3D"
 		else if seaconfig_export == "visible" then exportItem.state = 2
 		else if seaconfig_export == "selected" then exportItem.state = 3
 	)
-)
-
-rollout _SEAServer "Server"
-(		
-	label _serverLabel "Port:" pos:[7,11]
-	edittext _serverField pos:[35,10] width:90 text:"1080"
-	checkbutton  connectButton "Creat Server" pos:[132,8] width:78
 	
-	on connectButton changed state do
+	fn oninvalidate =
 	(
-		--connectButton.text = "Disconnect"
-		connectButton.text = "Please wait..."
-		connectButton.checked = true
+		presetSave.enabled = true
+	)
+	
+	on _SEA open do
+	(
+		append sea_listeners onchange
+		append sea_changes oninvalidate
+		
+		onchange()
+		
+		reload()
+		
+		seaprogressbar = progress
+		
+		enabledExport true
+		
+		presetSave.enabled = false
+	)
+	
+	on presetSettings selected s do
+	(
+		local config = ReadSEAConfig (presetSettings.selected + ".config")
+		
+		if config != undefined do
+		(
+			seaconfig_selected = presetSettings.selected
+			GetSEAConfig (seaconfig = config)
+		)
+		
+		seadispatchChange changes:false dispatch:true
+	)
+	
+	on presetFolder pressed do
+	(
+		shellLaunch "explorer.exe" (getSourceFolder())
+		
+		reload()
+	)
+	
+	on presetSave pressed do
+	(
+		presetSave.enabled = false
+		
+		if seaconfig_selected == undefined do seaconfig_selected = "Default"
+
+		SetSEAConfig seaconfig
+		
+		WriteSEAConfig seaconfig (seaconfig_selected + ".config")
+		
+		reload()
+	)
+		
+	on compressItem changed s do
+	(
+		if s == 1 then seaconfig_compress = "none"		
+		else if s == 2 then seaconfig_compress = "deflate"
+		else if s == 3 then seaconfig_compress = "lzma"
+		
+		seadispatchChange()
+	)
+	
+	on exportItem changed s do
+	(
+		if s == 1 then seaconfig_export = "all"
+		else if s == 2 then seaconfig_export = "visible"
+		else if s == 3 then seaconfig_export = "selected"
+		
+		seadispatchChange()
+	)	
+	
+	on exportButton pressed do
+	(
+		local presetSaveEnabled = presetSave.enabled
+		
+		presetSave.enabled = false
+		
+		enabledExport false
+		
+		local filename = getSaveFileName caption:"SEA3D File Format" types:"Sunag Entertainment Assets (*.sea)|*|SEA3D for Three.JS (*.tjs.sea)|*.tjs"
+		
+		if filename != undefined do
+		(
+			exportSEA3D (filename + ".sea")
+		)
+		
+		enabledExport true
+		
+		presetSave.enabled = presetSaveEnabled
 	)
 )
 
@@ -8095,44 +8022,42 @@ rollout _SEAGlobal "Global"
 		"Snapshot (not allow animation)"
 	) pos:[7,7]	
 
-	on extMethod changed s do
-	(		
-		seaconfig_snapshot = s == 3
-		seaconfig_parent = s == 1			
-	)
-	
-	on _SEAGlobal open do
+	fn onchange =
 	(
 		if seaconfig_parent then extMethod.state = 1
 		else if seaconfig_snapshot then extMethod.state = 3
 		else extMethod.state = 2
+	)
+	
+	on _SEAGlobal open do
+	(
+		append sea_listeners onchange
+		
+		onchange()
+	)
+	
+	on extMethod changed s do
+	(	
+		seaconfig_snapshot = s == 3
+		seaconfig_parent = s == 1
+		
+		seadispatchChange()
 	)
 )
 
 rollout _SEAAnimation "Animation"
 (
 	checkbox _enabled "Enabled" pos:[7,7] checked:seaconfig_animation
-	checkbox _static "All Static" pos:[147,7] checked:seaconfig_allstatic visible:(seaconfig_animation==false) tooltip:"Makes all objects as static. Recommended for scenery."
+	checkbox _static "All Static" pos:[147,7] checked:seaconfig_allstatic tooltip:"Makes all objects as static. Recommended for scenery."
 	
-	spinner _start "Start:" pos:[17,27] range:[-1000000,1000000,animationRange.start.frame as integer] width:85 type:#integer enabled:seaconfig_animation
-	spinner _end "End:" pos:[117,27] range:[-1000000,1000000,animationRange.end.frame as integer] width:85 type:#integer enabled:seaconfig_animation
-		
-	checkbox _instance "Instance Animations" pos:[7,49] checked:seaconfig_instanceanimation toolTip:"Add animation mesh for an instantiated object that does not contain animation." enabled:seaconfig_animation
-	checkbox _forceAnm "Force Animation Export" pos:[7,69] checked:seaconfig_force_animation toolTip:"Export animation of the objects not enabled." enabled:seaconfig_animation
+	spinner _start "Start:" pos:[17,27] range:[-1000000,1000000,animationRange.start.frame as integer] width:85 type:#integer 
+	spinner _end "End:" pos:[117,27] range:[-1000000,1000000,animationRange.end.frame as integer] width:85 type:#integer
 	
-	checkbox _bindoffset "Relative Transform" pos:[7,89] checked:seaconfig_bindoffset enabled:seaconfig_animation tooltip:"Starts from global or local(relative) position of the object. Bind Frame represent the initial frame."
-	spinner _bindframe "Bind Frame:" pos:[9,109] range:[-1000000,1000000,seaconfig_bindframe] type:#integer enabled:(seaconfig_animation and seaconfig_bindoffset)
+	checkbox _instance "Instance Animations" pos:[7,49] checked:seaconfig_instanceanimation toolTip:"Add animation mesh for an instantiated object that does not contain animation."
+	checkbox _forceAnm "Force Animation Export" pos:[7,69] checked:seaconfig_force_animation toolTip:"Export animation of the objects not enabled."
 	
-	radiobuttons _exportMethod "Detection Method" pos:[7,129] default:seaconfig_animationtype labels:#("Key Frame", "Difference (Recommended)") enabled:seaconfig_animation
-	
-	fn updateRolloutSize =
-	(		
-		if seaconfig_animation then
-		(
-			_SEAAnimation.height = 181
-		)
-		else _SEAAnimation.height = 27
-	)
+	checkbox _bindoffset "Relative Transform" pos:[7,89] checked:seaconfig_bindoffset tooltip:"Starts from global or local(relative) position of the object. Bind Frame represent the initial frame."
+	spinner _bindframe "Bind Frame:" pos:[9,109] range:[-1000000,1000000,seaconfig_bindframe] type:#integer
 	
 	fn updateAnimationRange =
 	(
@@ -8149,10 +8074,36 @@ rollout _SEAAnimation "Animation"
 			updateAnimationRange()
 		)
 	)
+	
+	fn updateRollout =
+	(
+		_static.visible = seaconfig_animation == false
+		_start.visible = _end.visible = seaconfig_animation
+		
+		if seaconfig_animation then
+		(
+			_SEAAnimation.height = 132
+		)
+		else _SEAAnimation.height = 27
+	)
 
+	fn onchange =
+	(
+		_enabled.checked = seaconfig_animation
+		_static.checked = seaconfig_allstatic
+		_instance.checked = seaconfig_instanceanimation
+		_forceAnm.checked = seaconfig_force_animation
+		_bindoffset.checked = seaconfig_bindoffset
+		_bindframe.value = seaconfig_bindframe
+		
+		updateRollout()
+	)
+	
 	on _SEAAnimation open do
 	(
-		updateRolloutSize()				
+		append sea_listeners onchange
+		
+		onchange()
 		
 		read()
 		
@@ -8170,91 +8121,112 @@ rollout _SEAAnimation "Animation"
 	on _static changed s do
 	(
 		seaconfig_allstatic = s
+		
+		seadispatchChange()
 	)
 	
 	on _bindoffset changed s do
 	(
 		seaconfig_bindoffset = s
+		
+		seadispatchChange()
 	)
 	
 	on _bindframe changed s do
 	(
-		seaconfig_bindframe = s		
+		seaconfig_bindframe = s
+
+		seadispatchChange()
 	)
 	
 	on _bindoffset changed s do
 	(
 		seaconfig_bindoffset = s
-		_bindframe.enabled = seaconfig_bindoffset
+		
+		seadispatchChange()
 	)	
-	
-	on _exportMethod changed s do
-	(
-		seaconfig_animationtype = s
-	)
 	
 	on _start changed s do
 	(
 		if (_start.value > _end.value) do _end.value = _start.value
+		
 		updateAnimationRange()
+		seadispatchChange()
 	)
 	
 	on _end changed s do
 	(
 		if (_end.value < _start.value) do _start.value = _end.value
+		
 		updateAnimationRange()
+		seadispatchChange()
 	)
 	
 	on _instance changed s do
 	(
 		seaconfig_instanceanimation = s
+		
+		seadispatchChange()
 	)
 	
 	on _forceAnm changed s do
 	(
 		seaconfig_force_animation = s
+		
+		seadispatchChange()
 	)
 	
 	on _enabled changed s do
 	(
-		_static.visible = seaconfig_animation
-		_forceAnm.enabled = _exportMethod.enabled = _instance.enabled = _start.enabled = _end.enabled = s
-		seaconfig_animation = s		
-		updateRolloutSize()
+		seaconfig_animation = s
+		
+		updateRollout()
+		seadispatchChange()
 	)
 )
 
 rollout _SEAGeometry "Geometry"
 (
 	checkbox _enabled "Enabled" pos:[7,7] checked:seaconfig_geometry		
-	checkbox _uvs "Texture Coordinates" pos:[80,7] checked:seaconfig_uv enabled:seaconfig_geometry
-	checkbox _multiple "Multiple Channels" pos:[80,27] checked:seaconfig_multiplechannel enabled:(seaconfig_uv and seaconfig_geometry)
-	checkbox _normal "Normal" pos:[80,47] checked:seaconfig_normal enabled:seaconfig_geometry	
-	checkbox _smoothingGroup "Smoothing Group" pos:[80,67] checked:seaconfig_sg enabled:(seaconfig_normal and seaconfig_geometry)				
-	checkbox _tangent "Tangent" pos:[80,87] checked:seaconfig_tangent enabled:(seaconfig_normal and seaconfig_geometry)	
-	radiobuttons _lossyGroup "Lossy Compression Algorithm" pos:[7,107] labels:#("None","D.High","D.Low") default:seaconfig_lossygeometry toolTip:"Compresses geometry with loss."				
+	checkbox _uvs "Texture Coordinates" pos:[80,7] checked:seaconfig_uv
+	checkbox _multiple "Multiple Channels" pos:[80,27] checked:seaconfig_multiplechannel
+	checkbox _normal "Normal" pos:[80,47] checked:seaconfig_normal
+	checkbox _smoothingGroup "Smoothing Group" pos:[80,67] checked:seaconfig_sg			
+	checkbox _tangent "Tangent" pos:[80,87] checked:seaconfig_tangent
 	
-	button addTag "Add Tag" pos:[7,27] width:66 height:23 toolTip:"Limits the parameters that will be exported of the object."						
+	button addTag "Add Tag" pos:[7,27] width:66 height:23 toolTip:"Limits and add parameters that will used in exportation of the object."						
 	
-	fn updateNormalsDeps =
-	(		
-		_tangent.enabled = _smoothingGroup.enabled = seaconfig_geometry and seaconfig_normal
-	)
-	
-	fn updateRolloutSize =
+	fn updateRollout =
 	(	
+		_tangent.enabled = _smoothingGroup.enabled = seaconfig_geometry and seaconfig_normal
+		_multiple.enabled  = seaconfig_geometry and seaconfig_uv
+		_uvs.enabled = _normal.enabled = seaconfig_geometry
 		_uvs.visible = seaconfig_geometry
 		
 		if seaconfig_geometry then
 		(			
-			_SEAGeometry.height = 144
+			_SEAGeometry.height = 108
 		)
 		else _SEAGeometry.height = 27
 	)
 	
+	fn onchange =
+	(
+		_enabled.checked = seaconfig_geometry
+		_uvs.checked = seaconfig_uv
+		_multiple.checked = seaconfig_multiplechannel
+		_normal.checked = seaconfig_normal
+		_smoothingGroup.checked = seaconfig_sg
+		_tangent.checked = seaconfig_tangent
+		
+		updateRollout()
+	)
+	
 	on _SEAGeometry open do
 	(
-		updateRolloutSize()
+		append sea_listeners onchange
+		
+		onchange()
 	)
 	
 	on addTag pressed do
@@ -8285,47 +8257,54 @@ rollout _SEAGeometry "Geometry"
 	
 	on _enabled changed s do
 	(
-		_uvs.enabled = _multiple.enabled = _normal.enabled = _smoothingGroup.enabled = s		
 		seaconfig_geometry = s
-		updateNormalsDeps()
-		updateRolloutSize()
+		
+		updateRollout()
+		seadispatchChange()
 	)
 	
 	on _uvs changed s do
 	(
 		_multiple.enabled = seaconfig_uv = s
+		
+		updateRollout()
+		seadispatchChange()
 	)
 	
 	on _multiple changed s do
 	(
 		seaconfig_multiplechannel = s
+		
+		seadispatchChange()
 	)
 	
 	on _vertexColor changed s do
 	(
 		seaconfig_vertexcolor = s
+		
+		seadispatchChange()
 	)
 	
 	on _normal changed s do
 	(
 		seaconfig_normal = s
-		updateNormalsDeps()
+		
+		updateRollout()
+		seadispatchChange()
 	)
 	
 	on _tangent changed s do
 	(
 		seaconfig_tangent = s
-		updateNormalsDeps()
+		
+		seadispatchChange()
 	)
 	
 	on _smoothingGroup changed s do
 	(
 		seaconfig_sg = s
-	)
-	
-	on _lossyGroup changed s do
-	(				
-		seaconfig_lossygeometry = s
+		
+		seadispatchChange()
 	)
 )
 
@@ -8333,19 +8312,47 @@ rollout _SEAMorph "Morpher"
 (
 	checkbox _enabled "Enabled" pos:[7,7] checked:seaconfig_morph
 	
+	fn onchange =
+	(
+		_enabled.checked = seaconfig_morph
+	)
+	
+	on _SEAMorph open do
+	(
+		append sea_listeners onchange
+		
+		onchange()
+	)
+	
 	on _enabled changed s do
 	(
 		seaconfig_morph = s
+		
+		seadispatchChange()
 	)
 )
 
 rollout _SEAVA "Vertex Animation"
 (
-	checkbox _enabled "Enabled" pos:[7,7] checked:seaconfig_morph
+	checkbox _enabled "Enabled" pos:[7,7] checked:seaconfig_vertexanimation
+	
+	fn onchange =
+	(
+		_enabled.checked = seaconfig_vertexanimation
+	)
+	
+	on _SEAVA open do
+	(
+		append sea_listeners onchange
+		
+		onchange()
+	)
 	
 	on _enabled changed s do
 	(
-		seaconfig_morph = s
+		seaconfig_vertexanimation = s
+		
+		seadispatchChange()
 	)
 )
 
@@ -8353,9 +8360,23 @@ rollout _SEAVC "Vertex Color"
 (
 	checkbox _enabled "Enabled" pos:[7,7] checked:seaconfig_vertexcolor toolTip:"Export Vertex Color if available."
 	
+	fn onchange =
+	(
+		_enabled.checked = seaconfig_vertexcolor
+	)
+	
+	on _SEAVC open do
+	(
+		append sea_listeners onchange
+		
+		onchange()
+	)
+	
 	on _enabled changed s do
 	(
 		seaconfig_vertexcolor = s
+		
+		seadispatchChange()
 	)
 )
 
@@ -8364,14 +8385,39 @@ rollout _SEARTT "RTT"
 	checkbox _enabled "Enabled" pos:[7,7] checked:seaconfig_rtt toolTip:"Render to Texture."
 	checkbox _followTarget "Follow Target" pos:[120,7] checked:seaconfig_rtt_target toolTip:"Render to Texture."
 	
+	fn updateRollout =
+	(
+		_followTarget.enabled = seaconfig_rtt
+	)
+	
+	fn onchange =
+	(
+		_enabled.checked = seaconfig_rtt
+		_followTarget.checked = seaconfig_rtt_target
+		
+		updateRollout()
+	)
+	
+	on _SEARTT open do
+	(
+		append sea_listeners onchange
+		
+		onchange()
+	)
+	
 	on _enabled changed s do
 	(
-		_followTarget.enabled = seaconfig_rtt = s
+		seaconfig_rtt = s
+		
+		updateRollout()
+		seadispatchChange()
 	)
 	
 	on _followTarget changed s do
 	(
 		seaconfig_rtt_target = s
+		
+		seadispatchChange()
 	)
 )
 
@@ -8379,22 +8425,39 @@ rollout _SEASkeleton "Skeleton"
 (
 	checkbox _enabled "Enabled" pos:[7,7] checked:seaconfig_skeleton			
 	
+	fn onchange =
+	(
+		_enabled.checked = seaconfig_skeleton
+	)
+	
+	on _SEASkeleton open do
+	(
+		append sea_listeners onchange
+		
+		onchange()
+	)
+	
 	on _enabled changed s do
 	(
 		seaconfig_skeleton = s
+		
+		seadispatchChange()
 	)
 )
 
 rollout _SEAMaterials "Materials"
 (
 	checkbox _enabled "Enabled" pos:[7,7] checked:seaconfig_material
-	checkbox _share "Shared" pos:[157,7] checked:seaconfig_sharematerials enabled:seaconfig_material tooltip:"Sharing material that has the same attributes."
-	checkbox _enabledTexture "Texture" pos:[7,27] checked:seaconfig_texture enabled:seaconfig_material
-	checkbox _enabledAnimationTakes "Enabled Animation Takes" pos:[7,47] checked:seaconfig_texture enabled:(seaconfig_texture and seaconfig_material)
-	checkbox _bakeUnkMat "Convert Incompatible Textures" pos:[7,67] checked:true enabled:(seaconfig_texture and seaconfig_material)
+	checkbox _share "Shared" pos:[157,7] checked:seaconfig_sharematerials tooltip:"Sharing material that has the same attributes."
+	checkbox _enabledTexture "Texture" pos:[7,27] checked:seaconfig_texture
+	checkbox _enabledAnimationTakes "Enabled Animation Takes" pos:[7,47] checked:seaconfig_texture
+	checkbox _bakeUnkMat "Convert Incompatible Textures" pos:[7,67] checked:seaconfig_baketextures
 	
-	fn updateRolloutSize =
-	(	
+	fn updateRollout =
+	(
+		_share.enabled = _enabledTexture.enabled = seaconfig_material
+		_enabledAnimationTakes.enabled = _bakeUnkMat.enabled = seaconfig_material and seaconfig_texture
+		
 		if seaconfig_material then
 		(
 			if seaconfig_texture then
@@ -8409,49 +8472,71 @@ rollout _SEAMaterials "Materials"
 		else _SEAMaterials.height = 27
 	)
 
+	fn onchange =
+	(
+		_enabled.checked = seaconfig_material
+		_share.checked = seaconfig_sharematerials
+		_enabledTexture.checked = seaconfig_texture
+		_enabledAnimationTakes.checked = seaconfig_textureAnimationTakes
+		_bakeUnkMat.checked = seaconfig_baketextures
+		
+		updateRollout()
+	)
+	
 	on _SEAMaterials open do
 	(
-		updateRolloutSize()
+		append sea_listeners onchange
+		
+		onchange()
 	)
 	
 	on _enabled changed s do
 	(
 		seaconfig_material = s
-		_enabledTexture.enabled = s
-		_share.enabled = _bakeUnkMat.enabled = _enabledAnimationTakes.enabled = s and seaconfig_texture
-		updateRolloutSize()
+		
+		updateRollout()
+		seadispatchChange()
 	)
 	
 	on _bakeUnkMat changed s do
 	(
 		seaconfig_baketextures = s
+		
+		seadispatchChange()
 	)
 	
 	on _enabledTexture changed s do
 	(
-		seaconfig_texture = s		
-		_bakeUnkMat.enabled = _enabledAnimationTakes.enabled = s
-		updateRolloutSize()
+		seaconfig_texture = s
+		
+		updateRollout()
+		seadispatchChange()
 	)
 	
 	on _enabledAnimationTakes changed s do
 	(
 		seaconfig_textureAnimationTakes = s		
+		
+		seadispatchChange()
 	)	
 	
 	on _share changed s do
 	(
 		seaconfig_sharematerials = s
+		
+		seadispatchChange()
 	)
 )
 
 rollout _SEACameras "Cameras"
 (
 	checkbox _enabled "Enabled" pos:[7,7] checked:seaconfig_camera
-	checkbox _target "Target" pos:[7,27] checked:seaconfig_cameratarget tooltip:"Export Camera Target." enabled:seaconfig_camera
+	checkbox _target "Target" pos:[7,27] checked:seaconfig_cameratarget tooltip:"Export Camera Target."
 	
-	fn updateRolloutSize =
+	fn updateRollout =
 	(	
+		_target.enabled = seaconfig_camera
+		
 		if seaconfig_camera then
 		(
 			_SEACameras.height = 48
@@ -8459,30 +8544,46 @@ rollout _SEACameras "Cameras"
 		else _SEACameras.height = 27
 	)
 
+	fn onchange =
+	(
+		_enabled.checked = seaconfig_camera
+		_target.checked = seaconfig_cameratarget
+		
+		updateRollout()
+	)
+	
 	on _SEACameras open do
 	(
-		updateRolloutSize()
+		append sea_listeners onchange
+		
+		onchange()
 	)
 	
 	on _target changed s do
 	(
 		seaconfig_cameratarget = s
+		
+		seadispatchChange()
 	)
 	
 	on _enabled changed s do
 	(
-		_target.enabled = seaconfig_camera = s
-		updateRolloutSize()
+		seaconfig_camera = s
+		
+		updateRollout()
+		seadispatchChange()
 	)
 )
 
 rollout _SEALights "Lights"
 (
 	checkbox _enabled "Enabled" pos:[7,7] checked:seaconfig_light
-	checkbox _target "Target" pos:[7,27] checked:seaconfig_lighttarget tooltip:"Export Light Target." enabled:seaconfig_light
+	checkbox _target "Target" pos:[7,27] checked:seaconfig_lighttarget tooltip:"Export Light Target."
 	
-	fn updateRolloutSize =
-	(	
+	fn updateRollout =
+	(
+		_target.enabled = seaconfig_light
+		
 		if seaconfig_light then
 		(
 			_SEALights.height = 48
@@ -8490,29 +8591,43 @@ rollout _SEALights "Lights"
 		else _SEALights.height = 27
 	)
 
+	fn onchange =
+	(
+		_enabled.checked = seaconfig_camera
+		_target.checked = seaconfig_cameratarget
+		
+		updateRollout()
+	) 
+	
 	on _SEALights open do
 	(
-		updateRolloutSize()
+		append sea_listeners onchange
+		
+		onchange()
 	)
 	
 	on _target changed s do
 	(
 		seaconfig_lighttarget = s
+		
+		seadispatchChange()
 	)
 	
 	on _enabled changed s do
 	(
-		_target.enabled = seaconfig_light = s
-		updateRolloutSize()
+		seaconfig_light = s
+		
+		updateRollout()
+		seadispatchChange()
 	)
 )
 
 rollout _SEASprite "Sprites"
 (
 	checkbox _enabled "Enabled" pos:[7,7] checked:seaconfig_sprite
-	button newSprite "New Sprite3D" pos:[130,7] width:80 height:23
+	button newSprite "Add Sprite" pos:[130,7] width:80 height:23
 	
-	fn updateRolloutSize =
+	fn updateRollout =
 	(	
 		newSprite.visible = seaconfig_sprite
 		
@@ -8523,15 +8638,26 @@ rollout _SEASprite "Sprites"
 		else _SEASprite.height = 27
 	)
 
+	fn onchange =
+	(
+		_enabled.checked = seaconfig_sprite
+		
+		updateRollout()
+	)
+	
 	on _SEASprite open do
 	(
-		updateRolloutSize()
+		append sea_listeners onchange
+		
+		onchange()
 	)
 	
 	on _enabled changed s do
 	(
 		seaconfig_sprite = s
-		updateRolloutSize()
+		
+		updateRollout()
+		seadispatchChange()
 	)		
 	
 	on newSprite pressed do
@@ -8550,26 +8676,12 @@ rollout _SEASprite "Sprites"
 rollout _SEASounds "Sounds"
 (
 	checkbox _enabled "Enabled" pos:[7,7] checked:seaconfig_sounds
-	checkbox _allsounds "Include all sounds" pos:[7,27] enabled:seaconfig_sounds checked:seaconfig_all_sounds	tooltip:"Add sounds not included in the scene."
-	listBox _field "Sound List" pos:[9,47] width:200 height:9 enabled:seaconfig_sounds
-	button newSound "New Sound3D" pos:[130,37] width:80 height:23
-	button uptBtn "Update" pos:[9,190] width:50 height:23 enabled:seaconfig_sounds tooltip:"Update Sound List"
-	button addBtn "Add" pos:[146,190] width:60 height:23 enabled:seaconfig_sounds
-	button removeBtn "Remove" pos:[80,190] width:60 height:23	enabled:seaconfig_sounds
-	
-	fn updateRolloutSize =
-	(	
-		if seaconfig_sounds then
-		(
-			_SEASounds.height = 219
-		)
-		else _SEASounds.height = 27
-	)
-
-	on _SEASounds open do
-	(
-		updateRolloutSize()
-	)
+	checkbox _allsounds "Include all sounds" pos:[7,27] checked:seaconfig_all_sounds	tooltip:"Add sounds not included in the scene."
+	listBox _field "Sound List" pos:[9,47] width:200 height:9
+	button newSound "Add Sound" pos:[130,37] width:80 height:23
+	button uptBtn "Update" pos:[9,190] width:50 height:23 tooltip:"Update Sound List"
+	button addBtn "Add" pos:[146,190] width:60 height:23
+	button removeBtn "Remove" pos:[80,190] width:60 height:23
 	
 	fn addSound filename =
 	(
@@ -8639,15 +8751,47 @@ rollout _SEASounds "Sounds"
 		_field.items = sea_sounds_names
 	)
 	
+	fn updateRollout =
+	(	
+		_allsounds.visible = seaconfig_sounds
+		
+		if seaconfig_sounds then
+		(
+			_SEASounds.height = 219
+		)
+		else _SEASounds.height = 27
+	)
+	
+	fn onchange =
+	(
+		_enabled.checked = seaconfig_sounds
+		_allsounds.checked = seaconfig_all_sounds
+		
+		updateRollout()
+	)
+
+	on _SEASounds open do
+	(
+		append sea_listeners onchange
+		
+		updateList upFolder:true
+		
+		onchange()
+	)
+	
 	on _enabled changed s do
 	(
-		uptBtn.enabled = _allsounds.enabled = addBtn.enabled = removeBtn.enabled = _field.enabled = seaconfig_sounds = s
-		updateRolloutSize()
+		seaconfig_sounds = s
+		
+		updateRollout()
+		seadispatchChange()
 	)
 	
 	on _allsounds changed s do
 	(
 		seaconfig_all_sounds = s
+		
+		seadispatchChange()
 	)
 	
 	on newSound pressed do
@@ -8665,6 +8809,7 @@ rollout _SEASounds "Sounds"
 		select s
 		
 		redrawViews()
+		seadispatchChange()
 	)
 	
 	on addBtn pressed do
@@ -8676,6 +8821,8 @@ rollout _SEASounds "Sounds"
 			addSound filename
 			updateList()
 		)
+		
+		seadispatchChange()
 	)
 	
 	on removeBtn pressed do
@@ -8685,6 +8832,8 @@ rollout _SEASounds "Sounds"
 			deleteItem sea_sounds _field.selection
 			updateList()
 		)
+		
+		seadispatchChange()
 	)		
 	
 	on uptBtn pressed do
@@ -8697,27 +8846,48 @@ rollout _SEASounds "Sounds"
 		)
 		
 		updateList upFolder:true
-	)
-	
-	on _SEASounds open do
-	(		
-		updateList upFolder:true
+		seadispatchChange()
 	)
 )
 
 rollout _SEASplines "Splines"
 (
 	checkbox _enabled "Enabled" pos:[7,7] checked:seaconfig_spline toolTip:"Convert Line to Path."
-	spinner _steps "Steps:" pos:[80,7] range:[1,1000000,seaconfig_splinestep] type:#integer enabled:seaconfig_spline
+	spinner _steps "Steps:" pos:[80,7] range:[1,1000000,seaconfig_splinestep] type:#integer
 	
-	on _steps changed s do
+	fn updateRollout =
 	(
-		seaconfig_splinestep = s
+		_steps.enabled = seaconfig_spline
+	)
+	
+	fn onchange =
+	(
+		_enabled.checked = seaconfig_spline
+		_steps.value = seaconfig_splinestep
+		
+		updateRollout()
+	)
+	
+	on _SEASplines open do
+	(
+		append sea_listeners onchange
+		
+		onchange()
 	)
 	
 	on _enabled changed s do
 	(
-		seaconfig_spline = _steps.enabled = s
+		seaconfig_spline = s
+		
+		updateRollout()
+		seadispatchChange()
+	)
+	
+	on _steps changed s do
+	(
+		seaconfig_splinestep = s
+		
+		seadispatchChange()
 	)
 )
 
@@ -8725,28 +8895,43 @@ rollout _SEADummy "Dummy"
 (
 	checkbox _enabled "Enabled" pos:[7,7] checked:seaconfig_dummy		
 	
+	fn onchange =
+	(
+		_enabled.checked = seaconfig_dummy
+	)
+	
+	on _SEADummy open do
+	(
+		append sea_listeners onchange
+		
+		onchange()
+	)
+	
 	on _enabled changed s do
 	(
 		seaconfig_dummy = s
+		
+		seadispatchChange()
 	)
 )
 
 rollout _SEAEnvironment "Environment"
 (
 	checkbox _enabled "Enabled" pos:[7,7] checked:seaconfig_env	
-	checkbox _environment "Environment Map" pos:[80,7] checked:seaconfig_envmap enabled:seaconfig_env
+	checkbox _environment "Environment Map" pos:[105,7] checked:seaconfig_envmap
 	
 	groupbox _fogGroup "Fog" pos:[7,27] width:202 height:90
-	checkbox _fogEnabled "Enabled" pos:[13,45] checked:seaconfig_fog[1] enabled:seaconfig_env
+	checkbox _fogEnabled "Enabled" pos:[13,45] checked:seaconfig_fog[1]
 	
-	colorpicker _fogColor "Color" pos:[17,90] color:seaconfig_fog[2] enabled:(seaconfig_fog[1] and seaconfig_env)
+	colorpicker _fogColor "Color" pos:[17,90] color:seaconfig_fog[2]
 	
-	spinner _fogMin "Min:" pos:[27,67] range:[-100000000,100000000,seaconfig_fog[3]] width:70 type:#float enabled:(seaconfig_fog[1] and seaconfig_env)
-	spinner _fogMax "Max:" pos:[117,67] range:[-100000000,100000000,seaconfig_fog[4]] width:80 type:#float enabled:(seaconfig_fog[1] and seaconfig_env)		
+	spinner _fogMin "Min:" pos:[27,67] range:[-100000000,100000000,seaconfig_fog[3]] width:70 type:#float 
+	spinner _fogMax "Max:" pos:[117,67] range:[-100000000,100000000,seaconfig_fog[4]] width:80 type:#float 	
 	
-	fn updateRolloutSize =
+	fn updateRollout =
 	(	
-		_environment.visible = seaconfig_env
+		_fogGroup.visible = _environment.enabled = seaconfig_env
+		_fogMax.enabled = _fogMin.enabled = _fogColor.enabled = seaconfig_fog[1]
 		
 		if seaconfig_env then
 		(
@@ -8754,109 +8939,155 @@ rollout _SEAEnvironment "Environment"
 		)
 		else _SEAEnvironment.height = 27
 	)
+	
+	fn onchange =
+	(
+		_environment.checked = seaconfig_env
+		_enabled.checked = seaconfig_envmap
+		_fogEnabled.checked = seaconfig_fog[1]
+		_fogColor.color = seaconfig_fog[2]
+		_fogMin.value = seaconfig_fog[3]
+		_fogMax.value = seaconfig_fog[4]
+		
+		updateRollout()
+	)
 
 	on _SEAEnvironment open do
 	(
-		updateRolloutSize()
-	)
-	
-	fn fogEnabledState s = 
-	(
-		seaconfig_fog[1] = _fogMin.enabled = _fogMax.enabled = _fogColor.enabled = s
+		append sea_listeners onchange
+		
+		onchange()
 	)
 	
 	on _fogEnabled changed s do
 	(
-		fogEnabledState s
+		seaconfig_fog[1] = s
+		
+		updateRollout()
+		seadispatchChange()
 	)
 	
 	on _fogColor changed s do
 	(
 		seaconfig_fog[2] = s
+		
+		seadispatchChange()
 	)
 	
 	on _fogMin changed s do
 	(
 		seaconfig_fog[3] = s
+		
+		seadispatchChange()
 	)
 	
 	on _fogMax changed s do
 	(
 		seaconfig_fog[4] = s
+		
+		seadispatchChange()
 	)
 	
 	on _environment changed s do
 	(
 		seaconfig_envmap = s
+		
+		seadispatchChange()
 	)
 	
 	on _enabled changed s do
 	(
-		fogEnabledState (_fogEnabled.checked and s)
-		_fogEnabled.enabled = _environment.enabled = seaconfig_env = s		
-		updateRolloutSize()
+		seaconfig_env = s
+		
+		updateRollout()
+		seadispatchChange()
 	)
 )
 
 rollout _SEAUtils "Utils"
 (	
-	checkbox _warning "Show Warning" pos:[7,7] checked:seaconfig_warning	
+	checkbox _warning "Show Warnings" pos:[7,7] checked:seaconfig_warning	
 	checkbox _instances "Enabled Instances" pos:[7,27] checked:seaconfig_instances		
 	checkbox _optimizer "Mesh Optimizer" pos:[7,47] checked:seaconfig_meshoptimizer	
 	checkbox _joinVertices "Join Identical Vertices" pos:[7,67] checked:seaconfig_joinvertices	
 	checkbox _autoRename "Auto Rename" pos:[7,87] checked:seaconfig_auto_rename
 	checkbox _positiveScale "Force Positive Scale" pos:[7,107] checked:seaconfig_positive_scale
 	checkbox _colorMat "Replace empty Material to Color" pos:[7,127] checked:seaconfig_materialcolor	 
-	checkbox _exception "Exception Protection" pos:[7,147] checked:seaconfig_exceptionprotection tooltip:"Protects your scene against unknown errors (debug mode). Use with caution!"	
-	button saveButton "Save Config" pos:[135,167] 		
-	
-	on saveButton pressed do
+	checkbox _exception "Exception Protection" pos:[7,147] checked:seaconfig_exceptionprotection tooltip:"Protects your scene against unknown errors (disable to debug mode). Use with caution!"	
+
+	fn onchange =
 	(
-		if seaconfig == undefined do
-			seaconfig = dotNetObject "Poonya.Utils.Hashmap"
+		_warning.checked = seaconfig_warning
+		_instances.checked = seaconfig_instances
+		_optimizer.checked = seaconfig_meshoptimizer
+		_joinVertices.checked = seaconfig_joinvertices
+		_autoRename.checked = seaconfig_auto_rename
+		_positiveScale.checked = seaconfig_positive_scale
+		_colorMat.checked = seaconfig_materialcolor
+		_exception.checked = seaconfig_exceptionprotection
+	)
+	
+	on _SEAUtils open do
+	(
+		append sea_listeners onchange
 		
-		SaveSEA3DExporterConfig seaconfig
-		SaveSEA3DConfig()
+		onchange()
 	)
 	
 	on _instances changed s do
 	(
 		seaconfig_instances = s
+		
+		seadispatchChange()
 	)
 	
 	on _warning changed s do
 	(
 		seaconfig_warning = s
+		
+		seadispatchChange()
 	)
 	
 	on _autoRename changed s do
 	(
 		seaconfig_auto_rename = s
+		
+		seadispatchChange()
 	)
 	
 	on _positiveScale changed s do
 	(
 		seaconfig_positive_scale = s
+		
+		seadispatchChange()
 	)
 	
 	on _colorMat changed s do
 	(
 		seaconfig_materialcolor = s
+		
+		seadispatchChange()
 	)
 	
 	on _optimizer changed s do
 	(
 		seaconfig_meshoptimizer = s
+		
+		seadispatchChange()
 	)
 	
 	on _joinVertices changed s do
 	(
 		seaconfig_joinvertices = s
+		
+		seadispatchChange()
 	)
 	
 	on _exception changed s do
 	(
 		seaconfig_exceptionprotection = s
+		
+		seadispatchChange()
 	)
 )
 
@@ -8867,34 +9098,71 @@ rollout _SEAFileInfo "File Info"
 	groupbox grp1 "Summary" pos:[7,27] width:200 height:140
 	
 	label _name "Name" pos:[15,41]
-	edittext _nameField pos:[15,60] width:180 text:seaconfig_fileinfo[2] enabled:seaconfig_fileinfo[1]	
+	edittext _nameField pos:[15,60] width:180 text:seaconfig_fileinfo[2] 
 	
 	label _author "Author / Copyright" pos:[15,82] 
-	edittext _authorField pos:[15,101] width:180 text:seaconfig_fileinfo[3] enabled:seaconfig_fileinfo[1]	
+	edittext _authorField pos:[15,101] width:180 text:seaconfig_fileinfo[3] 
 	
 	label _website "Website" pos:[15,123] 
-	edittext _websiteField pos:[15,142] width:180 text:seaconfig_fileinfo[4] enabled:seaconfig_fileinfo[1]	
+	edittext _websiteField pos:[15,142] width:180 text:seaconfig_fileinfo[4] 
 	
-	fn updateRolloutSize =
+	fn updateRollout =
 	(	
+		grp1.visible = seaconfig_fileinfo[1]
+		
 		if seaconfig_fileinfo[1] then
 		(
 			_SEAFileInfo.height = 173
 		)
 		else _SEAFileInfo.height = 27
 	)
+	
+	fn onchange =
+	(
+		_enabled.checked = seaconfig_fileinfo[1]	
+		_nameField.text = seaconfig_fileinfo[2]	
+		_authorField.text = seaconfig_fileinfo[3]	
+		_websiteField.text = seaconfig_fileinfo[4]	
+		
+		updateRollout()
+	)
 
 	on _SEAFileInfo open do
 	(
-		updateRolloutSize()
+		append sea_listeners onchange
+		
+		onchange()
 	)
 	
 	on _enabled changed s do
 	(
 		_nameField.enabled = _authorField.enabled = _websiteField.enabled = seaconfig_fileinfo[1] = s
-		updateRolloutSize()
+		
+		updateRollout()
+		seadispatchChange()
 	)
 	
+	on _nameField changed s do 
+	(
+		seaconfig_fileinfo[2] = s
+		
+		seadispatchChange()
+	)
+	
+	on _authorField changed s do
+	(
+		seaconfig_fileinfo[3] = s
+		
+		seadispatchChange()
+	)
+	
+	on _websiteField changed s do
+	(
+		seaconfig_fileinfo[4] = s
+		
+		seadispatchChange()
+	)
+
 	on _nameField changed s do seaconfig_fileinfo[2] = s	
 	on _authorField changed s do seaconfig_fileinfo[3] = s	
 	on _websiteField changed s do seaconfig_fileinfo[4] = s	
@@ -8904,9 +9172,23 @@ rollout _SEAttribs "Custom Attributes"
 (
 	checkbox _enabled "Enabled" pos:[7,7] checked:seaconfig_attrib	
 	
+	fn onchange =
+	(
+		_enabled.checked = seaconfig_attrib
+	)
+	
+	on _SEAAttribs open do
+	(
+		append sea_listeners onchange
+		
+		onchange()
+	)
+	
 	on _enabled changed s do
 	(
 		seaconfig_attrib = s
+		
+		seadispatchChange()
 	)
 )
 
@@ -8949,11 +9231,11 @@ rollout _SEABake "Bake"
 	spinner _falloff pos:[160,uisize] range:[0,9999,0.5] width:40 scale:.01 
 	label _labelDark "Dark" pos:[15,uisize]
 	label _labelFalloff "Falloff" pos:[110,uisize]
-		
+	
 	checkbox _relativeSize "Relative Size" pos:[7,uisize+=29] checked:seaconfig_relativesize tooltip:"Bake size relative to the object size."		
-	groupbox _texSizeGroup2 "Minimum Size" pos:[7,uisize+=20] width:202 height:42 enabled:seaconfig_relativesize
-	spinner _bakeVal2 "Power of 2:" pos:[43,uisize+=20] range:[1,13,seaconfig_minbakesize] width:80 type:#integer scale:.1 enabled:seaconfig_relativesize
-	label _size2 pos:[133,uisize+1] width:65 enabled:seaconfig_relativesize
+	groupbox _texSizeGroup2 "Minimum Size" pos:[7,uisize+=20] width:202 height:42
+	spinner _bakeVal2 "Power of 2:" pos:[43,uisize+=20] range:[1,13,seaconfig_minbakesize] width:80 type:#integer scale:.1 
+	label _size2 pos:[133,uisize+1] width:65
 	
 	fn enabledAOConfig v =
 	(
@@ -8993,29 +9275,16 @@ rollout _SEABake "Bake"
 		_falloff.value = seaao[6]
 	)
 	
-	fn updateRolloutSize =
-	(
-		_output.visible = true--seaconfig_renderall
-			
-		if _output.visible then
-		(
-			if seaconfig_relativesize then
-			(
-				_SEABake.height = 374
-			)
-			else
-			(
-				_SEABake.height = 326
-			)
-		)
-		else _SEABake.height = 103
-	)
-	
 	fn updateTextureSize =
 	(
 		_size.text = "Size: " + ((getPowerOf2 _bakeVal.value) as String)  + " px"		
 		_size2.text = "Size: " + ((getPowerOf2 _bakeVal2.value) as String)  + " px"
 	)	
+	
+	fn updateRelativeSize =
+	(
+		_texSizeGroup2.visible = _bakeVal2.visible = _size2.visible = seaconfig_relativesize
+	)
 	
 	fn updateBakeOut =
 	(
@@ -9043,15 +9312,41 @@ rollout _SEABake "Bake"
 		enabledAOConfig (seaconfig_bakeoutput == BAKE_AO)
 	)
 	
-	on _SEABake open do
-	(				
+	fn updateRollout =
+	(
+		--_output.visible = _createNewMap.visible =  seaconfig_renderall
+		
+		if _output.visible then
+		(
+			if seaconfig_relativesize then
+			(
+				_SEABake.height = 374
+			)
+			else
+			(
+				_SEABake.height = 326
+			)
+		)
+		else _SEABake.height = 103
+	)
+	
+	fn onchange =
+	(
+		updateRelativeSize()
 		updateOutput()
 		updateBakeOut()
 		updateTextureSize()
-		updateRolloutSize()		
 		updateAOConfigDisplay()
+		updateRollout()
 		
 		getBakeSettings()
+	)
+	
+	on _SEABake open do
+	(	
+		append sea_listeners onchange		
+		
+		onchange()
 	)
 	
 	on _bakeSelect pressed do
@@ -9099,36 +9394,44 @@ rollout _SEABake "Bake"
 		)
 		
 		selectMore list
+		
+		seadispatchChange()
 	)	
 	
 	on _samples changed s do
 	(
 		setBakeSettings()
+		seadispatchChange()
 	)
 	
 	on _bright changed s do
 	(
 		setBakeSettings()
+		seadispatchChange()
 	)
 	
 	on _dark changed s do
 	(
 		setBakeSettings()
+		seadispatchChange()
 	)
 	
 	on _spread changed s do
 	(
 		setBakeSettings()
+		seadispatchChange()
 	)
 	
 	on _maxDist changed s do
 	(
 		setBakeSettings()
+		seadispatchChange()
 	)
 	
 	on _falloff changed s do
 	(
 		setBakeSettings()
+		seadispatchChange()
 	)
 	
 	on _presetSettings selected s do
@@ -9154,6 +9457,7 @@ rollout _SEABake "Bake"
 		)
 		
 		setBakeSettings()
+		seadispatchChange()
 	)
 	
 	on _output changed s do
@@ -9164,37 +9468,47 @@ rollout _SEABake "Bake"
 		else seaconfig_bakeoutput = BAKE_AO		
 		
 		updateAOConfigDisplay()
+		seadispatchChange()
 	)
 	
 	on _relativeSize changed s do
 	(
 		seaconfig_relativesize = s
-		_texSizeGroup2.enabled = _bakeVal2.enabled = _size2.enabled = s
-		updateRolloutSize()
+		
+		updateRelativeSize()
+		updateRollout()
+		seadispatchChange()
 	)
 	
 	on _renderallObjects changed s do
 	(
 		seaconfig_renderall = s
-		updateRolloutSize()
+		
+		updateRollout()
+		seadispatchChange()
 	)
 	
 	on _createNewMap changed s do
 	(
 		seaconfig_newmapping = s
+		
+		seadispatchChange()
 	)
 	
 	on _bakeOut pressed do
 	(
 		if seaconfig_bakeext == EXT_JPEG then seaconfig_bakeext = EXT_PNG
 		else if seaconfig_bakeext == EXT_PNG then seaconfig_bakeext = EXT_JPEG
-			
+		
 		updateBakeOut()
+		seadispatchChange()
 	)
 	
 	on _bakeQuality changed s do
 	(
 		seaconfig_bakequality = s
+		
+		seadispatchChange()
 	)	
 		
 	on _bakeVal changed s do
@@ -9207,6 +9521,7 @@ rollout _SEABake "Bake"
 		)
 		
 		updateTextureSize()
+		seadispatchChange()
 	)
 	
 	on _bakeVal2 changed s do
@@ -9219,25 +9534,28 @@ rollout _SEABake "Bake"
 		)
 		
 		updateTextureSize()
+		seadispatchChange()
 	)
 )
 
 rollout _ATFExtension "ATF Extension"
 (
 	checkbox _enabled "Enabled" pos:[7,7] checked:seaconfig_atf		
-	checkbox _enabledAutoUpdate "Auto Update" pos:[130,7] checked:seaconfig_atf_auto enabled:seaconfig_atf tooltip:"Automatically updates ATF textures if modified."
-	checkbox _enabledJpegXr "JPEG-XR + LZMA" pos:[7,27] checked:seaconfig_atf_jpegxr enabled:(seaconfig_atf and seaconfig_atf_auto) tooltip:"Compress block compressed textures using JPEG-XR+LZMA to reduce file."
-	checkbox _enabledForce "Force" pos:[130,27] checked:seaconfig_atf_force enabled:(seaconfig_atf and seaconfig_atf_auto) tooltip:"Force auto update."
-	radiobuttons compressItem "Texture Compression Algorithm" pos:[7,47] default:1 labels:#("All", "DXT", "ETC1", "PVRTC") enabled:seaconfig_atf 
+	checkbox _enabledAutoUpdate "Auto Update" pos:[130,7] checked:seaconfig_atf_auto tooltip:"Automatically updates ATF textures if modified."
+	checkbox _enabledJpegXr "JPEG-XR + LZMA" pos:[7,27] checked:seaconfig_atf_jpegxr tooltip:"Compress block compressed textures using JPEG-XR+LZMA to reduce file."
+	checkbox _enabledForce "Force" pos:[130,27] checked:seaconfig_atf_force tooltip:"Force auto update."
+	radiobuttons compressItem "Texture Compression Algorithm" pos:[7,47] default:1 labels:#("All", "DXT", "ETC1", "PVRTC")
 	
-	fn updatenEnabled =
+	fn updateRollout =
 	(
-		_enabledForce.enabled = _enabledAutoUpdate.enabled = compressItem.enabled = _enabledJpegXr.enabled = seaconfig_atf
-		compressItem.enabled = _enabledJpegXr.enabled = _enabledForce.enabled = seaconfig_atf_auto
-	)
-	
-	fn updateRolloutSize =
-	(	
+		_enabledAutoUpdate.enabled = compressItem.enabled = seaconfig_atf
+		_enabledJpegXr.enabled = _enabledForce.enabled = seaconfig_atf and seaconfig_atf_auto
+		
+		if seaconfig_atf_compress == ENC_ALL then compressItem.state = 1
+		else if seaconfig_atf_compress == ENC_DXT then compressItem.state = 2
+		else if seaconfig_atf_compress == ENC_ETC1 then compressItem.state = 3
+		else if seaconfig_atf_compress == ENC_PVRTC then compressItem.state = 4
+		
 		if seaconfig_atf then
 		(
 			_ATFExtension.height = 83
@@ -9245,37 +9563,51 @@ rollout _ATFExtension "ATF Extension"
 		else _ATFExtension.height = 27
 	)
 
+	fn onchange =
+	(
+		_enabled.checked = seaconfig_atf_jpegxr
+		_enabledAutoUpdate.checked = seaconfig_atf_auto
+		_enabledJpegXr.checked = seaconfig_atf_jpegxr
+		_enabledForce.checked = seaconfig_atf_force
+		
+		updateRollout()
+	)
+	
 	on _ATFExtension open do
 	(
-		if seaconfig_atf_compress == ENC_ALL then compressItem.state = 1
-		else if seaconfig_atf_compress == ENC_DXT then compressItem.state = 2
-		else if seaconfig_atf_compress == ENC_ETC1 then compressItem.state = 3
-		else if seaconfig_atf_compress == ENC_PVRTC then compressItem.state = 3
+		append sea_listeners onchange
 		
-		updateRolloutSize()
+		onchange()
 	)
 	
 	on _enabled changed s do
 	(		
 		seaconfig_atf = s
-		updatenEnabled()
-		updateRolloutSize()
+		
+		updateRollout()
+		seadispatchChange()
 	)
 	
 	on _enabledJpegXr changed s do
 	(
-		seaconfig_atf_jpegxr = s				
+		seaconfig_atf_jpegxr = s
+		
+		seadispatchChange()
 	)
 	
 	on _enabledForce changed s do
 	(		
-		seaconfig_atf_force = s				
+		seaconfig_atf_force = s
+		
+		seadispatchChange()
 	)
 	
 	on _enabledAutoUpdate changed s do
 	(
-		seaconfig_atf_auto = s		
-		updatenEnabled()
+		seaconfig_atf_auto = s
+		
+		updateRollout()
+		seadispatchChange()
 	)
 	
 	on compressItem changed s do
@@ -9284,13 +9616,24 @@ rollout _ATFExtension "ATF Extension"
 		else if s == 2 then seaconfig_atf_compress = ENC_DXT
 		else if s == 3 then seaconfig_atf_compress = ENC_ETC1
 		else if s == 4 then seaconfig_atf_compress = ENC_PVRTC
+		
+		seadispatchChange()
 	)
 )
-
 
 --
 -- Initializer
 --
+
+try 
+(
+	if DisableWindowsGhosting == undefined do
+	(
+		DisableWindowsGhosting = DisableProcessWindowsGhosting()
+		DisableWindowsGhosting.DisableProcessWindowsGhosting()
+	)
+)
+catch()
 
 if sea_floater != undefined do
 (
@@ -9300,10 +9643,9 @@ if sea_floater != undefined do
 sea_floater = newRolloutFloater "SEA3D Exporter" 230 500
 
 addRollout _SEA sea_floater rolledUp:false
---addRollout _SEAServer sea_floater rolledUp:false
 addRollout _SEAFileInfo sea_floater rolledUp:false
 addRollout _SEAGlobal sea_floater rolledUp:true
-addRollout _SEABake sea_floater rolledUp:false
+addRollout _SEABake sea_floater rolledUp:true
 if ATF_SUPPORTS do addRollout _ATFExtension sea_floater rolledUp:false
 addRollout _SEAAnimation sea_floater rolledUp:false
 addRollout _SEAGeometry sea_floater rolledUp:false
@@ -9322,3 +9664,5 @@ addRollout _SEAttribs sea_floater rolledUp:false
 addRollout _SEAEnvironment sea_floater rolledUp:false
 addRollout _SEASounds sea_floater rolledUp:false
 addRollout _SEAUtils sea_floater rolledUp:false
+
+registerViewWindow sea_floater
