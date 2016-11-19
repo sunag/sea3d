@@ -51,7 +51,7 @@ Free cross-platform 3D IDE for games.
 
 SEA3D Player
 --
-SE3D Player is focused for artists and very useful to view models, animations and others.
+Focused for artists and very useful to view models, animations and others.
 
 **WebGL** **http://sunag.github.io/sea3d/Player/index.html**
 
