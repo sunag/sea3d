@@ -1,6 +1,6 @@
 [<img src="http://sunag.github.io/sea3d/Media/SEA3D-Top-BlackGL.jpg"/>](http://sunag.github.io/sea3d/)
 
-SEA3D
+SEA3D 1.8
 ==
 
 Open-source format and tools for game developers.
@@ -10,10 +10,10 @@ Open-source format and tools for game developers.
 * Open-source | Cross-platform
 * Export Animation (Takes), Texture, Material, Skeleton (Skin), Vertex Animation, Morph (+1000 slots), Camera, Lights, Environment and Helpers
 * Instancing of Geometry, Material, Texture and Animation
-* Lossy Compression
-* Native Scripting Language
+* Lossy Compression ( Open3DGC )
+* Native Scripting Language (Export to Java Script)
 * Scene Hierarchy
-* Physics and Sound3D Supports
+* Physics and Sounds Supports
 * Multiple Channels Texture and Mapping
 * Native Support for DetailMap, LightMap and Multilayer Blend Texture
 * Streaming File Format (Progressive Loader)
@@ -35,7 +35,7 @@ Help and Questions? Use SEA3D Forum
 
 **http://community.poonya.com/**
 
-SEA3D Studio 1.1.7 Viva!
+SEA3D Studio - Windows / Web (Lite)
 --
 Free cross-platform 3D IDE for games.
 
@@ -43,19 +43,21 @@ Free cross-platform 3D IDE for games.
 
 [<img src="http://sunag.github.io/sea3d/Media/SEA3D-Studio.jpg"/>](http://sea3d.poonya.com/studio/)
 
-**Join now** http://sea3d.poonya.com/studio/
+**Download** http://community.poonya.com/252
+
+**Web (Lite)** http://sea3d.poonya.com/studio/
 
 **SDK Framework** https://github.com/sunag/sea3d_studio_sdk
 
-SEA3D Player 1.7
+SEA3D Player
 --
 SE3D Player is focused for artists and very useful to view models, animations and others.
 
-**http://sea3d.poonya.com/player/**
+**WebGL** **http://sunag.github.io/sea3d/Player/index.html**
 
-*Click on the first button to open your file*
+**Flash** **http://sea3d.poonya.com/player/**
 
-SEA3D Exporter 1.7
+SEA3D Exporter
 --
 Easy and wide range of 3d features, export entire scenes to SEA3D with just few clicks.
 
