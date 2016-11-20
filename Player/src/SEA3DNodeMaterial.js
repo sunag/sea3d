@@ -152,7 +152,7 @@ THREE.SEA3D.MaterialBuilder = {
 							THREE.OperatorNode.MUL
 						);
 
-					}					else {
+					} else {
 
 						delete this.fresnelReflectance;
 						delete this.fresnelPower;

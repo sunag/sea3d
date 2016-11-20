@@ -284,7 +284,7 @@ THREE.SEA3D.prototype.readP2PConstraint = function ( sea ) {
 			this.toAmmoVec3( sea.pointB )
 		);
 
-	}	else {
+	} else {
 
 		ctrt = new Ammo.btPoint2PointConstraint(
 			sea.targetA.tag,

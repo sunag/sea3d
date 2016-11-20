@@ -438,7 +438,7 @@ THREE.SEA3D.prototype.updateTransform = function ( obj3d, sea ) {
 
 			obj3d.updateMatrixWorld();
 
-		}		else {
+		} else {
 
 			this._updateTransform( obj3d, sea );
 

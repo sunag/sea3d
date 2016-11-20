@@ -748,7 +748,7 @@ SEA3D.Math.lerpAngle = function ( val, tar, t ) {
 
 			tar += 360;
 
-		}		else {
+		} else {
 
 			tar -= 360;
 
@@ -1276,7 +1276,7 @@ SEA3D.Actions = function ( name, data, sea3d ) {
 
 				act.intrplParam0 = data.readFloat();
 
-			}			else if ( act.intrpl.indexOf( 'elastic.' ) == 0 ) {
+			} else if ( act.intrpl.indexOf( 'elastic.' ) == 0 ) {
 
 				act.intrplParam0 = data.readFloat();
 				act.intrplParam1 = data.readFloat();
@@ -2262,7 +2262,7 @@ SEA3D.Material = function ( name, data, sea3d ) {
 					tech.offsetX1 = data.readFloat();
 					tech.offsetY1 = data.readFloat();
 
-				}				else {
+				} else {
 
 					tech.offsetX0 = tech.offsetY0 =
 					tech.offsetX1 = tech.offsetY1 = 0;
@@ -2884,7 +2884,7 @@ SEA3D.File.prototype.readSEAObject = function () {
 
 		}
 
-	}	else {
+	} else {
 
 		obj = new SEA3D.Object( name, data, type, this );
 
@@ -2928,7 +2928,7 @@ SEA3D.File.prototype.readBody = function () {
 			if ( sea ) this.dispatchCompleteObject( sea );
 			else return false;
 
-		}		else return false;
+		} else return false;
 
 	}
 

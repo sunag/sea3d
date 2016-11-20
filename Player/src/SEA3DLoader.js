@@ -1871,7 +1871,7 @@ THREE.SEA3D.prototype.readSprite = function ( sea ) {
 			mat.opacity = sea.material.tag.opacity;
 			mat.fog = sea.material.receiveFog;
 
-		}		else mat = sea.material.tag.sprite;
+		} else mat = sea.material.tag.sprite;
 
 	}
 

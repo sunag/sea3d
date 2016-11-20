@@ -590,7 +590,7 @@ THREE.SEA3D.prototype.getSkeletonAnimationLegacy = function () {
 
 						mtx_local.multiplyMatrices( mtx_parent, mtx_global );
 
-					}					else {
+					} else {
 
 						this.flipMatrixBone( mtx_local );
 

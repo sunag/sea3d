@@ -30,7 +30,7 @@ SEA3D.GeometryDelta = function ( name, data, sea3d ) {
 		data.readNumber = data.readByte;
 		this.numDiv = 0xFF / 2;
 
-	}	else {
+	} else {
 
 		data.readNumber = data.readShort;
 		this.numDiv = 0xFFFF / 2;
