@@ -9,7 +9,7 @@
 
 'use strict';
 
-SEA3D.Deflate = function() {
+SEA3D.Deflate = function () {
 
 	/* Copyright (C) 1999 Masanao Izumo <iz@onicos.co.jp>
 	 * Version: 1.0.0.1
@@ -76,14 +76,14 @@ SEA3D.Deflate = function() {
 	16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15 );
 	/* objects (inflate) */
 
-	var zip_HuftList = function() {
+	var zip_HuftList = function () {
 
 		this.next = null;
 		this.list = null;
 
 	}
 
-	var zip_HuftNode = function() {
+	var zip_HuftNode = function () {
 
 		this.e = 0; // number of extra bits or operation
 		this.b = 0; // number of bits in this code or subcode
@@ -94,7 +94,7 @@ SEA3D.Deflate = function() {
 
 	}
 
-	var zip_HuftBuild = function( b,	// code lengths in bits (all assumed <= BMAX)
+	var zip_HuftBuild = function ( b,	// code lengths in bits (all assumed <= BMAX)
 			n,	// number of codes (assumed <= N_MAX)
 			s,	// number of simple-valued codes (0..s-1)
 			d,	// list of base values for non-simple codes
@@ -359,7 +359,7 @@ SEA3D.Deflate = function() {
 
 	/* routines (inflate) */
 
-	var zip_GET_BYTE = function() {
+	var zip_GET_BYTE = function () {
 
 		if ( zip_inflate_data.length == zip_inflate_pos )
 			return - 1;
@@ -367,7 +367,7 @@ SEA3D.Deflate = function() {
 
 	}
 
-	var zip_NEEDBITS = function( n ) {
+	var zip_NEEDBITS = function ( n ) {
 
 		while ( zip_bit_len < n ) {
 
@@ -378,20 +378,20 @@ SEA3D.Deflate = function() {
 
 	}
 
-	var zip_GETBITS = function( n ) {
+	var zip_GETBITS = function ( n ) {
 
 		return zip_bit_buf & zip_MASK_BITS[ n ];
 
 	}
 
-	var zip_DUMPBITS = function( n ) {
+	var zip_DUMPBITS = function ( n ) {
 
 		zip_bit_buf >>= n;
 		zip_bit_len -= n;
 
 	}
 
-	var zip_inflate_codes = function( buff, off, size ) {
+	var zip_inflate_codes = function ( buff, off, size ) {
 
 		/* inflate (decompress) the codes in a deflated (compressed) block.
 		       Return an error code or zero if it all goes ok. */
@@ -487,7 +487,7 @@ SEA3D.Deflate = function() {
 
 	}
 
-	var zip_inflate_stored = function( buff, off, size ) {
+	var zip_inflate_stored = function ( buff, off, size ) {
 
 		/* "decompress" an inflated type 0 (stored) block. */
 		var n;
@@ -526,7 +526,7 @@ SEA3D.Deflate = function() {
 
 	}
 
-	var zip_inflate_fixed = function( buff, off, size ) {
+	var zip_inflate_fixed = function ( buff, off, size ) {
 
 		/* decompress an inflated type 1 (fixed Huffman codes) block.  We should
 		       either replace this with a custom decoder, or at least precompute the
@@ -587,7 +587,7 @@ SEA3D.Deflate = function() {
 
 	}
 
-	var zip_inflate_dynamic = function( buff, off, size ) {
+	var zip_inflate_dynamic = function ( buff, off, size ) {
 
 		// decompress an inflated type 2 (dynamic Huffman codes) block.
 		var i; // temporary variables
@@ -730,7 +730,7 @@ SEA3D.Deflate = function() {
 
 	}
 
-	var zip_inflate_start = function() {
+	var zip_inflate_start = function () {
 
 		var i;
 
@@ -746,7 +746,7 @@ SEA3D.Deflate = function() {
 
 	}
 
-	var zip_inflate_internal = function( buff, off, size ) {
+	var zip_inflate_internal = function ( buff, off, size ) {
 
 		// decompress an inflated entry
 		var n, i;
@@ -833,7 +833,6 @@ SEA3D.Deflate = function() {
 
 				default: // error
 					i = - 1;
-					break;
 			}
 
 			if ( i == - 1 ) {
@@ -850,7 +849,7 @@ SEA3D.Deflate = function() {
 
 	}
 
-	var zip_inflate = function( data ) {
+	var zip_inflate = function ( data ) {
 
 		var i, j, pos = 0;
 
@@ -870,7 +869,7 @@ SEA3D.Deflate = function() {
 
 	}
 
-	return { inflate : zip_inflate };
+	return { inflate: zip_inflate };
 
 }();
 
@@ -879,10 +878,10 @@ SEA3D.Deflate = function() {
  * 	@author Sunag / http://www.sunag.com.br/
  */
 
-SEA3D.File.DeflateUncompress = function( data ) {
+SEA3D.File.DeflateUncompress = function ( data ) {
 
 	return SEA3D.Deflate.inflate( data );
 
-}
+};
 
 SEA3D.File.setDecompressionEngine( 1, "deflate", SEA3D.File.DeflateUncompress );

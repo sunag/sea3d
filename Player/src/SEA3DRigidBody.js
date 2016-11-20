@@ -9,7 +9,7 @@
 //	Sphere
 //
 
-SEA3D.Sphere = function( name, data, sea3d ) {
+SEA3D.Sphere = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -25,7 +25,7 @@ SEA3D.Sphere.prototype.type = "sph";
 //	Box
 //
 
-SEA3D.Box = function( name, data, sea3d ) {
+SEA3D.Box = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -43,7 +43,7 @@ SEA3D.Box.prototype.type = "box";
 //	Cone
 //
 
-SEA3D.Cone = function( name, data, sea3d ) {
+SEA3D.Cone = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -60,7 +60,7 @@ SEA3D.Cone.prototype.type = "cone";
 //	Capsule
 //
 
-SEA3D.Capsule = function( name, data, sea3d ) {
+SEA3D.Capsule = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -77,7 +77,7 @@ SEA3D.Capsule.prototype.type = "cap";
 //	Cylinder
 //
 
-SEA3D.Cylinder = function( name, data, sea3d ) {
+SEA3D.Cylinder = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -94,7 +94,7 @@ SEA3D.Cylinder.prototype.type = "cyl";
 //	Convex Geometry
 //
 
-SEA3D.ConvexGeometry = function( name, data, sea3d ) {
+SEA3D.ConvexGeometry = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -111,7 +111,7 @@ SEA3D.ConvexGeometry.prototype.type = "gs";
 //	Triangle Geometry
 //
 
-SEA3D.TriangleGeometry = function( name, data, sea3d ) {
+SEA3D.TriangleGeometry = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -128,7 +128,7 @@ SEA3D.TriangleGeometry.prototype.type = "sgs";
 //	Compound
 //
 
-SEA3D.Compound = function( name, data, sea3d ) {
+SEA3D.Compound = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -141,8 +141,8 @@ SEA3D.Compound = function( name, data, sea3d ) {
 	for ( var i = 0; i < count; i ++ ) {
 
 		this.compounds.push( {
-			shape : sea3d.getObject( data.readUInt() ),
-			transform : data.readMatrix()
+			shape: sea3d.getObject( data.readUInt() ),
+			transform: data.readMatrix()
 		} );
 
 	}
@@ -155,7 +155,7 @@ SEA3D.Compound.prototype.type = "cmps";
 //	Physics
 //
 
-SEA3D.Physics = function( name, data, sea3d ) {
+SEA3D.Physics = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -170,7 +170,7 @@ SEA3D.Physics = function( name, data, sea3d ) {
 
 };
 
-SEA3D.Physics.prototype.readTag = function( kind, data, size ) {
+SEA3D.Physics.prototype.readTag = function ( kind, data, size ) {
 
 };
 
@@ -178,7 +178,7 @@ SEA3D.Physics.prototype.readTag = function( kind, data, size ) {
 //	Rigidy Body Base
 //
 
-SEA3D.RigidBodyBase = function( name, data, sea3d ) {
+SEA3D.RigidBodyBase = function ( name, data, sea3d ) {
 
 	SEA3D.Physics.call( this, name, data, sea3d );
 
@@ -207,7 +207,7 @@ SEA3D.RigidBodyBase.prototype.constructor = SEA3D.RigidBodyBase;
 //	Rigidy Body
 //
 
-SEA3D.RigidBody = function( name, data, sea3d ) {
+SEA3D.RigidBody = function ( name, data, sea3d ) {
 
 	SEA3D.RigidBodyBase.call( this, name, data, sea3d );
 
@@ -224,7 +224,7 @@ SEA3D.RigidBody.prototype.type = "rb";
 //	Car Controller
 //
 
-SEA3D.CarController = function( name, data, sea3d ) {
+SEA3D.CarController = function ( name, data, sea3d ) {
 
 	SEA3D.RigidBodyBase.call( this, name, data, sea3d );
 
@@ -252,7 +252,7 @@ SEA3D.CarController = function( name, data, sea3d ) {
 
 };
 
-SEA3D.CarController.Wheel = function( data, sea3d ) {
+SEA3D.CarController.Wheel = function ( data, sea3d ) {
 
 	this.data = data;
 	this.sea3d = sea3d;
@@ -281,7 +281,7 @@ SEA3D.CarController.prototype.type = "carc";
 //	Constraints
 //
 
-SEA3D.Constraints = function( name, data, sea3d ) {
+SEA3D.Constraints = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -307,7 +307,7 @@ SEA3D.Constraints = function( name, data, sea3d ) {
 //	P2P Constraint
 //
 
-SEA3D.P2PConstraint = function( name, data, sea3d ) {
+SEA3D.P2PConstraint = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -326,7 +326,7 @@ SEA3D.P2PConstraint.prototype.type = "p2pc";
 //	Hinge Constraint
 //
 
-SEA3D.HingeConstraint = function( name, data, sea3d ) {
+SEA3D.HingeConstraint = function ( name, data, sea3d ) {
 
 	SEA3D.Constraints.call( this, name, data, sea3d );
 
@@ -341,21 +341,21 @@ SEA3D.HingeConstraint = function( name, data, sea3d ) {
 	if ( this.attrib & 4 ) {
 
 		this.limit = {
-			low : data.readFloat(),
-			high : data.readFloat(),
-			softness : data.readFloat(),
-			biasFactor : data.readFloat(),
-			relaxationFactor : data.readFloat()
-		}
+			low: data.readFloat(),
+			high: data.readFloat(),
+			softness: data.readFloat(),
+			biasFactor: data.readFloat(),
+			relaxationFactor: data.readFloat()
+		};
 
 	}
 
 	if ( this.attrib & 8 ) {
 
 		this.angularMotor = {
-			velocity : data.readFloat(),
-			impulse : data.readFloat()
-		}
+			velocity: data.readFloat(),
+			impulse: data.readFloat()
+		};
 
 	}
 
@@ -370,7 +370,7 @@ SEA3D.HingeConstraint.prototype.type = "hnec";
 //	Cone Twist Constraint
 //
 
-SEA3D.ConeTwistConstraint = function( name, data, sea3d ) {
+SEA3D.ConeTwistConstraint = function ( name, data, sea3d ) {
 
 	SEA3D.Constraints.call( this, name, data, sea3d );
 
@@ -385,12 +385,12 @@ SEA3D.ConeTwistConstraint = function( name, data, sea3d ) {
 	if ( this.attrib & 4 ) {
 
 		this.limit = {
-			swingSpan1 : data.readFloat(),
-			swingSpan2 : data.readFloat(),
-			twistSpan : data.readFloat(),
-			softness : data.readFloat(),
-			biasFactor : data.readFloat(),
-			relaxationFactor : data.readFloat()
+			swingSpan1: data.readFloat(),
+			swingSpan2: data.readFloat(),
+			twistSpan: data.readFloat(),
+			softness: data.readFloat(),
+			biasFactor: data.readFloat(),
+			relaxationFactor: data.readFloat()
 		};
 
 	}
@@ -406,7 +406,7 @@ SEA3D.ConeTwistConstraint.prototype.type = "ctwc";
 //	Extension
 //
 
-SEA3D.File.setExtension(function() {
+SEA3D.File.setExtension( function () {
 
 	// PHYSICS
 	this.addClass( SEA3D.Sphere );
@@ -422,5 +422,5 @@ SEA3D.File.setExtension(function() {
 	this.addClass( SEA3D.HingeConstraint );
 	this.addClass( SEA3D.ConeTwistConstraint );
 	this.addClass( SEA3D.CarController );
-	
+
 } );

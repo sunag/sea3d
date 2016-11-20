@@ -5,9 +5,9 @@
 
 'use strict';
 
-var SEA3D = { VERSION : 18100 }
+var SEA3D = { VERSION: 18100 };
 
-SEA3D.getVersion = function() {
+SEA3D.getVersion = function () {
 
 	// Max = 16777215 - VVSSBB  | V = Version | S = Subversion | B = Buildversion
 	var v = SEA3D.VERSION.toString(), l = v.length;
@@ -21,7 +21,7 @@ console.log( 'SEA3D ' + SEA3D.getVersion() );
 //	STREAM : STANDARD DATA-IO ( LITTLE-ENDIAN )
 //
 
-SEA3D.Stream = function( buffer ) {
+SEA3D.Stream = function ( buffer ) {
 
 	this.position = 0;
 	this.buffer = buffer || new ArrayBuffer();
@@ -87,7 +87,7 @@ SEA3D.Stream.INTERPOLATION_TABLE =	[
 	"bounce.in", "bounce.out", "bounce.inout"
 ];
 
-SEA3D.Stream.sizeOf = function( kind ) {
+SEA3D.Stream.sizeOf = function ( kind ) {
 
 	if ( kind == 0 ) return 0;
 	else if ( kind >= 1 && kind <= 31 ) return 1;
@@ -101,7 +101,7 @@ SEA3D.Stream.sizeOf = function( kind ) {
 SEA3D.Stream.prototype = {
 	constructor: SEA3D.Stream,
 
-	set buffer ( val ) {
+	set buffer( val ) {
 
 		this.buf = val;
 		this.length = val.byteLength;
@@ -109,26 +109,26 @@ SEA3D.Stream.prototype = {
 
 	},
 
-	get buffer () {
+	get buffer() {
 
 		return this.buf;
 
 	},
 
-	get bytesAvailable () {
+	get bytesAvailable() {
 
 		return this.length - this.position;
 
 	}
 };
 
-SEA3D.Stream.prototype.getByte = function( pos ) {
+SEA3D.Stream.prototype.getByte = function ( pos ) {
 
 	return this.data.getInt8( pos );
 
 };
 
-SEA3D.Stream.prototype.readBytes = function( len ) {
+SEA3D.Stream.prototype.readBytes = function ( len ) {
 
 	var buf = this.buf.slice( this.position, this.position + len );
 	this.position += len;
@@ -136,25 +136,25 @@ SEA3D.Stream.prototype.readBytes = function( len ) {
 
 };
 
-SEA3D.Stream.prototype.readByte = function() {
+SEA3D.Stream.prototype.readByte = function () {
 
 	return this.data.getInt8( this.position ++ );
 
 };
 
-SEA3D.Stream.prototype.readUByte = function() {
+SEA3D.Stream.prototype.readUByte = function () {
 
 	return this.data.getUint8( this.position ++ );
 
 };
 
-SEA3D.Stream.prototype.readBool = function() {
+SEA3D.Stream.prototype.readBool = function () {
 
 	return this.data.getInt8( this.position ++ ) != 0;
 
 };
 
-SEA3D.Stream.prototype.readShort = function() {
+SEA3D.Stream.prototype.readShort = function () {
 
 	var v = this.data.getInt16( this.position, true );
 	this.position += 2;
@@ -162,7 +162,7 @@ SEA3D.Stream.prototype.readShort = function() {
 
 };
 
-SEA3D.Stream.prototype.readUShort = function() {
+SEA3D.Stream.prototype.readUShort = function () {
 
 	var v = this.data.getUint16( this.position, true );
 	this.position += 2;
@@ -170,7 +170,7 @@ SEA3D.Stream.prototype.readUShort = function() {
 
 };
 
-SEA3D.Stream.prototype.readUInt24 = function() {
+SEA3D.Stream.prototype.readUInt24 = function () {
 
 	var v = this.data.getUint32( this.position, true ) & 0xFFFFFF;
 	this.position += 3;
@@ -178,13 +178,13 @@ SEA3D.Stream.prototype.readUInt24 = function() {
 
 };
 
-SEA3D.Stream.prototype.readUInt24F = function() {
+SEA3D.Stream.prototype.readUInt24F = function () {
 
 	return this.readUShort() | ( this.readUByte() << 16 );
 
 };
 
-SEA3D.Stream.prototype.readInt = function() {
+SEA3D.Stream.prototype.readInt = function () {
 
 	var v = this.data.getInt32( this.position, true );
 	this.position += 4;
@@ -192,7 +192,7 @@ SEA3D.Stream.prototype.readInt = function() {
 
 };
 
-SEA3D.Stream.prototype.readUInt = function() {
+SEA3D.Stream.prototype.readUInt = function () {
 
 	var v = this.data.getUint32( this.position, true );
 	this.position += 4;
@@ -200,7 +200,7 @@ SEA3D.Stream.prototype.readUInt = function() {
 
 };
 
-SEA3D.Stream.prototype.readFloat = function() {
+SEA3D.Stream.prototype.readFloat = function () {
 
 	var v = this.data.getFloat32( this.position, true );
 	this.position += 4;
@@ -208,7 +208,7 @@ SEA3D.Stream.prototype.readFloat = function() {
 
 };
 
-SEA3D.Stream.prototype.readUInteger = function() {
+SEA3D.Stream.prototype.readUInteger = function () {
 
 	var v = this.readUByte(),
 		r = v & 0x7F;
@@ -231,25 +231,25 @@ SEA3D.Stream.prototype.readUInteger = function() {
 
 };
 
-SEA3D.Stream.prototype.readVector2 = function() {
+SEA3D.Stream.prototype.readVector2 = function () {
 
-	return { x: this.readFloat(), y: this.readFloat() }
-
-};
-
-SEA3D.Stream.prototype.readVector3 = function() {
-
-	return { x: this.readFloat(), y: this.readFloat(), z: this.readFloat() }
+	return { x: this.readFloat(), y: this.readFloat() };
 
 };
 
-SEA3D.Stream.prototype.readVector4 = function() {
+SEA3D.Stream.prototype.readVector3 = function () {
 
-	return { x: this.readFloat(), y: this.readFloat(), z: this.readFloat(), w: this.readFloat() }
+	return { x: this.readFloat(), y: this.readFloat(), z: this.readFloat() };
 
 };
 
-SEA3D.Stream.prototype.readMatrix = function() {
+SEA3D.Stream.prototype.readVector4 = function () {
+
+	return { x: this.readFloat(), y: this.readFloat(), z: this.readFloat(), w: this.readFloat() };
+
+};
+
+SEA3D.Stream.prototype.readMatrix = function () {
 
 	var mtx = new Float32Array( 16 );
 
@@ -274,7 +274,7 @@ SEA3D.Stream.prototype.readMatrix = function() {
 
 };
 
-SEA3D.Stream.prototype.readUTF8 = function( len ) {
+SEA3D.Stream.prototype.readUTF8 = function ( len ) {
 
 	var buffer = this.readBytes( len );
 
@@ -282,31 +282,31 @@ SEA3D.Stream.prototype.readUTF8 = function( len ) {
 
 };
 
-SEA3D.Stream.prototype.readExt = function() {
+SEA3D.Stream.prototype.readExt = function () {
 
 	return this.readUTF8( 4 ).replace( /\0/g, "" );
 
 };
 
-SEA3D.Stream.prototype.readUTF8Tiny = function() {
+SEA3D.Stream.prototype.readUTF8Tiny = function () {
 
 	return this.readUTF8( this.readUByte() );
 
 };
 
-SEA3D.Stream.prototype.readUTF8Short = function() {
+SEA3D.Stream.prototype.readUTF8Short = function () {
 
 	return this.readUTF8( this.readUShort() );
 
 };
 
-SEA3D.Stream.prototype.readUTF8Long = function() {
+SEA3D.Stream.prototype.readUTF8Long = function () {
 
 	return this.readUTF8( this.readUInt() );
 
 };
 
-SEA3D.Stream.prototype.readUByteArray = function( length ) {
+SEA3D.Stream.prototype.readUByteArray = function ( length ) {
 
 	var v = new Uint8Array( length );
 
@@ -324,7 +324,7 @@ SEA3D.Stream.prototype.readUByteArray = function( length ) {
 
 };
 
-SEA3D.Stream.prototype.readUShortArray = function( length ) {
+SEA3D.Stream.prototype.readUShortArray = function ( length ) {
 
 	var v = new Uint16Array( length ),
 		len = length * 2;
@@ -344,7 +344,7 @@ SEA3D.Stream.prototype.readUShortArray = function( length ) {
 };
 
 
-SEA3D.Stream.prototype.readUInt24Array = function( length ) {
+SEA3D.Stream.prototype.readUInt24Array = function ( length ) {
 
 	var v = new Uint32Array( length );
 
@@ -359,7 +359,7 @@ SEA3D.Stream.prototype.readUInt24Array = function( length ) {
 };
 
 
-SEA3D.Stream.prototype.readUIntArray = function( length ) {
+SEA3D.Stream.prototype.readUIntArray = function ( length ) {
 
 	var v = new Uint32Array( length ),
 		len = length * 4;
@@ -378,7 +378,7 @@ SEA3D.Stream.prototype.readUIntArray = function( length ) {
 
 };
 
-SEA3D.Stream.prototype.readFloatArray = function( length ) {
+SEA3D.Stream.prototype.readFloatArray = function ( length ) {
 
 	var v = new Float32Array( length ),
 		len = length * 4;
@@ -398,19 +398,19 @@ SEA3D.Stream.prototype.readFloatArray = function( length ) {
 };
 
 
-SEA3D.Stream.prototype.readBlendMode = function() {
+SEA3D.Stream.prototype.readBlendMode = function () {
 
 	return SEA3D.Stream.BLEND_MODE[ this.readUByte() ];
 
 };
 
-SEA3D.Stream.prototype.readInterpolation = function() {
+SEA3D.Stream.prototype.readInterpolation = function () {
 
 	return SEA3D.Stream.INTERPOLATION_TABLE[ this.readUByte() ];
 
 };
 
-SEA3D.Stream.prototype.readTags = function( callback ) {
+SEA3D.Stream.prototype.readTags = function ( callback ) {
 
 	var numTag = this.readUByte();
 
@@ -428,7 +428,7 @@ SEA3D.Stream.prototype.readTags = function( callback ) {
 
 };
 
-SEA3D.Stream.prototype.readProperties = function( sea3d ) {
+SEA3D.Stream.prototype.readProperties = function ( sea3d ) {
 
 	var count = this.readUByte(),
 		props = {}, types = {};
@@ -449,7 +449,7 @@ SEA3D.Stream.prototype.readProperties = function( sea3d ) {
 
 };
 
-SEA3D.Stream.prototype.readAnimationList = function( sea3d ) {
+SEA3D.Stream.prototype.readAnimationList = function ( sea3d ) {
 
 	var list = [],
 		count = this.readUByte();
@@ -474,7 +474,7 @@ SEA3D.Stream.prototype.readAnimationList = function( sea3d ) {
 
 };
 
-SEA3D.Stream.prototype.readScriptList = function( sea3d ) {
+SEA3D.Stream.prototype.readScriptList = function ( sea3d ) {
 
 	var list = [],
 		count = this.readUByte();
@@ -519,16 +519,16 @@ SEA3D.Stream.prototype.readScriptList = function( sea3d ) {
 
 };
 
-SEA3D.Stream.prototype.readObject = function( sea3d ) {
+SEA3D.Stream.prototype.readObject = function ( sea3d ) {
 
 	return this.readToken( this.readUByte(), sea3d );
 
 };
 
-SEA3D.Stream.prototype.readToken = function( type, sea3d ) {
+SEA3D.Stream.prototype.readToken = function ( type, sea3d ) {
 
-	switch ( type )
-	{
+	switch ( type )	{
+
 		// 1D
 		case SEA3D.Stream.BOOLEAN:
 			return this.readBool();
@@ -579,7 +579,7 @@ SEA3D.Stream.prototype.readToken = function( type, sea3d ) {
 
 		case SEA3D.Stream.STRING_LONG:
 			return this.readUTF8Long();
-			break
+			break;
 
 		case SEA3D.Stream.ASSET:
 			var asset = this.readUInt();
@@ -588,21 +588,21 @@ SEA3D.Stream.prototype.readToken = function( type, sea3d ) {
 
 		default:
 			console.error( "DataType not found!" );
-			break;
+
 	}
 
 	return null;
 
 };
 
-SEA3D.Stream.prototype.readVector = function( type, length, offset ) {
+SEA3D.Stream.prototype.readVector = function ( type, length, offset ) {
 
 	var size = SEA3D.Stream.sizeOf( type ),
 		i = offset * size,
 		count = i + ( length * size );
 
-	switch ( type )
-	{
+	switch ( type )	{
+
 		// 1D
 		case SEA3D.Stream.BOOLEAN:
 
@@ -649,7 +649,7 @@ SEA3D.Stream.prototype.readVector = function( type, length, offset ) {
 
 };
 
-SEA3D.Stream.prototype.append = function( data ) {
+SEA3D.Stream.prototype.append = function ( data ) {
 
 	var tmp = new ArrayBuffer( this.data.byteLength + data.byteLength );
 	tmp.set( new ArrayBuffer( this.data ), 0 );
@@ -658,7 +658,7 @@ SEA3D.Stream.prototype.append = function( data ) {
 
 };
 
-SEA3D.Stream.prototype.concat = function( position, length ) {
+SEA3D.Stream.prototype.concat = function ( position, length ) {
 
 	return new SEA3D.Stream( this.buffer.slice( position, position + length ) );
 
@@ -668,7 +668,7 @@ SEA3D.Stream.prototype.concat = function( position, length ) {
  * @author DataStream.js
  */
 
-SEA3D.Stream.memcpy = function( dst, dstOffset, src, srcOffset, byteLength ) {
+SEA3D.Stream.memcpy = function ( dst, dstOffset, src, srcOffset, byteLength ) {
 
 	var dstU8 = new Uint8Array( dst, dstOffset, byteLength );
 	var srcU8 = new Uint8Array( src, srcOffset, byteLength );
@@ -681,7 +681,7 @@ SEA3D.Stream.memcpy = function( dst, dstOffset, src, srcOffset, byteLength ) {
 //	UByteArray
 //
 
-SEA3D.UByteArray = function() {
+SEA3D.UByteArray = function () {
 
 	this.ubytes = [];
 	this.length = 0;
@@ -691,14 +691,14 @@ SEA3D.UByteArray = function() {
 SEA3D.UByteArray.prototype = {
 	constructor: SEA3D.UByteArray,
 
-	add : function( ubytes ) {
+	add: function ( ubytes ) {
 
 		this.ubytes.push( ubytes );
 		this.length += ubytes.byteLength;
 
 	},
 
-	toBuffer : function() {
+	toBuffer: function () {
 
 		var memcpy = new Uint8Array( this.length );
 
@@ -719,11 +719,11 @@ SEA3D.UByteArray.prototype = {
 //
 
 SEA3D.Math = {
-	DEGREES : 180 / Math.PI,
-	RADIANS : Math.PI / 180
+	DEGREES: 180 / Math.PI,
+	RADIANS: Math.PI / 180
 };
 
-SEA3D.Math.angle = function( val ) {
+SEA3D.Math.angle = function ( val ) {
 
 	var ang = 180,
 		inv = val < 0;
@@ -740,7 +740,7 @@ SEA3D.Math.angle = function( val ) {
 
 };
 
-SEA3D.Math.lerpAngle = function( val, tar, t ) {
+SEA3D.Math.lerpAngle = function ( val, tar, t ) {
 
 	if ( Math.abs( val - tar ) > 180 ) {
 
@@ -748,8 +748,7 @@ SEA3D.Math.lerpAngle = function( val, tar, t ) {
 
 			tar += 360;
 
-		}
-		else {
+		}		else {
 
 			tar -= 360;
 
@@ -763,7 +762,7 @@ SEA3D.Math.lerpAngle = function( val, tar, t ) {
 
 };
 
-SEA3D.Math.lerpColor = function( val, tar, t ) {
+SEA3D.Math.lerpColor = function ( val, tar, t ) {
 
 	var a0 = val >> 24 & 0xff,
 		r0 = val >> 16 & 0xff,
@@ -784,19 +783,19 @@ SEA3D.Math.lerpColor = function( val, tar, t ) {
 
 };
 
-SEA3D.Math.lerp = function( val, tar, t ) {
+SEA3D.Math.lerp = function ( val, tar, t ) {
 
 	return val + ( ( tar - val ) * t );
 
 };
 
-SEA3D.Math.lerp1x = function( val, tar, t ) {
+SEA3D.Math.lerp1x = function ( val, tar, t ) {
 
 	val[ 0 ] += ( tar[ 0 ] - val[ 0 ] ) * t;
 
 };
 
-SEA3D.Math.lerp3x = function( val, tar, t ) {
+SEA3D.Math.lerp3x = function ( val, tar, t ) {
 
 	val[ 0 ] += ( tar[ 0 ] - val[ 0 ] ) * t;
 	val[ 1 ] += ( tar[ 1 ] - val[ 1 ] ) * t;
@@ -804,19 +803,19 @@ SEA3D.Math.lerp3x = function( val, tar, t ) {
 
 };
 
-SEA3D.Math.lerpAng1x = function( val, tar, t ) {
+SEA3D.Math.lerpAng1x = function ( val, tar, t ) {
 
 	val[ 0 ] = SEA3D.Math.lerpAngle( val[ 0 ], tar[ 0 ], t );
 
 };
 
-SEA3D.Math.lerpColor1x = function( val, tar, t ) {
+SEA3D.Math.lerpColor1x = function ( val, tar, t ) {
 
 	val[ 0 ] = SEA3D.Math.lerpColor( val[ 0 ], tar[ 0 ], t );
 
 };
 
-SEA3D.Math.lerpQuat4x = function( val, tar, t ) {
+SEA3D.Math.lerpQuat4x = function ( val, tar, t ) {
 
 	var x1 = val[ 0 ],
 		y1 = val[ 1 ],
@@ -857,7 +856,7 @@ SEA3D.Math.lerpQuat4x = function( val, tar, t ) {
 //	Timer
 //
 
-SEA3D.Timer = function() {
+SEA3D.Timer = function () {
 
 	this.time = this.start = Date.now();
 
@@ -866,25 +865,25 @@ SEA3D.Timer = function() {
 SEA3D.Timer.prototype = {
 	constructor: SEA3D.Timer,
 
-	get now () {
+	get now() {
 
 		return Date.now();
 
 	},
 
-	get deltaTime () {
+	get deltaTime() {
 
 		return Date.now() - this.time;
 
 	},
 
-	get elapsedTime () {
+	get elapsedTime() {
 
 		return Date.now() - this.start;
 
 	},
 
-	update: function() {
+	update: function () {
 
 		this.time = Date.now();
 
@@ -895,7 +894,7 @@ SEA3D.Timer.prototype = {
 //	Object
 //
 
-SEA3D.Object = function( name, data, type, sea3d ) {
+SEA3D.Object = function ( name, data, type, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -908,7 +907,7 @@ SEA3D.Object = function( name, data, type, sea3d ) {
 //	Geometry Base
 //
 
-SEA3D.GeometryBase = function( name, data, sea3d ) {
+SEA3D.GeometryBase = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -931,11 +930,11 @@ SEA3D.GeometryBase = function( name, data, sea3d ) {
 //	Geometry
 //
 
-SEA3D.Geometry = function( name, data, sea3d ) {
+SEA3D.Geometry = function ( name, data, sea3d ) {
 
 	SEA3D.GeometryBase.call( this, name, data, sea3d );
 
-	var i, j, vec, len;
+	var i, j, len;
 
 	// NORMAL
 	if ( this.attrib & 4 ) {
@@ -1014,8 +1013,8 @@ SEA3D.Geometry = function( name, data, sea3d ) {
 			j = data.readVInt() * 3;
 
 			this.groups.push( {
-				start : len,
-				count : j,
+				start: len,
+				count: j,
 			} );
 
 			len += j;
@@ -1035,8 +1034,8 @@ SEA3D.Geometry = function( name, data, sea3d ) {
 			len = data.readVInt() * 3;
 
 			this.groups.push( {
-				start : j,
-				count : len,
+				start: j,
+				count: len,
 			} );
 
 			j += len;
@@ -1060,7 +1059,7 @@ SEA3D.Geometry.prototype.type = "geo";
 //	Object3D
 //
 
-SEA3D.Object3D = function( name, data, sea3d ) {
+SEA3D.Object3D = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -1090,7 +1089,7 @@ SEA3D.Object3D = function( name, data, sea3d ) {
 
 };
 
-SEA3D.Object3D.prototype.readTag = function( kind, data, size ) {
+SEA3D.Object3D.prototype.readTag = function ( kind, data, size ) {
 
 };
 
@@ -1098,7 +1097,7 @@ SEA3D.Object3D.prototype.readTag = function( kind, data, size ) {
 //	Entity3D
 //
 
-SEA3D.Entity3D = function( name, data, sea3d ) {
+SEA3D.Entity3D = function ( name, data, sea3d ) {
 
 	SEA3D.Object3D.call( this, name, data, sea3d );
 
@@ -1121,7 +1120,7 @@ SEA3D.Entity3D.prototype.constructor = SEA3D.Entity3D;
 //	Sound3D
 //
 
-SEA3D.Sound3D = function( name, data, sea3d ) {
+SEA3D.Sound3D = function ( name, data, sea3d ) {
 
 	SEA3D.Object3D.call( this, name, data, sea3d );
 
@@ -1141,7 +1140,7 @@ SEA3D.Sound3D.prototype.constructor = SEA3D.Sound3D;
 //	Sound Point
 //
 
-SEA3D.SoundPoint = function( name, data, sea3d ) {
+SEA3D.SoundPoint = function ( name, data, sea3d ) {
 
 	SEA3D.Sound3D.call( this, name, data, sea3d );
 
@@ -1161,7 +1160,7 @@ SEA3D.SoundPoint.prototype.type = "sp";
 //	Container3D
 //
 
-SEA3D.Container3D = function( name, data, sea3d ) {
+SEA3D.Container3D = function ( name, data, sea3d ) {
 
 	SEA3D.Object3D.call( this, name, data, sea3d );
 
@@ -1180,7 +1179,7 @@ SEA3D.Container3D.prototype.type = "c3d";
 //	Script URL
 //
 
-SEA3D.ScriptURL = function( name, data, sea3d ) {
+SEA3D.ScriptURL = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -1196,7 +1195,7 @@ SEA3D.ScriptURL.prototype.type = "src";
 //	Texture URL
 //
 
-SEA3D.TextureURL = function( name, data, sea3d ) {
+SEA3D.TextureURL = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -1212,7 +1211,7 @@ SEA3D.TextureURL.prototype.type = "urlT";
 //	CubeMap URL
 //
 
-SEA3D.CubeMapURL = function( name, data, sea3d ) {
+SEA3D.CubeMapURL = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -1234,7 +1233,7 @@ SEA3D.CubeMapURL.prototype.type = "cURL";
 //	Actions
 //
 
-SEA3D.Actions = function( name, data, sea3d ) {
+SEA3D.Actions = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -1277,8 +1276,7 @@ SEA3D.Actions = function( name, data, sea3d ) {
 
 				act.intrplParam0 = data.readFloat();
 
-			}
-			else if ( act.intrpl.indexOf( 'elastic.' ) == 0 ) {
+			}			else if ( act.intrpl.indexOf( 'elastic.' ) == 0 ) {
 
 				act.intrplParam0 = data.readFloat();
 				act.intrplParam1 = data.readFloat();
@@ -1288,6 +1286,7 @@ SEA3D.Actions = function( name, data, sea3d ) {
 		}
 
 		switch ( kind ) {
+
 			case SEA3D.Actions.RTT_TARGET:
 				act.source = sea3d.getObject( data.readUInt() );
 				act.target = sea3d.getObject( data.readUInt() );
@@ -1341,6 +1340,7 @@ SEA3D.Actions = function( name, data, sea3d ) {
 			default:
 				console.log( "Action \"" + kind + "\" not found." );
 				break;
+
 		}
 
 		data.position = position + size;
@@ -1369,7 +1369,7 @@ SEA3D.Actions.prototype.type = "act";
 //	Properties
 //
 
-SEA3D.Properties = function( name, data, sea3d ) {
+SEA3D.Properties = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -1386,7 +1386,7 @@ SEA3D.Properties.prototype.type = "prop";
 //	File Info
 //
 
-SEA3D.FileInfo = function( name, data, sea3d ) {
+SEA3D.FileInfo = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -1405,7 +1405,7 @@ SEA3D.FileInfo.prototype.type = "info";
 //	Java Script
 //
 
-SEA3D.JavaScript = function( name, data, sea3d ) {
+SEA3D.JavaScript = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -1421,7 +1421,7 @@ SEA3D.JavaScript.prototype.type = "js";
 //	Java Script Method
 //
 
-SEA3D.JavaScriptMethod = function( name, data, sea3d ) {
+SEA3D.JavaScriptMethod = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -1437,8 +1437,8 @@ SEA3D.JavaScriptMethod = function( name, data, sea3d ) {
 		var method = data.readUTF8Tiny();
 
 		this.methods[ method ] = {
-			src : data.readUTF8Long()
-		}
+			src: data.readUTF8Long()
+		};
 
 	}
 
@@ -1450,7 +1450,7 @@ SEA3D.JavaScriptMethod.prototype.type = "jsm";
 //	GLSL
 //
 
-SEA3D.GLSL = function( name, data, sea3d ) {
+SEA3D.GLSL = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -1466,7 +1466,7 @@ SEA3D.GLSL.prototype.type = "glsl";
 //	Dummy
 //
 
-SEA3D.Dummy = function( name, data, sea3d ) {
+SEA3D.Dummy = function ( name, data, sea3d ) {
 
 	SEA3D.Object3D.call( this, name, data, sea3d );
 
@@ -1489,7 +1489,7 @@ SEA3D.Dummy.prototype.type = "dmy";
 //	Line
 //
 
-SEA3D.Line = function( name, data, sea3d ) {
+SEA3D.Line = function ( name, data, sea3d ) {
 
 	SEA3D.Object3D.call( this, name, data, sea3d );
 
@@ -1519,7 +1519,7 @@ SEA3D.Line.prototype.type = "line";
 //	Sprite
 //
 
-SEA3D.Sprite = function( name, data, sea3d ) {
+SEA3D.Sprite = function ( name, data, sea3d ) {
 
 	SEA3D.Object3D.call( this, name, data, sea3d );
 
@@ -1547,7 +1547,7 @@ SEA3D.Sprite.prototype.type = "m2d";
 //	Mesh
 //
 
-SEA3D.Mesh = function( name, data, sea3d ) {
+SEA3D.Mesh = function ( name, data, sea3d ) {
 
 	SEA3D.Entity3D.call( this, name, data, sea3d );
 
@@ -1592,8 +1592,8 @@ SEA3D.Mesh = function( name, data, sea3d ) {
 	if ( this.attrib & 1024 ) {
 
 		this.reference = {
-			type : data.readUByte(),
-			ref : sea3d.getObject( data.readUInt() )
+			type: data.readUByte(),
+			ref: sea3d.getObject( data.readUInt() )
 		};
 
 	}
@@ -1615,7 +1615,7 @@ SEA3D.Mesh.prototype.type = "m3d";
 //	Skeleton
 //
 
-SEA3D.Skeleton = function( name, data, sea3d ) {
+SEA3D.Skeleton = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -1643,7 +1643,7 @@ SEA3D.Skeleton.prototype.type = "skl";
 //	Skeleton Local
 //
 
-SEA3D.SkeletonLocal = function( name, data, sea3d ) {
+SEA3D.SkeletonLocal = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -1679,7 +1679,7 @@ SEA3D.SkeletonLocal.prototype.type = "sklq";
 //	Animation Base
 //
 
-SEA3D.AnimationBase = function( name, data, sea3d ) {
+SEA3D.AnimationBase = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -1725,7 +1725,7 @@ SEA3D.AnimationBase = function( name, data, sea3d ) {
 //	Animation
 //
 
-SEA3D.Animation = function( name, data, sea3d ) {
+SEA3D.Animation = function ( name, data, sea3d ) {
 
 	SEA3D.AnimationBase.call( this, name, data, sea3d );
 
@@ -1792,7 +1792,7 @@ SEA3D.Animation.prototype.type = "anm";
 //	Skeleton Animation
 //
 
-SEA3D.SkeletonAnimation = function( name, data, sea3d ) {
+SEA3D.SkeletonAnimation = function ( name, data, sea3d ) {
 
 	SEA3D.AnimationBase.call( this, name, data, sea3d );
 
@@ -1812,7 +1812,7 @@ SEA3D.SkeletonAnimation.prototype.type = "skla";
 //	Morph
 //
 
-SEA3D.Morph = function( name, data, sea3d ) {
+SEA3D.Morph = function ( name, data, sea3d ) {
 
 	SEA3D.GeometryBase.call( this, name, data, sea3d );
 
@@ -1831,7 +1831,7 @@ SEA3D.Morph = function( name, data, sea3d ) {
 		if ( useVertex ) verts = data.readFloatArray( this.length );
 		if ( useNormal ) norms = data.readFloatArray( this.length );
 
-		this.node[ i ] = { vertex: verts, normal: norms, name: nodeName }
+		this.node[ i ] = { vertex: verts, normal: norms, name: nodeName };
 
 	}
 
@@ -1846,7 +1846,7 @@ SEA3D.Morph.prototype.type = "mph";
 //	Vertex Animation
 //
 
-SEA3D.VertexAnimation = function( name, data, sea3d ) {
+SEA3D.VertexAnimation = function ( name, data, sea3d ) {
 
 	SEA3D.AnimationBase.call( this, name, data, sea3d );
 
@@ -1872,7 +1872,7 @@ SEA3D.VertexAnimation = function( name, data, sea3d ) {
 		if ( useVertex ) verts = data.readFloatArray( this.length );
 		if ( useNormal ) norms = data.readFloatArray( this.length );
 
-		this.frame[ i ] = { vertex: verts, normal: norms }
+		this.frame[ i ] = { vertex: verts, normal: norms };
 
 	}
 
@@ -1887,7 +1887,7 @@ SEA3D.VertexAnimation.prototype.type = "vtxa";
 //	Camera
 //
 
-SEA3D.Camera = function( name, data, sea3d ) {
+SEA3D.Camera = function ( name, data, sea3d ) {
 
 	SEA3D.Object3D.call( this, name, data, sea3d );
 
@@ -1917,7 +1917,7 @@ SEA3D.Camera.prototype.type = "cam";
 //	Orthographic Camera
 //
 
-SEA3D.OrthographicCamera = function( name, data, sea3d ) {
+SEA3D.OrthographicCamera = function ( name, data, sea3d ) {
 
 	SEA3D.Object3D.call( this, name, data, sea3d );
 
@@ -1938,7 +1938,7 @@ SEA3D.OrthographicCamera.prototype.type = "camo";
 //	Joint Object
 //
 
-SEA3D.JointObject = function( name, data, sea3d ) {
+SEA3D.JointObject = function ( name, data, sea3d ) {
 
 	SEA3D.Object3D.call( this, name, data, sea3d );
 
@@ -1958,7 +1958,7 @@ SEA3D.JointObject.prototype.type = "jnt";
 //	Light
 //
 
-SEA3D.Light = function( name, data, sea3d ) {
+SEA3D.Light = function ( name, data, sea3d ) {
 
 	SEA3D.Object3D.call( this, name, data, sea3d );
 
@@ -1969,7 +1969,7 @@ SEA3D.Light = function( name, data, sea3d ) {
 
 		var shadowHeader = data.readUByte();
 
-		this.shadow = {}
+		this.shadow = {};
 
 		this.shadow.opacity = shadowHeader & 1 ? data.readFloat() : 1;
 		this.shadow.color = shadowHeader & 2 ? data.readUInt24() : 0x000000;
@@ -1995,7 +1995,7 @@ SEA3D.Light.prototype.constructor = SEA3D.Light;
 //	Point Light
 //
 
-SEA3D.PointLight = function( name, data, sea3d ) {
+SEA3D.PointLight = function ( name, data, sea3d ) {
 
 	SEA3D.Light.call( this, name, data, sea3d );
 
@@ -2004,7 +2004,7 @@ SEA3D.PointLight = function( name, data, sea3d ) {
 		this.attenuation = {
 			start: data.readFloat(),
 			end: data.readFloat()
-		}
+		};
 
 	}
 
@@ -2023,16 +2023,16 @@ SEA3D.PointLight.prototype.type = "plht";
 //	Hemisphere Light
 //
 
-SEA3D.HemisphereLight = function( name, data, sea3d ) {
+SEA3D.HemisphereLight = function ( name, data, sea3d ) {
 
 	SEA3D.Light.call( this, name, data, sea3d );
 
 	if ( this.attrib & 128 ) {
 
 		this.attenuation = {
-				start: data.readFloat(),
-				end: data.readFloat()
-			}
+			start: data.readFloat(),
+			end: data.readFloat()
+		};
 
 	}
 
@@ -2051,7 +2051,7 @@ SEA3D.HemisphereLight.prototype.type = "hlht";
 //	Ambient Light
 //
 
-SEA3D.AmbientLight = function( name, data, sea3d ) {
+SEA3D.AmbientLight = function ( name, data, sea3d ) {
 
 	SEA3D.Light.call( this, name, data, sea3d );
 
@@ -2068,7 +2068,7 @@ SEA3D.AmbientLight.prototype.type = "alht";
 //	Directional Light
 //
 
-SEA3D.DirectionalLight = function( name, data, sea3d ) {
+SEA3D.DirectionalLight = function ( name, data, sea3d ) {
 
 	SEA3D.Light.call( this, name, data, sea3d );
 
@@ -2087,7 +2087,7 @@ SEA3D.DirectionalLight.prototype.type = "dlht";
 //	Material
 //
 
-SEA3D.Material = function( name, data, sea3d ) {
+SEA3D.Material = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -2134,6 +2134,7 @@ SEA3D.Material = function( name, data, sea3d ) {
 		var tech, methodAttrib;
 
 		switch ( kind ) {
+
 			case SEA3D.Material.PHONG:
 				tech = {
 					ambientColor: data.readUInt24(),
@@ -2261,11 +2262,10 @@ SEA3D.Material = function( name, data, sea3d ) {
 					tech.offsetX1 = data.readFloat();
 					tech.offsetY1 = data.readFloat();
 
-				}
-				else {
+				}				else {
 
 					tech.offsetX0 = tech.offsetY0 =
-					tech.offsetX1 = tech.offsetY1 = 0
+					tech.offsetX1 = tech.offsetY1 = 0;
 
 				}
 
@@ -2281,8 +2281,8 @@ SEA3D.Material = function( name, data, sea3d ) {
 
 			case SEA3D.Material.AMBIENT_MAP:
 				tech = {
-						texture: sea3d.getObject( data.readUInt() )
-					}
+					texture: sea3d.getObject( data.readUInt() )
+				};
 				break;
 
 			case SEA3D.Material.ALPHA_MAP:
@@ -2318,9 +2318,9 @@ SEA3D.Material = function( name, data, sea3d ) {
 
 			case SEA3D.Material.WRAP_LIGHTING:
 				tech = {
-						color: data.readUInt24(),
-						strength: data.readFloat()
-					};
+					color: data.readUInt24(),
+					strength: data.readFloat()
+				};
 				break;
 
 			case SEA3D.Material.COLOR_REPLACE:
@@ -2349,25 +2349,26 @@ SEA3D.Material = function( name, data, sea3d ) {
 				methodAttrib = data.readUByte();
 
 				tech = {
-					strength:data.readFloat()
+					strength: data.readFloat()
 				};
 
 				if ( methodAttrib & 1 ) tech.mask = sea3d.getObject( data.readUInt() );
 
 				break;
-				
+
 			case SEA3D.Material.CLEAR_COAT:
 				tech = {
-					strength:data.readFloat(),
-					roughness:data.readFloat()
+					strength: data.readFloat(),
+					roughness: data.readFloat()
 				};
 				break;
-				
+
 			default:
 				console.warn( "SEA3D: MaterialTechnique not found:", kind.toString( 16 ) );
 
 				data.position = pos += size;
 				continue;
+
 		}
 
 		tech.kind = kind;
@@ -2417,7 +2418,7 @@ SEA3D.Material.prototype.type = "mat";
 //	Composite
 //
 
-SEA3D.Composite = function( name, data, sea3d ) {
+SEA3D.Composite = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -2435,7 +2436,7 @@ SEA3D.Composite = function( name, data, sea3d ) {
 
 };
 
-SEA3D.Composite.prototype.getLayerByName = function( name ) {
+SEA3D.Composite.prototype.getLayerByName = function ( name ) {
 
 	for ( var i = 0; i < this.layer.length; i ++ ) {
 
@@ -2449,7 +2450,7 @@ SEA3D.Composite.prototype.getLayerByName = function( name ) {
 
 };
 
-SEA3D.Composite.prototype.Layer = function( data, sea3d ) {
+SEA3D.Composite.prototype.Layer = function ( data, sea3d ) {
 
 	var attrib = data.readUShort();
 
@@ -2474,7 +2475,7 @@ SEA3D.Composite.prototype.Layer = function( data, sea3d ) {
 
 };
 
-SEA3D.Composite.LayerBitmap = function( data, sea3d ) {
+SEA3D.Composite.LayerBitmap = function ( data, sea3d ) {
 
 	this.map = sea3d.getObject( data.readUInt() );
 
@@ -2498,7 +2499,7 @@ SEA3D.Composite.prototype.type = "ctex";
 //	Planar Render
 //
 
-SEA3D.PlanarRender = function( name, data, sea3d ) {
+SEA3D.PlanarRender = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -2517,7 +2518,7 @@ SEA3D.PlanarRender.prototype.type = "rttp";
 //	Cube Render
 //
 
-SEA3D.CubeRender = function( name, data, sea3d ) {
+SEA3D.CubeRender = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -2536,7 +2537,7 @@ SEA3D.CubeRender.prototype.type = "rttc";
 //	Cube Maps
 //
 
-SEA3D.CubeMap = function( name, data, sea3d ) {
+SEA3D.CubeMap = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -2566,7 +2567,7 @@ SEA3D.CubeMap.prototype.type = "cmap";
 //	JPEG
 //
 
-SEA3D.JPEG = function( name, data, sea3d ) {
+SEA3D.JPEG = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -2582,7 +2583,7 @@ SEA3D.JPEG.prototype.type = "jpg";
 //	JPEG_XR
 //
 
-SEA3D.JPEG_XR = function( name, data, sea3d ) {
+SEA3D.JPEG_XR = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -2598,7 +2599,7 @@ SEA3D.JPEG_XR.prototype.type = "wdp";
 //	PNG
 //
 
-SEA3D.PNG = function( name, data, sea3d ) {
+SEA3D.PNG = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -2614,7 +2615,7 @@ SEA3D.PNG.prototype.type = "png";
 //	GIF
 //
 
-SEA3D.GIF = function( name, data, sea3d ) {
+SEA3D.GIF = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -2630,7 +2631,7 @@ SEA3D.GIF.prototype.type = "gif";
 //	OGG
 //
 
-SEA3D.OGG = function( name, data, sea3d ) {
+SEA3D.OGG = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -2644,7 +2645,7 @@ SEA3D.OGG.prototype.type = "ogg";
 //	MP3
 //
 
-SEA3D.MP3 = function( name, data, sea3d ) {
+SEA3D.MP3 = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -2658,7 +2659,7 @@ SEA3D.MP3.prototype.type = "mp3";
 //	FILE FORMAT
 //
 
-SEA3D.File = function( config ) {
+SEA3D.File = function ( config ) {
 
 	this.config = {
 		streaming: true,
@@ -2741,29 +2742,29 @@ SEA3D.File = function( config ) {
 
 SEA3D.File.Extensions = [];
 SEA3D.File.CompressionLibs = {};
-SEA3D.File.DecompressionMethod = {}
+SEA3D.File.DecompressionMethod = {};
 
-SEA3D.File.setExtension = function( callback ) {
+SEA3D.File.setExtension = function ( callback ) {
 
 	SEA3D.File.Extensions.push( callback );
 
 };
 
-SEA3D.File.setDecompressionEngine = function( id, name, method ) {
+SEA3D.File.setDecompressionEngine = function ( id, name, method ) {
 
 	SEA3D.File.CompressionLibs[ id ] = name;
 	SEA3D.File.DecompressionMethod[ id ] = method;
 
 };
 
-SEA3D.File.prototype.addClass = function( clazz, unique ) {
+SEA3D.File.prototype.addClass = function ( clazz, unique ) {
 
 	this.typeClass[ clazz.prototype.type ] = clazz;
 	this.typeUnique[ clazz.prototype.type ] = unique === true;
 
 };
 
-SEA3D.File.prototype.readHead = function() {
+SEA3D.File.prototype.readHead = function () {
 
 	if ( this.stream.bytesAvailable < 16 )
 		return false;
@@ -2813,19 +2814,19 @@ SEA3D.File.prototype.readHead = function() {
 
 };
 
-SEA3D.File.prototype.getObject = function( index ) {
+SEA3D.File.prototype.getObject = function ( index ) {
 
 	return this.objects[ index ];
 
 };
 
-SEA3D.File.prototype.getObjectByName = function( name ) {
+SEA3D.File.prototype.getObjectByName = function ( name ) {
 
 	return this.objects[ name ];
 
 };
 
-SEA3D.File.prototype.readSEAObject = function() {
+SEA3D.File.prototype.readSEAObject = function () {
 
 	if ( this.stream.bytesAvailable < 4 )
 		return null;
@@ -2883,8 +2884,7 @@ SEA3D.File.prototype.readSEAObject = function() {
 
 		}
 
-	}
-	else {
+	}	else {
 
 		obj = new SEA3D.Object( name, data, type, this );
 
@@ -2905,13 +2905,13 @@ SEA3D.File.prototype.readSEAObject = function() {
 
 };
 
-SEA3D.File.prototype.isDone = function() {
+SEA3D.File.prototype.isDone = function () {
 
 	return this.position == this.length;
 
 };
 
-SEA3D.File.prototype.readBody = function() {
+SEA3D.File.prototype.readBody = function () {
 
 	this.timer.update();
 
@@ -2928,8 +2928,7 @@ SEA3D.File.prototype.readBody = function() {
 			if ( sea ) this.dispatchCompleteObject( sea );
 			else return false;
 
-		}
-		else return false;
+		}		else return false;
 
 	}
 
@@ -2939,7 +2938,7 @@ SEA3D.File.prototype.readBody = function() {
 
 };
 
-SEA3D.File.prototype.initParse = function() {
+SEA3D.File.prototype.initParse = function () {
 
 	this.timer = new SEA3D.Timer();
 	this.position = 0;
@@ -2947,7 +2946,7 @@ SEA3D.File.prototype.initParse = function() {
 
 };
 
-SEA3D.File.prototype.parse = function() {
+SEA3D.File.prototype.parse = function () {
 
 	this.initParse();
 
@@ -2956,7 +2955,7 @@ SEA3D.File.prototype.parse = function() {
 
 };
 
-SEA3D.File.prototype.parseObject = function() {
+SEA3D.File.prototype.parseObject = function () {
 
 	this.timer.update();
 
@@ -3012,7 +3011,7 @@ SEA3D.File.prototype.parseObject = function() {
 
 };
 
-SEA3D.File.prototype.readComplete = function() {
+SEA3D.File.prototype.readComplete = function () {
 
 	this.stream.position = this.dataPosition;
 
@@ -3025,7 +3024,7 @@ SEA3D.File.prototype.readComplete = function() {
 
 };
 
-SEA3D.File.prototype.readState = function() {
+SEA3D.File.prototype.readState = function () {
 
 	while ( this.state() ) continue;
 
@@ -3043,7 +3042,7 @@ SEA3D.File.prototype.readState = function() {
 
 };
 
-SEA3D.File.prototype.read = function( buffer ) {
+SEA3D.File.prototype.read = function ( buffer ) {
 
 	if ( ! buffer ) throw new Error( "No data found." );
 
@@ -3056,7 +3055,7 @@ SEA3D.File.prototype.read = function( buffer ) {
 
 };
 
-SEA3D.File.prototype.dispatchCompleteObject = function( obj ) {
+SEA3D.File.prototype.dispatchCompleteObject = function ( obj ) {
 
 	if ( ! this.onCompleteObject ) return;
 
@@ -3067,7 +3066,7 @@ SEA3D.File.prototype.dispatchCompleteObject = function( obj ) {
 
 };
 
-SEA3D.File.prototype.dispatchProgress = function() {
+SEA3D.File.prototype.dispatchProgress = function () {
 
 	if ( ! this.onProgress ) return;
 
@@ -3079,7 +3078,7 @@ SEA3D.File.prototype.dispatchProgress = function() {
 
 };
 
-SEA3D.File.prototype.dispatchDownloadProgress = function( position, length ) {
+SEA3D.File.prototype.dispatchDownloadProgress = function ( position, length ) {
 
 	if ( ! this.onDownloadProgress ) return;
 
@@ -3091,28 +3090,28 @@ SEA3D.File.prototype.dispatchDownloadProgress = function( position, length ) {
 
 };
 
-SEA3D.File.prototype.dispatchComplete = function() {
+SEA3D.File.prototype.dispatchComplete = function () {
 
 	var elapsedTime = this.timer.elapsedTime;
 	var message = elapsedTime + "ms, " + this.objects.length + " objects";
 
 	if ( this.onComplete ) this.onComplete( {
-			file: this,
-			timeTotal: elapsedTime,
-			message: message
-		} );
+		file: this,
+		timeTotal: elapsedTime,
+		message: message
+	} );
 	else console.log( "SEA3D:", message );
 
 };
 
-SEA3D.File.prototype.dispatchError = function( id, message ) {
+SEA3D.File.prototype.dispatchError = function ( id, message ) {
 
 	if ( this.onError ) this.onError( { file: this, id: id, message: message } );
 	else console.error( "SEA3D: #" + id, message );
 
 };
 
-SEA3D.File.prototype.load = function( url ) {
+SEA3D.File.prototype.load = function ( url ) {
 
 	var file = this,
 		xhr = new XMLHttpRequest();
@@ -3120,7 +3119,7 @@ SEA3D.File.prototype.load = function( url ) {
 	xhr.open( "GET", url, true );
 	xhr.responseType = 'arraybuffer';
 
-	xhr.onprogress = function( e ) {
+	xhr.onprogress = function ( e ) {
 
 		if ( e.lengthComputable ) {
 
@@ -3128,9 +3127,9 @@ SEA3D.File.prototype.load = function( url ) {
 
 		}
 
-	}
+	};
 
-	xhr.onreadystatechange = function() {
+	xhr.onreadystatechange = function () {
 
 		if ( xhr.readyState === 2 ) {
 			//xhr.getResponseHeader("Content-Length");
@@ -3151,7 +3150,7 @@ SEA3D.File.prototype.load = function( url ) {
 
 		}
 
-	}
+	};
 
 	xhr.send();
 

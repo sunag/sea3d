@@ -5,7 +5,7 @@
 
 'use strict';
 
-THREE.SEA3D.prototype.toAmmoVec3 = function( v ) {
+THREE.SEA3D.prototype.toAmmoVec3 = function ( v ) {
 
 	return new Ammo.btVector3( v.x, v.y, v.z );
 
@@ -15,7 +15,7 @@ THREE.SEA3D.prototype.toAmmoVec3 = function( v ) {
 //	Sphere
 //
 
-THREE.SEA3D.prototype.readSphere = function( sea ) {
+THREE.SEA3D.prototype.readSphere = function ( sea ) {
 
 	var shape = new Ammo.btSphereShape( sea.radius );
 
@@ -28,7 +28,7 @@ THREE.SEA3D.prototype.readSphere = function( sea ) {
 //	Box
 //
 
-THREE.SEA3D.prototype.readBox = function( sea ) {
+THREE.SEA3D.prototype.readBox = function ( sea ) {
 
 	var shape = new Ammo.btBoxShape( new Ammo.btVector3( sea.width * .5, sea.height * .5, sea.depth * .5 ) );
 
@@ -41,7 +41,7 @@ THREE.SEA3D.prototype.readBox = function( sea ) {
 //	Cone
 //
 
-THREE.SEA3D.prototype.readCone = function( sea ) {
+THREE.SEA3D.prototype.readCone = function ( sea ) {
 
 	var shape = new Ammo.btConeShape( sea.radius, sea.height );
 
@@ -54,7 +54,7 @@ THREE.SEA3D.prototype.readCone = function( sea ) {
 //	Cylinder
 //
 
-THREE.SEA3D.prototype.readCylinder = function( sea ) {
+THREE.SEA3D.prototype.readCylinder = function ( sea ) {
 
 	var shape = new Ammo.btCylinderShape( new Ammo.btVector3( sea.height, sea.radius, sea.radius ) );
 
@@ -67,7 +67,7 @@ THREE.SEA3D.prototype.readCylinder = function( sea ) {
 //	Capsule
 //
 
-THREE.SEA3D.prototype.readCapsule = function( sea ) {
+THREE.SEA3D.prototype.readCapsule = function ( sea ) {
 
 	var shape = new Ammo.btCapsuleShape( sea.radius, sea.height );
 
@@ -80,7 +80,7 @@ THREE.SEA3D.prototype.readCapsule = function( sea ) {
 //	Convex Geometry
 //
 
-THREE.SEA3D.prototype.readConvexGeometry = function( sea ) {
+THREE.SEA3D.prototype.readConvexGeometry = function ( sea ) {
 
 	if ( this.config.convexHull ) {
 
@@ -103,7 +103,7 @@ THREE.SEA3D.prototype.readConvexGeometry = function( sea ) {
 //	Triangle Geometry
 //
 
-THREE.SEA3D.prototype.readTriangleGeometry = function( sea ) {
+THREE.SEA3D.prototype.readTriangleGeometry = function ( sea ) {
 
 	var triMesh = THREE.AMMO.createTriangleMesh( sea.geometry.tag, sea.subGeometryIndex );
 
@@ -118,7 +118,7 @@ THREE.SEA3D.prototype.readTriangleGeometry = function( sea ) {
 //	Compound
 //
 
-THREE.SEA3D.prototype.readCompound = function( sea ) {
+THREE.SEA3D.prototype.readCompound = function ( sea ) {
 
 	var shape = new Ammo.btCompoundShape();
 
@@ -143,7 +143,7 @@ THREE.SEA3D.prototype.readCompound = function( sea ) {
 //	Rigid Body Base
 //
 
-THREE.SEA3D.prototype.readRigidBodyBase = function( sea ) {
+THREE.SEA3D.prototype.readRigidBodyBase = function ( sea ) {
 
 	var shape = sea.shape.tag,
 		transform;
@@ -184,7 +184,7 @@ THREE.SEA3D.prototype.readRigidBodyBase = function( sea ) {
 //	Rigid Body
 //
 
-THREE.SEA3D.prototype.readRigidBody = function( sea ) {
+THREE.SEA3D.prototype.readRigidBody = function ( sea ) {
 
 	var rb = this.readRigidBodyBase( sea );
 
@@ -196,7 +196,7 @@ THREE.SEA3D.prototype.readRigidBody = function( sea ) {
 //	Car Controller
 //
 
-THREE.SEA3D.prototype.readCarController = function( sea ) {
+THREE.SEA3D.prototype.readCarController = function ( sea ) {
 
 	var body = this.readRigidBodyBase( sea );
 
@@ -271,7 +271,7 @@ THREE.SEA3D.prototype.readCarController = function( sea ) {
 //	P2P Constraint
 //
 
-THREE.SEA3D.prototype.readP2PConstraint = function( sea ) {
+THREE.SEA3D.prototype.readP2PConstraint = function ( sea ) {
 
 	var ctrt;
 
@@ -284,8 +284,7 @@ THREE.SEA3D.prototype.readP2PConstraint = function( sea ) {
 			this.toAmmoVec3( sea.pointB )
 		);
 
-	}
-	else {
+	}	else {
 
 		ctrt = new Ammo.btPoint2PointConstraint(
 			sea.targetA.tag,
@@ -305,7 +304,7 @@ THREE.SEA3D.prototype.readP2PConstraint = function( sea ) {
 //	Hinge Constraint
 //
 
-THREE.SEA3D.prototype.readHingeConstraint = function( sea ) {
+THREE.SEA3D.prototype.readHingeConstraint = function ( sea ) {
 
 	var ctrt;
 
@@ -355,7 +354,7 @@ THREE.SEA3D.prototype.readHingeConstraint = function( sea ) {
 //	Cone Twist Constraint
 //
 
-THREE.SEA3D.prototype.readConeTwistConstraint = function( sea ) {
+THREE.SEA3D.prototype.readConeTwistConstraint = function ( sea ) {
 
 	var ctrt;
 
@@ -390,7 +389,7 @@ THREE.SEA3D.prototype.readConeTwistConstraint = function( sea ) {
 //	Domain
 //
 
-THREE.SEA3D.Domain.prototype.enabledPhysics = function( enabled ) {
+THREE.SEA3D.Domain.prototype.enabledPhysics = function ( enabled ) {
 
 	var i = this.rigidBodies ? this.rigidBodies.length : 0;
 
@@ -402,7 +401,7 @@ THREE.SEA3D.Domain.prototype.enabledPhysics = function( enabled ) {
 
 };
 
-THREE.SEA3D.Domain.prototype.applyContainerTransform = function() {
+THREE.SEA3D.Domain.prototype.applyContainerTransform = function () {
 
 	this.container.updateMatrix();
 
@@ -416,7 +415,7 @@ THREE.SEA3D.Domain.prototype.applyContainerTransform = function() {
 
 };
 
-THREE.SEA3D.Domain.prototype.applyTransform = function( matrix ) {
+THREE.SEA3D.Domain.prototype.applyTransform = function ( matrix ) {
 
 	var mtx = THREE.SEA3D.MTXBUF, vec = THREE.SEA3D.VECBUF;
 
@@ -469,19 +468,19 @@ THREE.SEA3D.Domain.prototype.applyTransform = function( matrix ) {
 //	Extension
 //
 
-THREE.SEA3D.Domain.prototype.getShape = THREE.SEA3D.prototype.getShape = function( name ) {
+THREE.SEA3D.Domain.prototype.getShape = THREE.SEA3D.prototype.getShape = function ( name ) {
 
 	return this.objects[ "shpe/" + name ];
 
 };
 
-THREE.SEA3D.Domain.prototype.getRigidBody = THREE.SEA3D.prototype.getRigidBody = function( name ) {
+THREE.SEA3D.Domain.prototype.getRigidBody = THREE.SEA3D.prototype.getRigidBody = function ( name ) {
 
 	return this.objects[ "rb/" + name ];
 
 };
 
-THREE.SEA3D.Domain.prototype.getConstraint = THREE.SEA3D.prototype.getConstraint = function( name ) {
+THREE.SEA3D.Domain.prototype.getConstraint = THREE.SEA3D.prototype.getConstraint = function ( name ) {
 
 	return this.objects[ "ctnt/" + name ];
 
@@ -489,7 +488,7 @@ THREE.SEA3D.Domain.prototype.getConstraint = THREE.SEA3D.prototype.getConstraint
 
 THREE.SEA3D.EXTENSIONS_LOADER.push( {
 
-	parse : function() {
+	parse: function () {
 
 		delete this.shapes;
 		delete this.rigidBodies;
@@ -498,7 +497,7 @@ THREE.SEA3D.EXTENSIONS_LOADER.push( {
 
 	},
 
-	setTypeRead : function() {
+	setTypeRead: function () {
 
 		// CONFIG
 
@@ -537,7 +536,7 @@ THREE.SEA3D.EXTENSIONS_LOADER.push( {
 
 THREE.SEA3D.EXTENSIONS_DOMAIN.push( {
 
-	dispose : function() {
+	dispose: function () {
 
 		var i;
 

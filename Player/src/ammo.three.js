@@ -11,23 +11,23 @@
 'use strict';
 
 THREE.AMMO = {
-	world:null,
-	rigidBodies : [],
-	rigidBodiesTarget : [],
-	rigidBodiesOffset : [],
-	rigidBodiesEnabled : [],
-	constraints : [],
-	vehicles : [],
-	vehiclesWheels : [],
+	world: null,
+	rigidBodies: [],
+	rigidBodiesTarget: [],
+	rigidBodiesOffset: [],
+	rigidBodiesEnabled: [],
+	constraints: [],
+	vehicles: [],
+	vehiclesWheels: [],
 
-	ACTIVE : 1,
-	ISLAND_SLEEPING : 2,
-	WANTS_DEACTIVATION : 3,
-	DISABLE_DEACTIVATION : 4,
-	DISABLE_SIMULATION : 5,
-	VERSION : 0.8,
+	ACTIVE: 1,
+	ISLAND_SLEEPING: 2,
+	WANTS_DEACTIVATION: 3,
+	DISABLE_DEACTIVATION: 4,
+	DISABLE_SIMULATION: 5,
+	VERSION: 0.8,
 
-	init : function( gravity, worldScale, broadphase ) {
+	init: function ( gravity, worldScale, broadphase ) {
 
 		gravity = gravity !== undefined ? gravity : - 90.8;
 
@@ -66,7 +66,7 @@ THREE.AMMO = {
 
 	},
 
-	setGravity : function( gravity ) {
+	setGravity: function ( gravity ) {
 
 		this.gravity = gravity;
 
@@ -75,13 +75,13 @@ THREE.AMMO = {
 		return this;
 
 	},
-	getGravity : function() {
+	getGravity: function () {
 
 		return this.gravity;
 
 	},
 
-	setEnabledRigidBody : function( rb, enabled ) {
+	setEnabledRigidBody: function ( rb, enabled ) {
 
 		if ( this.getEnabledRigidBody( rb ) == enabled ) return;
 
@@ -91,12 +91,12 @@ THREE.AMMO = {
 		return this;
 
 	},
-	getEnabledRigidBody : function( rb ) {
+	getEnabledRigidBody: function ( rb ) {
 
 		return this.rigidBodiesEnabled[ this.rigidBodies.indexOf( rb ) ] === true;
 
 	},
-	addRigidBody : function( rb, target, offset, enabled ) {
+	addRigidBody: function ( rb, target, offset, enabled ) {
 
 		enabled = enabled !== undefined ? enabled : true;
 
@@ -110,7 +110,7 @@ THREE.AMMO = {
 		return this;
 
 	},
-	removeRigidBody : function( rb, destroy ) {
+	removeRigidBody: function ( rb, destroy ) {
 
 		var index = this.rigidBodies.indexOf( rb );
 
@@ -126,13 +126,13 @@ THREE.AMMO = {
 		return this;
 
 	},
-	containsRigidBody : function( rb ) {
+	containsRigidBody: function ( rb ) {
 
 		return this.rigidBodies.indexOf( rb ) > - 1;
 
 	},
 
-	addConstraint : function( ctrt, disableCollisionsBetweenBodies ) {
+	addConstraint: function ( ctrt, disableCollisionsBetweenBodies ) {
 
 		disableCollisionsBetweenBodies = disableCollisionsBetweenBodies == undefined ? true : disableCollisionsBetweenBodies;
 
@@ -142,7 +142,7 @@ THREE.AMMO = {
 		return this;
 
 	},
-	removeConstraint : function( ctrt, destroy ) {
+	removeConstraint: function ( ctrt, destroy ) {
 
 		this.constraints.splice( this.constraints.indexOf( ctrt ), 1 );
 		this.world.removeConstraint( ctrt );
@@ -152,13 +152,13 @@ THREE.AMMO = {
 		return this;
 
 	},
-	containsConstraint : function( ctrt ) {
+	containsConstraint: function ( ctrt ) {
 
 		return this.constraints.indexOf( rb ) > - 1;
 
 	},
 
-	addVehicle : function( vehicle, wheels ) {
+	addVehicle: function ( vehicle, wheels ) {
 
 		this.vehicles.push( vehicle );
 		this.vehiclesWheels.push( wheels != undefined ? wheels : [] );
@@ -168,7 +168,7 @@ THREE.AMMO = {
 		return this;
 
 	},
-	removeVehicle : function( vehicle, destroy ) {
+	removeVehicle: function ( vehicle, destroy ) {
 
 		var index = this.vehicles.indexOf( vehicle );
 
@@ -182,13 +182,13 @@ THREE.AMMO = {
 		return this;
 
 	},
-	containsVehicle : function( vehicle ) {
+	containsVehicle: function ( vehicle ) {
 
 		return this.vehicles.indexOf( vehicle ) > - 1;
 
 	},
 
-	createTriangleMesh : function( geometry, index, removeDuplicateVertices ) {
+	createTriangleMesh: function ( geometry, index, removeDuplicateVertices ) {
 
 		index = index == undefined ? - 1 : index;
 		removeDuplicateVertices = removeDuplicateVertices == undefined ? false : removeDuplicateVertices;
@@ -225,7 +225,7 @@ THREE.AMMO = {
 		return mTriMesh;
 
 	},
-	createConvexHull : function( geometry, index ) {
+	createConvexHull: function ( geometry, index ) {
 
 		index = index == undefined ? - 1 : index;
 
@@ -258,17 +258,17 @@ THREE.AMMO = {
 
 	},
 
-	getTargetByRigidBody : function( rb ) {
+	getTargetByRigidBody: function ( rb ) {
 
 		return this.rigidBodiesTarget[ this.rigidBodies.indexOf( rb ) ];
 
 	},
-	getRigidBodyByTarget : function( target ) {
+	getRigidBodyByTarget: function ( target ) {
 
 		return this.rigidBodies[ this.rigidBodiesTarget.indexOf( target ) ];
 
 	},
-	getTransformFromMatrix : function( mtx ) {
+	getTransformFromMatrix: function ( mtx ) {
 
 		var transform = new Ammo.btTransform();
 
@@ -289,13 +289,13 @@ THREE.AMMO = {
 		return transform;
 
 	},
-	getMatrixFromTransform : function( transform ) {
+	getMatrixFromTransform: function ( transform ) {
 
 		var position = new THREE.Vector3();
 		var quaternion = new THREE.Quaternion();
 		var scale = new THREE.Vector3( 1, 1, 1 );
 
-		return function( transform, matrix ) {
+		return function ( transform, matrix ) {
 
 			matrix = matrix || new THREE.Matrix4();
 
@@ -313,7 +313,7 @@ THREE.AMMO = {
 
 	}(),
 
-	updateTargetTransform : function() {
+	updateTargetTransform: function () {
 
 		var matrix = new THREE.Matrix4();
 
@@ -321,7 +321,7 @@ THREE.AMMO = {
 		var quaternion = new THREE.Quaternion();
 		var scale = new THREE.Vector3( 1, 1, 1 );
 
-		return function( obj3d, transform, offset ) {
+		return function ( obj3d, transform, offset ) {
 
 			var pos = transform.getOrigin(),
 				quat = transform.getRotation();
@@ -333,7 +333,7 @@ THREE.AMMO = {
 
 			} else {
 
-				position.set( pos.x(), pos.y(), pos.z() )
+				position.set( pos.x(), pos.y(), pos.z() );
 				quaternion.set( quat.x(), quat.y(), quat.z(), quat.w() );
 
 				matrix.compose( position, quaternion, scale );
@@ -350,7 +350,7 @@ THREE.AMMO = {
 		};
 
 	}(),
-	update : function( delta, iteration, fixedDelta ) {
+	update: function ( delta, iteration, fixedDelta ) {
 
 		this.world.stepSimulation( delta, iteration || 0, fixedDelta || ( 60 / 1000 ) );
 
@@ -396,4 +396,4 @@ THREE.AMMO = {
 		return this;
 
 	}
-}
+};

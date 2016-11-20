@@ -5,28 +5,28 @@
 
 'use strict';
 
-THREE.SEA3D = function( config ) {
+THREE.SEA3D = function ( config ) {
 
 	this.config = {
-		id : "",
-		scripts : true,
-		runScripts : true,
-		autoPlay : false,
-		dummys : true,
-		multiplier : 1,
-		bounding : true,
-		audioRolloffFactor : 10,
-		lights : true,
-		useEnvironment : true,
-		useVertexTexture : true,
-		forceStatic : false,
-		streaming : true,
-		async : true,
-		paths : {},
-		timeLimit : 10,
-		premultipliedAlpha : false,
-		stageWidth : window ? window.innerWidth : 1024,
-		stageHeight : window ? window.innerHeight : 1024
+		id: "",
+		scripts: true,
+		runScripts: true,
+		autoPlay: false,
+		dummys: true,
+		multiplier: 1,
+		bounding: true,
+		audioRolloffFactor: 10,
+		lights: true,
+		useEnvironment: true,
+		useVertexTexture: true,
+		forceStatic: false,
+		streaming: true,
+		async: true,
+		paths: {},
+		timeLimit: 10,
+		premultipliedAlpha: false,
+		stageWidth: window ? window.innerWidth : 1024,
+		stageHeight: window ? window.innerHeight : 1024
 	};
 
 	if ( config ) this.loadConfig( config );
@@ -49,21 +49,21 @@ THREE.SEA3D.prototype = {
 
 	constructor: THREE.SEA3D,
 
-	set container ( val ) {
+	set container( val ) {
 
 		this.config.container = val;
 
 	},
 
-	get container () {
+	get container() {
 
 		return this.config.container;
 
 	},
-	
-	setShadowMap : function( light ) {
 
-		light.shadow.mapSize.width = 2048
+	setShadowMap: function ( light ) {
+
+		light.shadow.mapSize.width = 2048;
 		light.shadow.mapSize.height = 1024;
 
 		light.castShadow = true;
@@ -89,7 +89,7 @@ Object.assign( THREE.SEA3D.prototype, THREE.EventDispatcher.prototype );
 //	Domain
 //
 
-THREE.SEA3D.Domain = function( id, objects, container ) {
+THREE.SEA3D.Domain = function ( id, objects, container ) {
 
 	this.id = id;
 	this.objects = objects;
@@ -106,55 +106,55 @@ THREE.SEA3D.Domain = function( id, objects, container ) {
 
 Object.assign( THREE.SEA3D.Domain.prototype, {
 
-	add : function( src ) {
+	add: function ( src ) {
 
 		this.sources.push( src );
 
 	},
 
-	remove : function( src ) {
+	remove: function ( src ) {
 
 		this.sources.splice( this.sources.indexOf( src ), 1 );
 
 	},
 
-	contains : function( src ) {
+	contains: function ( src ) {
 
 		return this.sources.indexOf( src ) != - 1;
 
 	},
 
-	addEventListener : function( type, listener ) {
+	addEventListener: function ( type, listener ) {
 
 		this.events.addEventListener( type, listener );
 
 	},
 
-	hasEventListener : function( type, listener ) {
+	hasEventListener: function ( type, listener ) {
 
 		return this.events.hasEventListener( type, listener );
 
 	},
 
-	removeEventListener : function( type, listener ) {
+	removeEventListener: function ( type, listener ) {
 
 		this.events.removeEventListener( type, listener );
 
 	},
 
-	print : function() {
+	print: function () {
 
 		console.log.apply( console, arguments );
 
 	},
 
-	watch : function() {
+	watch: function () {
 
 		console.log.apply( console, 'watch:', arguments );
 
 	},
 
-	runScripts : function() {
+	runScripts: function () {
 
 		for ( var i = 0; i < this.scriptTargets.length; i ++ ) {
 
@@ -164,7 +164,7 @@ Object.assign( THREE.SEA3D.Domain.prototype, {
 
 	},
 
-	runJSMList : function( target ) {
+	runJSMList: function ( target ) {
 
 		var scripts = target.scripts;
 
@@ -178,16 +178,16 @@ Object.assign( THREE.SEA3D.Domain.prototype, {
 
 	},
 
-	runJSM : function( target, script ) {
+	runJSM: function ( target, script ) {
 
 		if ( target.local == undefined ) target.local = {};
 
 		var include = {
-			print : this.print,
-			watch : this.watch,
-			sea3d : this,
-			scene : this.container,
-			source : new THREE.SEA3D.ScriptDomain( this, target instanceof THREE.SEA3D.Domain )
+			print: this.print,
+			watch: this.watch,
+			sea3d: this,
+			scene: this.container,
+			source: new THREE.SEA3D.ScriptDomain( this, target instanceof THREE.SEA3D.Domain )
 		};
 
 		Object.freeze( include.source );
@@ -196,7 +196,7 @@ Object.assign( THREE.SEA3D.Domain.prototype, {
 
 		try {
 
-			this.methods[ script.method ] (
+			this.methods[ script.method ](
 				include,
 				this.getReference,
 				this.global,
@@ -214,13 +214,13 @@ Object.assign( THREE.SEA3D.Domain.prototype, {
 
 	},
 
-	getReference : function( ns ) {
+	getReference: function ( ns ) {
 
 		return eval( ns );
 
 	},
 
-	disposeList : function( list ) {
+	disposeList: function ( list ) {
 
 		if ( ! list || ! list.length ) return;
 
@@ -236,7 +236,7 @@ Object.assign( THREE.SEA3D.Domain.prototype, {
 
 	},
 
-	dispatchEvent : function( event ) {
+	dispatchEvent: function ( event ) {
 
 		event.domain = this;
 
@@ -253,7 +253,7 @@ Object.assign( THREE.SEA3D.Domain.prototype, {
 
 	},
 
-	dispose : function() {
+	dispose: function () {
 
 		this.disposeList( this.sources );
 
@@ -276,7 +276,7 @@ Object.assign( THREE.SEA3D.Domain.prototype, {
 		this.disposeList( this.materials );
 		this.disposeList( this.dummys );
 
-		this.dispatchEvent( { type : "dispose" } );
+		this.dispatchEvent( { type: "dispose" } );
 
 	}
 } );
@@ -285,7 +285,7 @@ Object.assign( THREE.SEA3D.Domain.prototype, {
 //	Domain Manager
 //
 
-THREE.SEA3D.DomainManager = function( autoDisposeRootDomain ) {
+THREE.SEA3D.DomainManager = function ( autoDisposeRootDomain ) {
 
 	this.domains = [];
 	this.autoDisposeRootDomain = autoDisposeRootDomain == undefined ? true : false;
@@ -294,7 +294,7 @@ THREE.SEA3D.DomainManager = function( autoDisposeRootDomain ) {
 
 Object.assign( THREE.SEA3D.DomainManager.prototype, {
 
-	onDisposeDomain : function( e ) {
+	onDisposeDomain: function ( e ) {
 
 		this.remove( e.domain );
 
@@ -306,7 +306,7 @@ Object.assign( THREE.SEA3D.DomainManager.prototype, {
 
 	},
 
-	add : function( domain ) {
+	add: function ( domain ) {
 
 		this._onDisposeDomain = this._onDisposeDomain || this.onDisposeDomain.bind( this );
 
@@ -320,7 +320,7 @@ Object.assign( THREE.SEA3D.DomainManager.prototype, {
 
 	},
 
-	remove : function( domain ) {
+	remove: function ( domain ) {
 
 		domain.removeEvent( "dispose", this._onDisposeDomain );
 
@@ -328,13 +328,13 @@ Object.assign( THREE.SEA3D.DomainManager.prototype, {
 
 	},
 
-	contains : function( domain ) {
+	contains: function ( domain ) {
 
 		return this.domains.indexOf( domain ) != - 1;
 
 	},
 
-	disposeList : function( list ) {
+	disposeList: function ( list ) {
 
 		if ( ! list || ! list.length ) return;
 
@@ -350,7 +350,7 @@ Object.assign( THREE.SEA3D.DomainManager.prototype, {
 
 	},
 
-	dispose : function() {
+	dispose: function () {
 
 		this.disposeList( this.domains );
 		this.disposeList( this.textures );
@@ -365,60 +365,60 @@ Object.assign( THREE.SEA3D.DomainManager.prototype, {
 //	Script ( closure for private functions )
 //
 
-THREE.SEA3D.ScriptDomain = function( domain, root ) {
+THREE.SEA3D.ScriptDomain = function ( domain, root ) {
 
 	domain = domain || new THREE.SEA3D.Domain();
 	domain.add( this );
 
 	var events = new THREE.EventDispatcher();
 
-	this.getId = function() {
+	this.getId = function () {
 
 		return domain.id;
 
-	}
+	};
 
-	this.isRoot = function() {
+	this.isRoot = function () {
 
 		return root;
 
-	}
+	};
 
-	this.addEventListener = function( type, listener ) {
+	this.addEventListener = function ( type, listener ) {
 
 		events.addEventListener( type, listener );
 
-	}
+	};
 
-	this.hasEventListener = function( type, listener ) {
+	this.hasEventListener = function ( type, listener ) {
 
 		return events.hasEventListener( type, listener );
 
-	}
+	};
 
-	this.removeEventListener = function( type, listener ) {
+	this.removeEventListener = function ( type, listener ) {
 
 		events.removeEventListener( type, listener );
 
-	}
+	};
 
-	this.dispatchEvent = function( event ) {
+	this.dispatchEvent = function ( event ) {
 
 		event.script = this;
 
 		events.dispatchEvent( event );
 
-	}
+	};
 
-	this.dispose = function() {
+	this.dispose = function () {
 
 		domain.remove( this );
 
 		if ( root ) domain.dispose();
 
-		this.dispatchEvent( { type : "dispose" } );
+		this.dispatchEvent( { type: "dispose" } );
 
-	}
+	};
 
 };
 
@@ -426,39 +426,39 @@ THREE.SEA3D.ScriptDomain = function( domain, root ) {
 //	Script Manager ( closure for private functions )
 //
 
-THREE.SEA3D.ScriptManager = function() {
+THREE.SEA3D.ScriptManager = function () {
 
 	this.scripts = [];
 
-	var onDisposeScript = ( function( e ) {
+	var onDisposeScript = ( function ( e ) {
 
 		this.remove( e.script );
 
 	} ).bind( this );
 
-	this.add = function( src ) {
+	this.add = function ( src ) {
 
 		src.addEventListener( "dispose", onDisposeScript );
 
 		this.scripts.push( src );
 
-	}
+	};
 
-	this.remove = function( src ) {
+	this.remove = function ( src ) {
 
 		src.removeEventListener( "dispose", onDisposeScript );
 
 		this.scripts.splice( this.scripts.indexOf( src ), 1 );
 
-	}
+	};
 
-	this.contains = function( src ) {
+	this.contains = function ( src ) {
 
 		return this.scripts.indexOf( src ) > - 1;
 
-	}
+	};
 
-	this.dispatchEvent = function( event ) {
+	this.dispatchEvent = function ( event ) {
 
 		var scripts = this.scripts.concat(),
 			i = scripts.length;
@@ -469,7 +469,7 @@ THREE.SEA3D.ScriptManager = function() {
 
 		}
 
-	}
+	};
 
 };
 
@@ -479,11 +479,11 @@ THREE.SEA3D.ScriptManager = function() {
 
 THREE.SEA3D.ScriptHandler = new THREE.SEA3D.ScriptManager();
 
-THREE.SEA3D.ScriptHandler.dispatchUpdate = function( delta ) {
+THREE.SEA3D.ScriptHandler.dispatchUpdate = function ( delta ) {
 
 	this.dispatchEvent( {
-		type : "update",
-		delta : delta
+		type: "update",
+		delta: delta
 	} );
 
 };
@@ -492,7 +492,7 @@ THREE.SEA3D.ScriptHandler.dispatchUpdate = function( delta ) {
 //	Animator
 //
 
-THREE.SEA3D.Animator = function( clips, mixer ) {
+THREE.SEA3D.Animator = function ( clips, mixer ) {
 
 	this.clips = clips;
 
@@ -502,7 +502,7 @@ THREE.SEA3D.Animator = function( clips, mixer ) {
 
 Object.assign( THREE.SEA3D.Animator.prototype, {
 
-	update : function( dt ) {
+	update: function ( dt ) {
 
 		this.mixer.update( dt || 0 );
 
@@ -518,7 +518,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	},
 
-	updateAnimations : function( mixer ) {
+	updateAnimations: function ( mixer ) {
 
 		if ( this.playing ) this.stop();
 
@@ -539,7 +539,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 		this.animationsData = {};
 
 		// if no geometry animation
-		if( this.geometry && this.geometry.animations === undefined ) return;
+		if ( this.geometry && this.geometry.animations === undefined ) return;
 
 		this.clips = this instanceof THREE.SEA3D.Animator ? this.clips : this.geometry.animations;
 
@@ -553,7 +553,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	},
 
-	addAnimation: function( clip ) {
+	addAnimation: function ( clip ) {
 
 		var name = clip.name;
 
@@ -567,7 +567,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	},
 
-	removeAnimation: function( clip ) {
+	removeAnimation: function ( clip ) {
 
 		var name = clip.name;
 
@@ -581,7 +581,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	},
 
-	pause : function() {
+	pause: function () {
 
 		if ( this.playing && this.currentAnimation ) {
 
@@ -595,7 +595,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	},
 
-	resume : function() {
+	resume: function () {
 
 		if ( ! this.playing && this.currentAnimation ) {
 
@@ -609,7 +609,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	},
 
-	setTimeScale : function( val ) {
+	setTimeScale: function ( val ) {
 
 		this.timeScale = val;
 
@@ -619,13 +619,13 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	},
 
-	getTimeScale : function() {
+	getTimeScale: function () {
 
 		return this.timeScale;
 
 	},
 
-	updateTimeScale : function() {
+	updateTimeScale: function () {
 
 		this.currentAnimationAction.setEffectiveTimeScale( this.timeScale * ( this.currentAnimation ? this.currentAnimation.timeScale : 1 ) );
 
@@ -633,7 +633,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	},
 
-	play : function( name, crossfade, offset, weight ) {
+	play: function ( name, crossfade, offset, weight ) {
 
 		var animation = this.animations[ name ] || this.animationsIndex[ name ];
 
@@ -687,16 +687,16 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	},
 
-	stop : function() {
+	stop: function () {
 
-		if( this.playing ) THREE.SEA3D.AnimationHandler.removeAnimator( this );
+		if ( this.playing ) THREE.SEA3D.AnimationHandler.removeAnimator( this );
 
 		if ( this.currentAnimation ) {
 
 			this.currentAnimationAction.stop();
 
 			//THREE.SEA3D.AnimationHandler.removeAnimator( this );
-			
+
 			this.previousAnimation = this.currentAnimation;
 			this.previousAnimationData = this.currentAnimationData;
 			this.previousAnimationAction = this.currentAnimationAction;
@@ -713,9 +713,9 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	},
 
-	playw: function( name, weight ) {
+	playw: function ( name, weight ) {
 
-		if( !this.playing && !this.paused ) THREE.SEA3D.AnimationHandler.addAnimator( this );
+		if ( ! this.playing && ! this.paused ) THREE.SEA3D.AnimationHandler.addAnimator( this );
 
 		var anim = this.animations[ name ] || this.animationsIndex[ name ];
 
@@ -732,7 +732,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	},
 
-	crossFade: function( fromAnimName, toAnimName, duration, wrap ) {
+	crossFade: function ( fromAnimName, toAnimName, duration, wrap ) {
 
 		this.mixer.stopAllAction();
 
@@ -745,7 +745,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	},
 
-	setClipTimeScale: function( name, value ) {
+	setClipTimeScale: function ( name, value ) {
 
 		var anim = this.animations[ name ];
 		var clip = this.mixer.clipAction( anim );
@@ -756,7 +756,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	},
 
-	stopAll: function() {
+	stopAll: function () {
 
 		this.stop().mixer.stopAllAction();
 
@@ -766,7 +766,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	},
 
-	unPauseAll: function() {
+	unPauseAll: function () {
 
 		this.mixer.timeScale = 1;
 
@@ -777,7 +777,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	},
 
-	pauseAll: function() {
+	pauseAll: function () {
 
 		this.mixer.timeScale = 0;
 
@@ -788,7 +788,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	},
 
-	setRelative : function( val ) {
+	setRelative: function ( val ) {
 
 		if ( this.relative == val ) return;
 
@@ -800,7 +800,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	},
 
-	getRelative : function() {
+	getRelative: function () {
 
 		return this.relative;
 
@@ -812,7 +812,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 //	Object3D Animator
 //
 
-THREE.SEA3D.Object3DAnimator = function( clips, object3d ) {
+THREE.SEA3D.Object3DAnimator = function ( clips, object3d ) {
 
 	this.object3d = object3d;
 
@@ -822,9 +822,9 @@ THREE.SEA3D.Object3DAnimator = function( clips, object3d ) {
 
 THREE.SEA3D.Object3DAnimator.prototype = Object.assign( Object.create( THREE.SEA3D.Animator.prototype ), {
 
-	constructor : THREE.SEA3D.Object3DAnimator,
+	constructor: THREE.SEA3D.Object3DAnimator,
 
-	stop : function() {
+	stop: function () {
 
 		if ( this.currentAnimation ) {
 
@@ -844,7 +844,7 @@ THREE.SEA3D.Object3DAnimator.prototype = Object.assign( Object.create( THREE.SEA
 
 	},
 
-	setRelative : function( val ) {
+	setRelative: function ( val ) {
 
 		THREE.SEA3D.Animator.prototype.setRelative.call( this, val );
 
@@ -860,7 +860,7 @@ THREE.SEA3D.Object3DAnimator.prototype = Object.assign( Object.create( THREE.SEA
 //	Camera Animator
 //
 
-THREE.SEA3D.CameraAnimator = function( clips, object3d ) {
+THREE.SEA3D.CameraAnimator = function ( clips, object3d ) {
 
 	THREE.SEA3D.Object3DAnimator.call( this, clips, object3d );
 
@@ -868,7 +868,7 @@ THREE.SEA3D.CameraAnimator = function( clips, object3d ) {
 
 THREE.SEA3D.CameraAnimator.prototype = Object.assign( Object.create( THREE.SEA3D.Object3DAnimator.prototype ), {
 
-	constructor : THREE.SEA3D.CameraAnimator
+	constructor: THREE.SEA3D.CameraAnimator
 
 } );
 
@@ -876,7 +876,7 @@ THREE.SEA3D.CameraAnimator.prototype = Object.assign( Object.create( THREE.SEA3D
 //	Sound Animator
 //
 
-THREE.SEA3D.SoundAnimator = function( clips, object3d ) {
+THREE.SEA3D.SoundAnimator = function ( clips, object3d ) {
 
 	THREE.SEA3D.Object3DAnimator.call( this, clips, object3d );
 
@@ -884,7 +884,7 @@ THREE.SEA3D.SoundAnimator = function( clips, object3d ) {
 
 THREE.SEA3D.SoundAnimator.prototype = Object.assign( Object.create( THREE.SEA3D.Object3DAnimator.prototype ), {
 
-	constructor : THREE.SEA3D.SoundAnimator
+	constructor: THREE.SEA3D.SoundAnimator
 
 } );
 
@@ -893,7 +893,7 @@ THREE.SEA3D.SoundAnimator.prototype = Object.assign( Object.create( THREE.SEA3D.
 //	Light Animator
 //
 
-THREE.SEA3D.LightAnimator = function( clips, object3d ) {
+THREE.SEA3D.LightAnimator = function ( clips, object3d ) {
 
 	THREE.SEA3D.Object3DAnimator.call( this, clips, object3d );
 
@@ -901,7 +901,7 @@ THREE.SEA3D.LightAnimator = function( clips, object3d ) {
 
 THREE.SEA3D.LightAnimator.prototype = Object.assign( Object.create( THREE.SEA3D.Object3DAnimator.prototype ), {
 
-	constructor : THREE.SEA3D.LightAnimator
+	constructor: THREE.SEA3D.LightAnimator
 
 } );
 
@@ -909,7 +909,7 @@ THREE.SEA3D.LightAnimator.prototype = Object.assign( Object.create( THREE.SEA3D.
 //	Container
 //
 
-THREE.SEA3D.Object3D = function( ) {
+THREE.SEA3D.Object3D = function ( ) {
 
 	THREE.Object3D.call( this );
 
@@ -917,12 +917,12 @@ THREE.SEA3D.Object3D = function( ) {
 
 THREE.SEA3D.Object3D.prototype = Object.assign( Object.create( THREE.Object3D.prototype ), {
 
-	constructor : THREE.SEA3D.Object3D,
+	constructor: THREE.SEA3D.Object3D,
 
 	// Relative Animation Extension ( Only used if relative animation is enabled )
 	// TODO: It can be done with shader
 
-	updateAnimateMatrix : function( force ) {
+	updateAnimateMatrix: function ( force ) {
 
 		if ( this.matrixAutoUpdate === true ) this.updateMatrix();
 
@@ -958,7 +958,7 @@ THREE.SEA3D.Object3D.prototype = Object.assign( Object.create( THREE.Object3D.pr
 
 	},
 
-	setAnimator : function( val ) {
+	setAnimator: function ( val ) {
 
 		if ( this.getAnimator() == val )
 			return;
@@ -981,7 +981,7 @@ THREE.SEA3D.Object3D.prototype = Object.assign( Object.create( THREE.Object3D.pr
 
 	},
 
-	getAnimator : function() {
+	getAnimator: function () {
 
 		return this.animate != undefined;
 
@@ -993,7 +993,7 @@ THREE.SEA3D.Object3D.prototype = Object.assign( Object.create( THREE.Object3D.pr
 //	Dummy
 //
 
-THREE.SEA3D.Dummy = function( width, height, depth ) {
+THREE.SEA3D.Dummy = function ( width, height, depth ) {
 
 	this.width = width != undefined ? width : 100;
 	this.height = height != undefined ? height : 100;
@@ -1012,9 +1012,9 @@ THREE.SEA3D.Dummy.MATERIAL = new THREE.MeshBasicMaterial( { wireframe: true, col
 
 THREE.SEA3D.Dummy.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), THREE.SEA3D.Object3D.prototype, {
 
-	constructor : THREE.SEA3D.Dummy,
+	constructor: THREE.SEA3D.Dummy,
 
-	copy : function( source ) {
+	copy: function ( source ) {
 
 		THREE.Mesh.prototype.copy.call( this, source );
 
@@ -1027,7 +1027,7 @@ THREE.SEA3D.Dummy.prototype = Object.assign( Object.create( THREE.Mesh.prototype
 
 	},
 
-	dispose : function() {
+	dispose: function () {
 
 		this.geometry.dispose();
 
@@ -1039,7 +1039,7 @@ THREE.SEA3D.Dummy.prototype = Object.assign( Object.create( THREE.Mesh.prototype
 //	Mesh
 //
 
-THREE.SEA3D.Mesh = function( geometry, material ) {
+THREE.SEA3D.Mesh = function ( geometry, material ) {
 
 	THREE.Mesh.call( this, geometry, material );
 
@@ -1047,23 +1047,23 @@ THREE.SEA3D.Mesh = function( geometry, material ) {
 
 THREE.SEA3D.Mesh.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), THREE.SEA3D.Mesh.prototype, THREE.SEA3D.Object3D.prototype, {
 
-	constructor : THREE.SEA3D.Mesh,
+	constructor: THREE.SEA3D.Mesh,
 
-	setWeight : function( name, val ) {
+	setWeight: function ( name, val ) {
 
-        if( this.animations && ( this.animations[ name ] || this.animationsIndex[ name ] ) ) this.mixer.clipAction( name ).setEffectiveWeight( val );
-		if( this.morphTargetInfluences && this.morphTargetDictionary[ name ] !== undefined ) this.morphTargetInfluences[ this.morphTargetDictionary[ name ] ] = val;
-
-	},
-
-	getWeight : function( name ) {
-
-        if( this.animations && ( this.animations[ name ] || this.animationsIndex[ name ] ) ) return this.mixer.clipAction( name ).getEffectiveWeight();
-        if( this.morphTargetDictionary && this.morphTargetDictionary[ name ] !== undefined ) return this.morphTargetInfluences[ this.morphTargetDictionary[ name ] ];
+		if ( this.animations && ( this.animations[ name ] || this.animationsIndex[ name ] ) ) this.mixer.clipAction( name ).setEffectiveWeight( val );
+		if ( this.morphTargetInfluences && this.morphTargetDictionary[ name ] !== undefined ) this.morphTargetInfluences[ this.morphTargetDictionary[ name ] ] = val;
 
 	},
 
-	copy : function( source ) {
+	getWeight: function ( name ) {
+
+		if ( this.animations && ( this.animations[ name ] || this.animationsIndex[ name ] ) ) return this.mixer.clipAction( name ).getEffectiveWeight();
+		if ( this.morphTargetDictionary && this.morphTargetDictionary[ name ] !== undefined ) return this.morphTargetInfluences[ this.morphTargetDictionary[ name ] ];
+
+	},
+
+	copy: function ( source ) {
 
 		THREE.Mesh.prototype.copy.call( this, source );
 
@@ -1082,7 +1082,7 @@ THREE.SEA3D.Mesh.prototype = Object.assign( Object.create( THREE.Mesh.prototype 
 //	Skinning
 //
 
-THREE.SEA3D.SkinnedMesh = function( geometry, material, useVertexTexture ) {
+THREE.SEA3D.SkinnedMesh = function ( geometry, material, useVertexTexture ) {
 
 	THREE.SkinnedMesh.call( this, geometry, material, useVertexTexture );
 
@@ -1092,9 +1092,9 @@ THREE.SEA3D.SkinnedMesh = function( geometry, material, useVertexTexture ) {
 
 THREE.SEA3D.SkinnedMesh.prototype = Object.assign( Object.create( THREE.SkinnedMesh.prototype ), THREE.SEA3D.Mesh.prototype, THREE.SEA3D.Animator.prototype, {
 
-	constructor : THREE.SEA3D.SkinnedMesh,
+	constructor: THREE.SEA3D.SkinnedMesh,
 
-	boneByName : function( name ) {
+	boneByName: function ( name ) {
 
 		var bones = this.skeleton.bones;
 
@@ -1107,7 +1107,7 @@ THREE.SEA3D.SkinnedMesh.prototype = Object.assign( Object.create( THREE.SkinnedM
 
 	},
 
-	copy : function( source ) {
+	copy: function ( source ) {
 
 		THREE.SkinnedMesh.prototype.copy.call( this, source );
 
@@ -1126,7 +1126,7 @@ THREE.SEA3D.SkinnedMesh.prototype = Object.assign( Object.create( THREE.SkinnedM
 //	Vertex Animation
 //
 
-THREE.SEA3D.VertexAnimationMesh = function( geometry, material ) {
+THREE.SEA3D.VertexAnimationMesh = function ( geometry, material ) {
 
 	THREE.Mesh.call( this, geometry, material );
 
@@ -1138,9 +1138,9 @@ THREE.SEA3D.VertexAnimationMesh = function( geometry, material ) {
 
 THREE.SEA3D.VertexAnimationMesh.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), THREE.SEA3D.Mesh.prototype, THREE.SEA3D.Animator.prototype, {
 
-	constructor : THREE.SEA3D.VertexAnimationMesh,
+	constructor: THREE.SEA3D.VertexAnimationMesh,
 
-	copy : function( source ) {
+	copy: function ( source ) {
 
 		THREE.Mesh.prototype.copy.call( this, source );
 
@@ -1159,7 +1159,7 @@ THREE.SEA3D.VertexAnimationMesh.prototype = Object.assign( Object.create( THREE.
 //	Camera
 //
 
-THREE.SEA3D.Camera = function( fov, aspect, near, far ) {
+THREE.SEA3D.Camera = function ( fov, aspect, near, far ) {
 
 	THREE.PerspectiveCamera.call( this, fov, aspect, near, far );
 
@@ -1167,9 +1167,9 @@ THREE.SEA3D.Camera = function( fov, aspect, near, far ) {
 
 THREE.SEA3D.Camera.prototype = Object.assign( Object.create( THREE.PerspectiveCamera.prototype ), THREE.SEA3D.Object3D.prototype, {
 
-	constructor : THREE.SEA3D.Camera,
+	constructor: THREE.SEA3D.Camera,
 
-	copy : function( source ) {
+	copy: function ( source ) {
 
 		THREE.PerspectiveCamera.prototype.copy.call( this, source );
 
@@ -1188,7 +1188,7 @@ THREE.SEA3D.Camera.prototype = Object.assign( Object.create( THREE.PerspectiveCa
 //	Orthographic Camera
 //
 
-THREE.SEA3D.OrthographicCamera = function( left, right, top, bottom, near, far ) {
+THREE.SEA3D.OrthographicCamera = function ( left, right, top, bottom, near, far ) {
 
 	THREE.OrthographicCamera.call( this, left, right, top, bottom, near, far );
 
@@ -1196,9 +1196,9 @@ THREE.SEA3D.OrthographicCamera = function( left, right, top, bottom, near, far )
 
 THREE.SEA3D.OrthographicCamera.prototype = Object.assign( Object.create( THREE.OrthographicCamera.prototype ), THREE.SEA3D.Object3D.prototype, {
 
-	constructor : THREE.SEA3D.OrthographicCamera,
+	constructor: THREE.SEA3D.OrthographicCamera,
 
-	copy : function( source ) {
+	copy: function ( source ) {
 
 		THREE.OrthographicCamera.prototype.copy.call( this, source );
 
@@ -1217,7 +1217,7 @@ THREE.SEA3D.OrthographicCamera.prototype = Object.assign( Object.create( THREE.O
 //	PointLight
 //
 
-THREE.SEA3D.PointLight = function( hex, intensity, distance, decay ) {
+THREE.SEA3D.PointLight = function ( hex, intensity, distance, decay ) {
 
 	THREE.PointLight.call( this, hex, intensity, distance, decay );
 
@@ -1225,9 +1225,9 @@ THREE.SEA3D.PointLight = function( hex, intensity, distance, decay ) {
 
 THREE.SEA3D.PointLight.prototype = Object.assign( Object.create( THREE.PointLight.prototype ), THREE.SEA3D.Object3D.prototype, {
 
-	constructor : THREE.SEA3D.PointLight,
+	constructor: THREE.SEA3D.PointLight,
 
-	copy : function( source ) {
+	copy: function ( source ) {
 
 		THREE.PointLight.prototype.copy.call( this, source );
 
@@ -1246,7 +1246,7 @@ THREE.SEA3D.PointLight.prototype = Object.assign( Object.create( THREE.PointLigh
 //	Point Sound
 //
 
-THREE.SEA3D.PointSound = function( listener ) {
+THREE.SEA3D.PointSound = function ( listener ) {
 
 	THREE.PositionalAudio.call( this, listener );
 
@@ -1254,9 +1254,9 @@ THREE.SEA3D.PointSound = function( listener ) {
 
 THREE.SEA3D.PointSound.prototype = Object.assign( Object.create( THREE.PositionalAudio.prototype ), THREE.SEA3D.Object3D.prototype, {
 
-	constructor : THREE.SEA3D.PointSound,
+	constructor: THREE.SEA3D.PointSound,
 
-	copy : function( source ) {
+	copy: function ( source ) {
 
 		THREE.PositionalAudio.prototype.copy.call( this, source );
 
@@ -1277,9 +1277,9 @@ THREE.SEA3D.PointSound.prototype = Object.assign( Object.create( THREE.Positiona
 
 THREE.SEA3D.AnimationHandler = {
 
-	animators : [],
+	animators: [],
 
-	update : function( dt ) {
+	update: function ( dt ) {
 
 		var i = 0;
 
@@ -1291,7 +1291,7 @@ THREE.SEA3D.AnimationHandler = {
 
 	},
 
-	addAnimator : function( animator ) {
+	addAnimator: function ( animator ) {
 
 		var index = this.animators.indexOf( animator );
 
@@ -1299,7 +1299,7 @@ THREE.SEA3D.AnimationHandler = {
 
 	},
 
-	removeAnimator : function( animator ) {
+	removeAnimator: function ( animator ) {
 
 		var index = this.animators.indexOf( animator );
 
@@ -1313,85 +1313,85 @@ THREE.SEA3D.AnimationHandler = {
 //	Output
 //
 
-THREE.SEA3D.Domain.prototype.getMesh = THREE.SEA3D.prototype.getMesh = function( name ) {
+THREE.SEA3D.Domain.prototype.getMesh = THREE.SEA3D.prototype.getMesh = function ( name ) {
 
 	return this.objects[ "m3d/" + name ];
 
 };
 
-THREE.SEA3D.Domain.prototype.getDummy = THREE.SEA3D.prototype.getDummy = function( name ) {
+THREE.SEA3D.Domain.prototype.getDummy = THREE.SEA3D.prototype.getDummy = function ( name ) {
 
 	return this.objects[ "dmy/" + name ];
 
 };
 
-THREE.SEA3D.Domain.prototype.getLine = THREE.SEA3D.prototype.getLine = function( name ) {
+THREE.SEA3D.Domain.prototype.getLine = THREE.SEA3D.prototype.getLine = function ( name ) {
 
 	return this.objects[ "line/" + name ];
 
 };
 
-THREE.SEA3D.Domain.prototype.getSound3D = THREE.SEA3D.prototype.getSound3D = function( name ) {
+THREE.SEA3D.Domain.prototype.getSound3D = THREE.SEA3D.prototype.getSound3D = function ( name ) {
 
 	return this.objects[ "sn3d/" + name ];
 
 };
 
-THREE.SEA3D.Domain.prototype.getMaterial = THREE.SEA3D.prototype.getMaterial = function( name ) {
+THREE.SEA3D.Domain.prototype.getMaterial = THREE.SEA3D.prototype.getMaterial = function ( name ) {
 
 	return this.objects[ "mat/" + name ];
 
 };
 
-THREE.SEA3D.Domain.prototype.getLight = THREE.SEA3D.prototype.getLight = function( name ) {
+THREE.SEA3D.Domain.prototype.getLight = THREE.SEA3D.prototype.getLight = function ( name ) {
 
 	return this.objects[ "lht/" + name ];
 
 };
 
-THREE.SEA3D.Domain.prototype.getGLSL = THREE.SEA3D.prototype.getGLSL = function( name ) {
+THREE.SEA3D.Domain.prototype.getGLSL = THREE.SEA3D.prototype.getGLSL = function ( name ) {
 
 	return this.objects[ "glsl/" + name ];
 
 };
 
-THREE.SEA3D.Domain.prototype.getCamera = THREE.SEA3D.prototype.getCamera = function( name ) {
+THREE.SEA3D.Domain.prototype.getCamera = THREE.SEA3D.prototype.getCamera = function ( name ) {
 
 	return this.objects[ "cam/" + name ];
 
 };
 
-THREE.SEA3D.Domain.prototype.getTexture = THREE.SEA3D.prototype.getTexture = function( name ) {
+THREE.SEA3D.Domain.prototype.getTexture = THREE.SEA3D.prototype.getTexture = function ( name ) {
 
 	return this.objects[ "tex/" + name ];
 
 };
 
-THREE.SEA3D.Domain.prototype.getCubeMap = THREE.SEA3D.prototype.getCubeMap = function( name ) {
+THREE.SEA3D.Domain.prototype.getCubeMap = THREE.SEA3D.prototype.getCubeMap = function ( name ) {
 
 	return this.objects[ "cmap/" + name ];
 
 };
 
-THREE.SEA3D.Domain.prototype.getJointObject = THREE.SEA3D.prototype.getJointObject = function( name ) {
+THREE.SEA3D.Domain.prototype.getJointObject = THREE.SEA3D.prototype.getJointObject = function ( name ) {
 
 	return this.objects[ "jnt/" + name ];
 
 };
 
-THREE.SEA3D.Domain.prototype.getContainer3D = THREE.SEA3D.prototype.getContainer3D = function( name ) {
+THREE.SEA3D.Domain.prototype.getContainer3D = THREE.SEA3D.prototype.getContainer3D = function ( name ) {
 
 	return this.objects[ "c3d/" + name ];
 
 };
 
-THREE.SEA3D.Domain.prototype.getSprite = THREE.SEA3D.prototype.getSprite = function( name ) {
+THREE.SEA3D.Domain.prototype.getSprite = THREE.SEA3D.prototype.getSprite = function ( name ) {
 
 	return this.objects[ "m2d/" + name ];
 
 };
 
-THREE.SEA3D.Domain.prototype.getProperties = THREE.SEA3D.prototype.getProperties = function( name ) {
+THREE.SEA3D.Domain.prototype.getProperties = THREE.SEA3D.prototype.getProperties = function ( name ) {
 
 	return this.objects[ "prop/" + name ];
 
@@ -1401,19 +1401,19 @@ THREE.SEA3D.Domain.prototype.getProperties = THREE.SEA3D.prototype.getProperties
 //	Utils
 //
 
-THREE.SEA3D.prototype.isPowerOfTwo = function( num ) {
+THREE.SEA3D.prototype.isPowerOfTwo = function ( num ) {
 
 	return num ? ( ( num & - num ) == num ) : false;
 
 };
 
-THREE.SEA3D.prototype.nearestPowerOfTwo = function( num ) {
+THREE.SEA3D.prototype.nearestPowerOfTwo = function ( num ) {
 
 	return Math.pow( 2, Math.round( Math.log( num ) / Math.LN2 ) );
 
 };
 
-THREE.SEA3D.prototype.updateTransform = function( obj3d, sea ) {
+THREE.SEA3D.prototype.updateTransform = function ( obj3d, sea ) {
 
 	var mtx = THREE.SEA3D.MTXBUF, vec = THREE.SEA3D.VECBUF;
 
@@ -1441,13 +1441,13 @@ THREE.SEA3D.prototype.updateTransform = function( obj3d, sea ) {
 
 };
 
-THREE.SEA3D.prototype.toVector3 = function( data ) {
+THREE.SEA3D.prototype.toVector3 = function ( data ) {
 
 	return new THREE.Vector3( data.x, data.y, data.z );
 
 };
 
-THREE.SEA3D.prototype.toFaces = function( faces ) {
+THREE.SEA3D.prototype.toFaces = function ( faces ) {
 
 	// xyz(- / +) to xyz(+ / -) sequence
 	var f = [];
@@ -1463,7 +1463,7 @@ THREE.SEA3D.prototype.toFaces = function( faces ) {
 
 };
 
-THREE.SEA3D.prototype.updateScene = function() {
+THREE.SEA3D.prototype.updateScene = function () {
 
 	if ( this.materials != undefined ) {
 
@@ -1477,7 +1477,7 @@ THREE.SEA3D.prototype.updateScene = function() {
 
 };
 
-THREE.SEA3D.prototype.addSceneObject = function( sea, obj3d ) {
+THREE.SEA3D.prototype.addSceneObject = function ( sea, obj3d ) {
 
 	obj3d = obj3d || sea.tag;
 
@@ -1498,25 +1498,25 @@ THREE.SEA3D.prototype.addSceneObject = function( sea, obj3d ) {
 
 };
 
-THREE.SEA3D.prototype.createObjectURL = function( raw, mime ) {
+THREE.SEA3D.prototype.createObjectURL = function ( raw, mime ) {
 
 	return ( window.URL || window.webkitURL ).createObjectURL( new Blob( [ raw ], { type: mime } ) );
 
 };
 
-THREE.SEA3D.prototype.bufferToTexture = function( raw ) {
+THREE.SEA3D.prototype.bufferToTexture = function ( raw ) {
 
 	return this.createObjectURL( raw, "image" );
 
 };
 
-THREE.SEA3D.prototype.bufferToSound = function( raw ) {
+THREE.SEA3D.prototype.bufferToSound = function ( raw ) {
 
 	return this.createObjectURL( raw, "audio" );
 
 };
 
-THREE.SEA3D.prototype.parsePath = function( url ) {
+THREE.SEA3D.prototype.parsePath = function ( url ) {
 
 	var paths = this.config.paths;
 
@@ -1530,7 +1530,7 @@ THREE.SEA3D.prototype.parsePath = function( url ) {
 
 };
 
-THREE.SEA3D.prototype.applyDefaultAnimation = function( sea, animatorClass ) {
+THREE.SEA3D.prototype.applyDefaultAnimation = function ( sea, animatorClass ) {
 
 	var obj = sea.tag;
 
@@ -1539,6 +1539,7 @@ THREE.SEA3D.prototype.applyDefaultAnimation = function( sea, animatorClass ) {
 		var anm = sea.animations[ i ];
 
 		switch ( anm.tag.type ) {
+
 			case SEA3D.Animation.prototype.type:
 				obj.animator = new animatorClass( anm.tag.tag, obj );
 				obj.animator.setRelative( anm.relative );
@@ -1551,6 +1552,7 @@ THREE.SEA3D.prototype.applyDefaultAnimation = function( sea, animatorClass ) {
 
 				return obj.animator;
 				break;
+
 		}
 
 	}
@@ -1561,7 +1563,7 @@ THREE.SEA3D.prototype.applyDefaultAnimation = function( sea, animatorClass ) {
 //	Animation
 //
 
-THREE.SEA3D.prototype.readAnimation = function( sea ) {
+THREE.SEA3D.prototype.readAnimation = function ( sea ) {
 
 	var clips = [], delta = ( 1000 / sea.frameRate ) / 1000;
 
@@ -1574,7 +1576,7 @@ THREE.SEA3D.prototype.readAnimation = function( sea ) {
 		for ( var j = 0; j < sea.dataList.length; j ++ ) {
 
 			var anm = sea.dataList[ j ],
-				t, k, times, values, 
+				t, k, times, values,
 				data = anm.data,
 				start = seq.start * anm.blockSize,
 				end = start + ( seq.count * anm.blockSize ),
@@ -1582,6 +1584,7 @@ THREE.SEA3D.prototype.readAnimation = function( sea ) {
 				name = null;
 
 			switch ( anm.kind ) {
+
 				case SEA3D.Animation.POSITION:
 					name = '.position';
 					break;
@@ -1605,11 +1608,13 @@ THREE.SEA3D.prototype.readAnimation = function( sea ) {
 				case SEA3D.Animation.FOV:
 					name = '.fov';
 					break;
+
 			}
 
 			if ( ! name ) continue;
 
 			switch ( anm.type ) {
+
 				case SEA3D.Stream.BYTE:
 				case SEA3D.Stream.UBYTE:
 				case SEA3D.Stream.INT:
@@ -1652,7 +1657,7 @@ THREE.SEA3D.prototype.readAnimation = function( sea ) {
 
 				case SEA3D.Stream.VECTOR4D:
 
-				    values = data.subarray( start, end );
+					values = data.subarray( start, end );
 					times = new Float32Array( values.length / anm.blockSize );
 					t = 0;
 
@@ -1687,6 +1692,7 @@ THREE.SEA3D.prototype.readAnimation = function( sea ) {
 					tracks.push( new THREE.VectorKeyframeTrack( name, times, values, intrpl ) );//ColorKeyframeTrack
 
 					break;
+
 			}
 
 		}
@@ -1708,7 +1714,7 @@ THREE.SEA3D.prototype.readAnimation = function( sea ) {
 //	Geometry
 //
 
-THREE.SEA3D.prototype.readGeometryBuffer = function( sea ) {
+THREE.SEA3D.prototype.readGeometryBuffer = function ( sea ) {
 
 	var geo = new THREE.BufferGeometry();
 
@@ -1739,12 +1745,14 @@ THREE.SEA3D.prototype.readGeometryBuffer = function( sea ) {
 
 	if ( sea.joint ) {
 
-		if( THREE.Float32BufferAttribute ){ // three dev
+		if ( THREE.Float32BufferAttribute ) {
+
+			// three dev
 
 			geo.addAttribute( 'skinIndex', new THREE.Float32BufferAttribute( sea.joint, sea.jointPerVertex ) );
-		    geo.addAttribute( 'skinWeight', new THREE.Float32BufferAttribute( sea.weight, sea.jointPerVertex ) );
+			geo.addAttribute( 'skinWeight', new THREE.Float32BufferAttribute( sea.weight, sea.jointPerVertex ) );
 
-		}else{
+		} else {
 
 			geo.addAttribute( 'skinIndex', new THREE.Float32Attribute( sea.joint, sea.jointPerVertex ) );
 			geo.addAttribute( 'skinWeight', new THREE.Float32Attribute( sea.weight, sea.jointPerVertex ) );
@@ -1771,7 +1779,7 @@ THREE.SEA3D.prototype.readGeometryBuffer = function( sea ) {
 //	Dummy
 //
 
-THREE.SEA3D.prototype.readDummy = function( sea ) {
+THREE.SEA3D.prototype.readDummy = function ( sea ) {
 
 	var dummy = new THREE.SEA3D.Dummy( sea.width, sea.height, sea.depth );
 	dummy.name = sea.name;
@@ -1790,22 +1798,24 @@ THREE.SEA3D.prototype.readDummy = function( sea ) {
 //	Line
 //
 
-THREE.SEA3D.prototype.readLine = function( sea ) {
+THREE.SEA3D.prototype.readLine = function ( sea ) {
 
 	var	geo = new THREE.BufferGeometry();
 
 	if ( sea.closed )
 		sea.vertex.push( sea.vertex[ 0 ], sea.vertex[ 1 ], sea.vertex[ 2 ] );
 
-	if( THREE.Float32BufferAttribute ){ // three dev
+	if ( THREE.Float32BufferAttribute ) {
 
-	    geo.addAttribute( 'position', new THREE.Float32BufferAttribute( sea.vertex, 3 ) );
+		// three dev
 
-    } else {
+		geo.addAttribute( 'position', new THREE.Float32BufferAttribute( sea.vertex, 3 ) );
 
-   	    geo.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( sea.vertex ), 3 ) );
+	} else {
 
-    }
+		geo.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( sea.vertex ), 3 ) );
+
+	}
 
 	var line = new THREE.Line( geo, new THREE.LineBasicMaterial( { color: THREE.SEA3D.HELPER_COLOR, linewidth: 3 } ) );
 	line.name = sea.name;
@@ -1824,7 +1834,7 @@ THREE.SEA3D.prototype.readLine = function( sea ) {
 //	Container3D
 //
 
-THREE.SEA3D.prototype.readContainer3D = function( sea ) {
+THREE.SEA3D.prototype.readContainer3D = function ( sea ) {
 
 	var container = new THREE.SEA3D.Object3D();
 
@@ -1842,7 +1852,7 @@ THREE.SEA3D.prototype.readContainer3D = function( sea ) {
 //	Sprite
 //
 
-THREE.SEA3D.prototype.readSprite = function( sea ) {
+THREE.SEA3D.prototype.readSprite = function ( sea ) {
 
 	var mat;
 
@@ -1861,8 +1871,7 @@ THREE.SEA3D.prototype.readSprite = function( sea ) {
 			mat.opacity = sea.material.tag.opacity;
 			mat.fog = sea.material.receiveFog;
 
-		}
-		else mat = sea.material.tag.sprite;
+		}		else mat = sea.material.tag.sprite;
 
 	}
 
@@ -1883,7 +1892,7 @@ THREE.SEA3D.prototype.readSprite = function( sea ) {
 //	Mesh
 //
 
-THREE.SEA3D.prototype.readMesh = function( sea ) {
+THREE.SEA3D.prototype.readMesh = function ( sea ) {
 
 	var i, count, geo = sea.geometry.tag, mesh, mat, skeleton, skeletonAnimation, vertexAnimation, morpher;
 
@@ -1892,6 +1901,7 @@ THREE.SEA3D.prototype.readMesh = function( sea ) {
 		var mod = sea.modifiers[ i ];
 
 		switch ( mod.type ) {
+
 			case SEA3D.Skeleton.prototype.type:
 			case SEA3D.SkeletonLocal.prototype.type:
 				skeleton = mod;
@@ -1905,6 +1915,7 @@ THREE.SEA3D.prototype.readMesh = function( sea ) {
 				geo.morphAttributes = morpher.tag.attribs;
 				geo.morphTargets = morpher.tag.targets;
 				break;
+
 		}
 
 	}
@@ -1914,6 +1925,7 @@ THREE.SEA3D.prototype.readMesh = function( sea ) {
 		var anm = sea.animations[ i ];
 
 		switch ( anm.tag.type ) {
+
 			case SEA3D.SkeletonAnimation.prototype.type:
 				skeletonAnimation = anm.tag;
 
@@ -1927,6 +1939,7 @@ THREE.SEA3D.prototype.readMesh = function( sea ) {
 				geo.morphTargets = vertexAnimation.tag.targets;
 				geo.animations = vertexAnimation.tag.animations;
 				break;
+
 		}
 
 	}
@@ -2013,7 +2026,7 @@ THREE.SEA3D.prototype.readMesh = function( sea ) {
 //	Sound Point
 //
 
-THREE.SEA3D.prototype.readSoundPoint = function( sea ) {
+THREE.SEA3D.prototype.readSoundPoint = function ( sea ) {
 
 	if ( ! this.audioListener ) {
 
@@ -2029,7 +2042,7 @@ THREE.SEA3D.prototype.readSoundPoint = function( sea ) {
 
 	var sound3d = new THREE.SEA3D.PointSound( this.audioListener );
 
-	new THREE.AudioLoader().load( sea.sound.tag, function( buffer ) {
+	new THREE.AudioLoader().load( sea.sound.tag, function ( buffer ) {
 
 		sound3d.setBuffer( buffer );
 
@@ -2057,7 +2070,7 @@ THREE.SEA3D.prototype.readSoundPoint = function( sea ) {
 //	Cube Render
 //
 
-THREE.SEA3D.prototype.readCubeRender = function( sea ) {
+THREE.SEA3D.prototype.readCubeRender = function ( sea ) {
 
 	var cube = new THREE.CubeCamera( 0.1, 5000, THREE.SEA3D.RTT_SIZE );
 	cube.renderTarget.cubeCamera = cube;
@@ -2076,7 +2089,7 @@ THREE.SEA3D.prototype.readCubeRender = function( sea ) {
 //	Images (WDP, JPEG, PNG and GIF)
 //
 
-THREE.SEA3D.prototype.readTexture = function( sea ) {
+THREE.SEA3D.prototype.readTexture = function ( sea ) {
 
 	var image = new Image(),
 		texture = new THREE.Texture();
@@ -2088,7 +2101,7 @@ THREE.SEA3D.prototype.readTexture = function( sea ) {
 
 	if ( this.config.anisotropy !== undefined ) texture.anisotropy = this.config.anisotropy;
 
-	image.onload = function() {
+	image.onload = function () {
 
 		texture.needsUpdate = true;
 
@@ -2105,7 +2118,7 @@ THREE.SEA3D.prototype.readTexture = function( sea ) {
 //	Cube Map
 //
 
-THREE.SEA3D.prototype.readCubeMap = function( sea ) {
+THREE.SEA3D.prototype.readCubeMap = function ( sea ) {
 
 	var faces = this.toFaces( sea.faces ), texture = new THREE.CubeTexture( [] );
 
@@ -2115,7 +2128,7 @@ THREE.SEA3D.prototype.readCubeMap = function( sea ) {
 	texture.flipY = false;
 	texture.format = THREE.RGBFormat;
 
-	var onLoaded = function() {
+	var onLoaded = function () {
 
 		if ( ++ loaded == 6 ) {
 
@@ -2148,7 +2161,7 @@ THREE.SEA3D.prototype.readCubeMap = function( sea ) {
 //	Sound (MP3, OGG)
 //
 
-THREE.SEA3D.prototype.readSound = function( sea ) {
+THREE.SEA3D.prototype.readSound = function ( sea ) {
 
 	var sound = this.bufferToSound( sea.data.buffer );
 
@@ -2161,13 +2174,13 @@ THREE.SEA3D.prototype.readSound = function( sea ) {
 //	Script URL
 //
 
-THREE.SEA3D.prototype.readScriptURL = function( sea ) {
+THREE.SEA3D.prototype.readScriptURL = function ( sea ) {
 
 	this.file.resume = false;
 
 	var loader = new THREE.FileLoader();
 
-	loader.setResponseType( "text" ).load( sea.url, function( src ) {
+	loader.setResponseType( "text" ).load( sea.url, function ( src ) {
 
 		this.file.resume = true;
 
@@ -2182,7 +2195,7 @@ THREE.SEA3D.prototype.readScriptURL = function( sea ) {
 //	Texture URL
 //
 
-THREE.SEA3D.prototype.readTextureURL = function( sea ) {
+THREE.SEA3D.prototype.readTextureURL = function ( sea ) {
 
 	var texture = new THREE.TextureLoader().load( this.parsePath( sea.url ) );
 
@@ -2201,7 +2214,7 @@ THREE.SEA3D.prototype.readTextureURL = function( sea ) {
 //	CubeMap URL
 //
 
-THREE.SEA3D.prototype.readCubeMapURL = function( sea ) {
+THREE.SEA3D.prototype.readCubeMapURL = function ( sea ) {
 
 	var faces = this.toFaces( sea.faces );
 
@@ -2219,7 +2232,7 @@ THREE.SEA3D.prototype.readCubeMapURL = function( sea ) {
 
 		this.file.resume = ! usePMREM;
 
-		texture = new THREE.HDRCubeTextureLoader().load( THREE.UnsignedByteType, faces, function( texture ) {
+		texture = new THREE.HDRCubeTextureLoader().load( THREE.UnsignedByteType, faces, function ( texture ) {
 
 			if ( usePMREM ) {
 
@@ -2260,7 +2273,7 @@ THREE.SEA3D.prototype.readCubeMapURL = function( sea ) {
 //	Runtime
 //
 
-THREE.SEA3D.prototype.getJSMList = function( target, scripts ) {
+THREE.SEA3D.prototype.getJSMList = function ( target, scripts ) {
 
 	var scriptTarget = [];
 
@@ -2283,7 +2296,7 @@ THREE.SEA3D.prototype.getJSMList = function( target, scripts ) {
 
 };
 
-THREE.SEA3D.prototype.readJavaScriptMethod = function( sea ) {
+THREE.SEA3D.prototype.readJavaScriptMethod = function ( sea ) {
 
 	try {
 
@@ -2304,7 +2317,7 @@ THREE.SEA3D.prototype.readJavaScriptMethod = function( sea ) {
 			'hasEventListener = $SRC.hasEventListener.bind( $SRC ),\n' +
 			'removeEventListener = $SRC.removeEventListener.bind( $SRC ),\n' +
 			'dispatchEvent = $SRC.dispatchEvent.bind( $SRC ),\n' +
-			'dispose = $SRC.dispose.bind( $SRC );\n'
+			'dispose = $SRC.dispose.bind( $SRC );\n';
 
 		for ( var name in sea.methods ) {
 
@@ -2312,7 +2325,7 @@ THREE.SEA3D.prototype.readJavaScriptMethod = function( sea ) {
 
 		}
 
-		src += 'return $METHOD; })'
+		src += 'return $METHOD; })';
 
 		this.domain.methods = eval( src )();
 
@@ -2329,7 +2342,7 @@ THREE.SEA3D.prototype.readJavaScriptMethod = function( sea ) {
 //	GLSL
 //
 
-THREE.SEA3D.prototype.readGLSL = function( sea ) {
+THREE.SEA3D.prototype.readGLSL = function ( sea ) {
 
 	this.domain.glsl = this.glsl = this.glsl || [];
 	this.glsl.push( this.objects[ "glsl/" + sea.name ] = sea.tag = sea.src );
@@ -2341,12 +2354,12 @@ THREE.SEA3D.prototype.readGLSL = function( sea ) {
 //
 
 THREE.SEA3D.prototype.materialTechnique =
-( function() {
+( function () {
 
-	var techniques = {}
+	var techniques = {};
 
 	// FINAL
-	techniques.onComplete = function( mat, sea ) {
+	techniques.onComplete = function ( mat, sea ) {
 
 		if ( sea.alpha < 1 || mat.blending > THREE.NormalBlending ) {
 
@@ -2359,7 +2372,7 @@ THREE.SEA3D.prototype.materialTechnique =
 
 	// PHYSICAL
 	techniques[ SEA3D.Material.PHYSICAL ] =
-	function( mat, tech ) {
+	function ( mat, tech ) {
 
 		mat.color.setHex( tech.color );
 		mat.roughness = tech.roughness;
@@ -2369,7 +2382,7 @@ THREE.SEA3D.prototype.materialTechnique =
 
 	// REFLECTIVITY
 	techniques[ SEA3D.Material.REFLECTIVITY ] =
-	function( mat, tech ) {
+	function ( mat, tech ) {
 
 		mat.reflectivity = tech.strength;
 
@@ -2377,16 +2390,16 @@ THREE.SEA3D.prototype.materialTechnique =
 
 	// CLEAR_COAT
 	techniques[ SEA3D.Material.CLEAR_COAT ] =
-	function( mat, tech ) {
+	function ( mat, tech ) {
 
 		mat.clearCoat = tech.strength;
 		mat.clearCoatRoughness = tech.roughness;
 
 	};
-	
+
 	// PHONG
 	techniques[ SEA3D.Material.PHONG ] =
-	function( mat, tech ) {
+	function ( mat, tech ) {
 
 		mat.color.setHex( tech.diffuseColor );
 		mat.specular.setHex( tech.specularColor ).multiplyScalar( tech.specular );
@@ -2396,11 +2409,11 @@ THREE.SEA3D.prototype.materialTechnique =
 
 	// DIFFUSE_MAP
 	techniques[ SEA3D.Material.DIFFUSE_MAP ] =
-	function( mat, tech, sea ) {
+	function ( mat, tech, sea ) {
 
 		mat.map = tech.texture.tag;
 		mat.color.setHex( 0xFFFFFF );
-		
+
 		mat.map.wrapS = mat.map.wrapT = sea.repeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
 
 		if ( tech.texture.transparent ) {
@@ -2413,7 +2426,7 @@ THREE.SEA3D.prototype.materialTechnique =
 
 	// ROUGHNESS_MAP
 	techniques[ SEA3D.Material.ROUGHNESS_MAP ] =
-	function( mat, tech ) {
+	function ( mat, tech ) {
 
 		mat.roughnessMap = tech.texture.tag;
 
@@ -2421,7 +2434,7 @@ THREE.SEA3D.prototype.materialTechnique =
 
 	// METALNESS_MAP
 	techniques[ SEA3D.Material.METALNESS_MAP ] =
-	function( mat, tech ) {
+	function ( mat, tech ) {
 
 		mat.metalnessMap = tech.texture.tag;
 
@@ -2429,7 +2442,7 @@ THREE.SEA3D.prototype.materialTechnique =
 
 	// SPECULAR_MAP
 	techniques[ SEA3D.Material.SPECULAR_MAP ] =
-	function( mat, tech ) {
+	function ( mat, tech ) {
 
 		if ( mat.specular ) {
 
@@ -2442,7 +2455,7 @@ THREE.SEA3D.prototype.materialTechnique =
 
 	// NORMAL_MAP
 	techniques[ SEA3D.Material.NORMAL_MAP ] =
-	function( mat, tech ) {
+	function ( mat, tech ) {
 
 		mat.normalMap = tech.texture.tag;
 
@@ -2451,7 +2464,7 @@ THREE.SEA3D.prototype.materialTechnique =
 	// REFLECTION
 	techniques[ SEA3D.Material.REFLECTION ] =
 	techniques[ SEA3D.Material.FRESNEL_REFLECTION ] =
-	function( mat, tech ) {
+	function ( mat, tech ) {
 
 		mat.envMap = tech.texture.tag;
 		mat.envMap.mapping = THREE.CubeReflectionMapping;
@@ -2463,7 +2476,7 @@ THREE.SEA3D.prototype.materialTechnique =
 
 	// REFLECTION_SPHERICAL
 	techniques[ SEA3D.Material.REFLECTION_SPHERICAL ] =
-	function( mat, tech ) {
+	function ( mat, tech ) {
 
 		mat.envMap = tech.texture.tag;
 		mat.envMap.mapping = THREE.SphericalReflectionMapping;
@@ -2475,7 +2488,7 @@ THREE.SEA3D.prototype.materialTechnique =
 
 	// REFRACTION
 	techniques[ SEA3D.Material.REFRACTION_MAP ] =
-	function( mat, tech ) {
+	function ( mat, tech ) {
 
 		mat.envMap = tech.texture.tag;
 		mat.envMap.mapping = THREE.CubeRefractionMapping;
@@ -2487,7 +2500,7 @@ THREE.SEA3D.prototype.materialTechnique =
 
 	// LIGHT_MAP
 	techniques[ SEA3D.Material.LIGHT_MAP ] =
-	function( mat, tech ) {
+	function ( mat, tech ) {
 
 		if ( tech.blendMode == "multiply" ) mat.aoMap = tech.texture.tag;
 		else mat.lightMap = tech.texture.tag;
@@ -2496,11 +2509,11 @@ THREE.SEA3D.prototype.materialTechnique =
 
 	// ALPHA_MAP
 	techniques[ SEA3D.Material.ALPHA_MAP ] =
-	function( mat, tech, sea ) {
+	function ( mat, tech, sea ) {
 
 		mat.alphaMap = tech.texture.tag;
 		mat.transparent = true;
-		
+
 		mat.alphaMap.wrapS = mat.alphaMap.wrapT = sea.repeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
 
 	};
@@ -2509,13 +2522,13 @@ THREE.SEA3D.prototype.materialTechnique =
 
 } )();
 
-THREE.SEA3D.prototype.createMaterial = function( sea ) {
+THREE.SEA3D.prototype.createMaterial = function ( sea ) {
 
-	if (sea.tecniquesDict[ SEA3D.Material.REFLECTIVITY ] || sea.tecniquesDict[ SEA3D.Material.CLEAR_COAT ]) {
+	if ( sea.tecniquesDict[ SEA3D.Material.REFLECTIVITY ] || sea.tecniquesDict[ SEA3D.Material.CLEAR_COAT ] ) {
 
 		return new THREE.MeshPhysicalMaterial();
 
-	} else if (sea.tecniquesDict[ SEA3D.Material.PHYSICAL ]) {
+	} else if ( sea.tecniquesDict[ SEA3D.Material.PHYSICAL ] ) {
 
 		return new THREE.MeshStandardMaterial();
 
@@ -2525,7 +2538,7 @@ THREE.SEA3D.prototype.createMaterial = function( sea ) {
 
 };
 
-THREE.SEA3D.prototype.setBlending = function( mat, blendMode ) {
+THREE.SEA3D.prototype.setBlending = function ( mat, blendMode ) {
 
 	if ( blendMode === "normal" ) return;
 
@@ -2556,7 +2569,7 @@ THREE.SEA3D.prototype.setBlending = function( mat, blendMode ) {
 
 };
 
-THREE.SEA3D.prototype.readMaterial = function( sea ) {
+THREE.SEA3D.prototype.readMaterial = function ( sea ) {
 
 	var mat = this.createMaterial( sea );
 	mat.name = sea.name;
@@ -2593,7 +2606,7 @@ THREE.SEA3D.prototype.readMaterial = function( sea ) {
 //	Point Light
 //
 
-THREE.SEA3D.prototype.readPointLight = function( sea ) {
+THREE.SEA3D.prototype.readPointLight = function ( sea ) {
 
 	var light = new THREE.SEA3D.PointLight( sea.color, sea.multiplier * this.config.multiplier );
 	light.name = sea.name;
@@ -2623,7 +2636,7 @@ THREE.SEA3D.prototype.readPointLight = function( sea ) {
 //	Hemisphere Light
 //
 
-THREE.SEA3D.prototype.readHemisphereLight = function( sea ) {
+THREE.SEA3D.prototype.readHemisphereLight = function ( sea ) {
 
 	var light = new THREE.HemisphereLight( sea.color, sea.secondColor, sea.multiplier * this.config.multiplier );
 	light.position.set( 0, 500, 0 );
@@ -2644,7 +2657,7 @@ THREE.SEA3D.prototype.readHemisphereLight = function( sea ) {
 //	Ambient Light
 //
 
-THREE.SEA3D.prototype.readAmbientLight = function( sea ) {
+THREE.SEA3D.prototype.readAmbientLight = function ( sea ) {
 
 	var light = new THREE.AmbientLight( sea.color, sea.multiplier * this.config.multiplier );
 	light.name = sea.name;
@@ -2664,7 +2677,7 @@ THREE.SEA3D.prototype.readAmbientLight = function( sea ) {
 //	Directional Light
 //
 
-THREE.SEA3D.prototype.readDirectionalLight = function( sea ) {
+THREE.SEA3D.prototype.readDirectionalLight = function ( sea ) {
 
 	var light = new THREE.DirectionalLight( sea.color, sea.multiplier * this.config.multiplier );
 	light.name = sea.name;
@@ -2692,7 +2705,7 @@ THREE.SEA3D.prototype.readDirectionalLight = function( sea ) {
 //	Camera
 //
 
-THREE.SEA3D.prototype.readCamera = function( sea ) {
+THREE.SEA3D.prototype.readCamera = function ( sea ) {
 
 	var camera = new THREE.SEA3D.Camera( sea.fov );
 	camera.name = sea.name;
@@ -2711,7 +2724,7 @@ THREE.SEA3D.prototype.readCamera = function( sea ) {
 //	Orthographic Camera
 //
 
-THREE.SEA3D.prototype.readOrthographicCamera = function( sea ) {
+THREE.SEA3D.prototype.readOrthographicCamera = function ( sea ) {
 
 	var aspect, width, height;
 
@@ -2748,7 +2761,7 @@ THREE.SEA3D.prototype.readOrthographicCamera = function( sea ) {
 //	Skeleton
 //
 
-THREE.SEA3D.prototype.readSkeletonLocal = function( sea ) {
+THREE.SEA3D.prototype.readSkeletonLocal = function ( sea ) {
 
 	var bones = [];
 
@@ -2773,7 +2786,7 @@ THREE.SEA3D.prototype.readSkeletonLocal = function( sea ) {
 //	Joint Object
 //
 
-THREE.SEA3D.prototype.readJointObject = function( sea ) {
+THREE.SEA3D.prototype.readJointObject = function ( sea ) {
 
 	var mesh = sea.target.tag,
 		bone = mesh.skeleton.bones[ sea.joint ];
@@ -2787,11 +2800,13 @@ THREE.SEA3D.prototype.readJointObject = function( sea ) {
 //	Morpher
 //
 
-THREE.SEA3D.prototype.readMorpher = function( sea ) {
+THREE.SEA3D.prototype.readMorpher = function ( sea ) {
 
-	var attribs = { position : [] }, targets = [];
+	var attribs = { position: [] }, targets = [];
 
-	if( THREE.Float32BufferAttribute ){ // three dev
+	if ( THREE.Float32BufferAttribute ) {
+
+		// three dev
 
 		for ( var i = 0; i < sea.node.length; i ++ ) {
 
@@ -2832,8 +2847,8 @@ THREE.SEA3D.prototype.readMorpher = function( sea ) {
 	}
 
 	sea.tag = {
-		attribs : attribs,
-		targets : targets
+		attribs: attribs,
+		targets: targets
 	};
 
 };
@@ -2842,7 +2857,7 @@ THREE.SEA3D.prototype.readMorpher = function( sea ) {
 //	Skeleton Animation
 //
 
-THREE.SEA3D.prototype.getSkeletonAnimation = function( sea, skl ) {
+THREE.SEA3D.prototype.getSkeletonAnimation = function ( sea, skl ) {
 
 	if ( sea.tag ) return sea.tag;
 
@@ -2907,11 +2922,13 @@ THREE.SEA3D.prototype.getSkeletonAnimation = function( sea, skl ) {
 //	Vertex Animation
 //
 
-THREE.SEA3D.prototype.readVertexAnimation = function( sea ) {
+THREE.SEA3D.prototype.readVertexAnimation = function ( sea ) {
 
-	var attribs = { position : [] }, targets = [], animations = [], i, j, l;
+	var attribs = { position: [] }, targets = [], animations = [], i, j, l;
 
-	if( THREE.Float32BufferAttribute ){ // three dev
+	if ( THREE.Float32BufferAttribute ) {
+
+		// three dev
 
 		for ( i = 0, l = sea.frame.length; i < l; i ++ ) {
 
@@ -2971,9 +2988,9 @@ THREE.SEA3D.prototype.readVertexAnimation = function( sea ) {
 	}
 
 	sea.tag = {
-		attribs : attribs,
-		targets : targets,
-		animations : animations
+		attribs: attribs,
+		targets: targets,
+		animations: animations
 	};
 
 };
@@ -2982,7 +2999,7 @@ THREE.SEA3D.prototype.readVertexAnimation = function( sea ) {
 //	Actions
 //
 
-THREE.SEA3D.prototype.applyEnvironment = function( envMap ) {
+THREE.SEA3D.prototype.applyEnvironment = function ( envMap ) {
 
 	for ( var j = 0, l = this.materials.length; j < l; ++ j ) {
 
@@ -3003,7 +3020,7 @@ THREE.SEA3D.prototype.applyEnvironment = function( envMap ) {
 
 };
 
-THREE.SEA3D.prototype.readActions = function( sea ) {
+THREE.SEA3D.prototype.readActions = function ( sea ) {
 
 	for ( var i = 0; i < sea.actions.length; i ++ ) {
 
@@ -3068,7 +3085,7 @@ THREE.SEA3D.Event = {
 	ERROR: "sea3d_error"
 };
 
-THREE.SEA3D.prototype.onProgress = function( e ) {
+THREE.SEA3D.prototype.onProgress = function ( e ) {
 
 	e.status = e.type;
 	e.progress = e.loaded / e.total;
@@ -3078,7 +3095,7 @@ THREE.SEA3D.prototype.onProgress = function( e ) {
 
 };
 
-THREE.SEA3D.prototype.onLoadProgress = function( e ) {
+THREE.SEA3D.prototype.onLoadProgress = function ( e ) {
 
 	e.type = THREE.SEA3D.Event.LOAD_PROGRESS;
 	this.dispatchEvent( e );
@@ -3087,7 +3104,7 @@ THREE.SEA3D.prototype.onLoadProgress = function( e ) {
 
 };
 
-THREE.SEA3D.prototype.onDownloadProgress = function( e ) {
+THREE.SEA3D.prototype.onDownloadProgress = function ( e ) {
 
 	e.type = THREE.SEA3D.Event.DOWNLOAD_PROGRESS;
 	this.dispatchEvent( e );
@@ -3096,35 +3113,35 @@ THREE.SEA3D.prototype.onDownloadProgress = function( e ) {
 
 };
 
-THREE.SEA3D.prototype.onComplete = function( e ) {
+THREE.SEA3D.prototype.onComplete = function ( e ) {
 
 	e.type = THREE.SEA3D.Event.COMPLETE;
 	this.dispatchEvent( e );
 
 };
 
-THREE.SEA3D.prototype.onCompleteObject = function( e ) {
+THREE.SEA3D.prototype.onCompleteObject = function ( e ) {
 
 	e.type = THREE.SEA3D.Event.OBJECT_COMPLETE;
 	this.dispatchEvent( e );
 
 };
 
-THREE.SEA3D.prototype.onParseProgress = function( e ) {
+THREE.SEA3D.prototype.onParseProgress = function ( e ) {
 
 	e.type = THREE.SEA3D.Event.PARSE_PROGRESS;
 	this.dispatchEvent( e );
 
 };
 
-THREE.SEA3D.prototype.onParseComplete = function( e ) {
+THREE.SEA3D.prototype.onParseComplete = function ( e ) {
 
 	e.type = THREE.SEA3D.Event.PARSE_COMPLETE;
 	this.dispatchEvent( e );
 
 };
 
-THREE.SEA3D.prototype.onError = function( e ) {
+THREE.SEA3D.prototype.onError = function ( e ) {
 
 	e.type = THREE.SEA3D.Event.ERROR;
 	this.dispatchEvent( e );
@@ -3135,7 +3152,7 @@ THREE.SEA3D.prototype.onError = function( e ) {
 //	Loader
 //
 
-THREE.SEA3D.prototype.createDomain = function() {
+THREE.SEA3D.prototype.createDomain = function () {
 
 	return this.domain = new THREE.SEA3D.Domain(
 		this.config.id,
@@ -3145,7 +3162,7 @@ THREE.SEA3D.prototype.createDomain = function() {
 
 };
 
-THREE.SEA3D.prototype.clone = function( config, onParseComplete, onParseProgress ) {
+THREE.SEA3D.prototype.clone = function ( config, onParseComplete, onParseProgress ) {
 
 	if ( ! this.file.isDone() ) throw new Error( "Previous parse is not completed." );
 
@@ -3165,7 +3182,7 @@ THREE.SEA3D.prototype.clone = function( config, onParseComplete, onParseProgress
 
 };
 
-THREE.SEA3D.prototype.loadConfig = function( config ) {
+THREE.SEA3D.prototype.loadConfig = function ( config ) {
 
 	for ( var name in config ) {
 
@@ -3175,7 +3192,7 @@ THREE.SEA3D.prototype.loadConfig = function( config ) {
 
 };
 
-THREE.SEA3D.prototype.parse = function( onParseComplete, onParseProgress ) {
+THREE.SEA3D.prototype.parse = function ( onParseComplete, onParseProgress ) {
 
 	delete this.cameras;
 	delete this.containers;
@@ -3198,7 +3215,7 @@ THREE.SEA3D.prototype.parse = function( onParseComplete, onParseProgress ) {
 
 	this.setTypeRead();
 
-	this.file.onParseComplete = ( function( e ) {
+	this.file.onParseComplete = ( function ( e ) {
 
 		if ( this.config.manager ) this.config.manager.add( this.domain );
 
@@ -3226,7 +3243,7 @@ THREE.SEA3D.prototype.parse = function( onParseComplete, onParseProgress ) {
 
 };
 
-THREE.SEA3D.prototype.onHead = function( args ) {
+THREE.SEA3D.prototype.onHead = function ( args ) {
 
 	if ( args.sign != 'TJS' ) {
 
@@ -3239,7 +3256,7 @@ THREE.SEA3D.prototype.onHead = function( args ) {
 THREE.SEA3D.EXTENSIONS_LOADER = [];
 THREE.SEA3D.EXTENSIONS_DOMAIN = [];
 
-THREE.SEA3D.prototype.setTypeRead = function() {
+THREE.SEA3D.prototype.setTypeRead = function () {
 
 	this.file.typeRead = {};
 
@@ -3308,7 +3325,7 @@ THREE.SEA3D.prototype.setTypeRead = function() {
 
 };
 
-THREE.SEA3D.prototype.load = function( data ) {
+THREE.SEA3D.prototype.load = function ( data ) {
 
 	this.file = new SEA3D.File();
 	this.file.scope = this;
@@ -3321,7 +3338,7 @@ THREE.SEA3D.prototype.load = function( data ) {
 	this.file.onError = this.onError.bind( this );
 	this.file.onHead = this.onHead.bind( this );
 
-	this.file.onComplete = ( function( e ) {
+	this.file.onComplete = ( function ( e ) {
 
 		if ( this.config.manager ) this.config.manager.add( this.domain );
 
@@ -3335,7 +3352,7 @@ THREE.SEA3D.prototype.load = function( data ) {
 
 	this.setTypeRead();
 
-	if(data===undefined) return;
+	if ( data === undefined ) return;
 
 	if ( typeof data == "string" ) this.file.load( data );
 	else this.file.read( data );

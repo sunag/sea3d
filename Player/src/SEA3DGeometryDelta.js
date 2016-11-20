@@ -9,7 +9,7 @@
 //	Geometry Delta
 //
 
-SEA3D.GeometryDelta = function( name, data, sea3d ) {
+SEA3D.GeometryDelta = function ( name, data, sea3d ) {
 
 	var i, j, start, delta, len, vec;
 
@@ -30,8 +30,7 @@ SEA3D.GeometryDelta = function( name, data, sea3d ) {
 		data.readNumber = data.readByte;
 		this.numDiv = 0xFF / 2;
 
-	}
-	else {
+	}	else {
 
 		data.readNumber = data.readShort;
 		this.numDiv = 0xFFFF / 2;
@@ -136,8 +135,8 @@ SEA3D.GeometryDelta = function( name, data, sea3d ) {
 
 			var vColor = new Float32Array( colorCount );
 
-			switch ( numColorData )
-			{
+			switch ( numColorData )			{
+
 				case 1:
 					j = 0;
 					while ( j < colorCount ) {
@@ -185,6 +184,7 @@ SEA3D.GeometryDelta = function( name, data, sea3d ) {
 
 					}
 					break;
+
 			}
 
 			this.color[ i ] = vColor;
@@ -237,8 +237,8 @@ SEA3D.GeometryDelta = function( name, data, sea3d ) {
 			}
 
 			this.groups.push( {
-				start : start,
-				count : vec.length - start,
+				start: start,
+				count: vec.length - start,
 			} );
 
 		}
@@ -252,8 +252,8 @@ SEA3D.GeometryDelta = function( name, data, sea3d ) {
 			len = data.readUInteger() * 3;
 
 			this.groups.push( {
-				start : j,
-				count : len,
+				start: j,
+				count: len,
 			} );
 
 			len += j;
@@ -279,7 +279,7 @@ SEA3D.GeometryDelta.prototype.type = "geDL";
 
 THREE.SEA3D.EXTENSIONS_LOADER.push( {
 
-	setTypeRead : function() {
+	setTypeRead: function () {
 
 		this.file.addClass( SEA3D.GeometryDelta, true );
 
