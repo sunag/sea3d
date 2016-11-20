@@ -5,6 +5,21 @@
 
 'use strict';
 
+//
+//	Polyfills
+//
+
+if (THREE.Float32BufferAttribute === undefined) {
+
+	THREE.Float32BufferAttribute = THREE.Float32Attribute;
+
+}
+
+//
+//
+//	SEA3D
+//
+
 THREE.SEA3D = function ( config ) {
 
 	this.config = {
@@ -30,21 +45,6 @@ THREE.SEA3D = function ( config ) {
 	if ( config ) this.loadConfig( config );
 
 };
-
-// polyfill THREE.Float32BufferAttribute in three dev
-
-if ( THREE.Float32BufferAttribute === undefined ) {
-
-    THREE.Float32BufferAttribute = function ( array, itemSize ) {
-
-        THREE.BufferAttribute.call( this, new Float32Array( array ), itemSize );
-
-    }
-
-    THREE.Float32BufferAttribute.prototype = Object.create( THREE.BufferAttribute.prototype );
-    THREE.Float32BufferAttribute.prototype.constructor = THREE.Float32BufferAttribute;
-
-}
 
 //
 //	Config
