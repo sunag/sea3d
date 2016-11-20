@@ -546,6 +546,7 @@ seaTimeRange = #(animationRange.start.frame as integer,animationRange.end.frame 
 seaUnits = #(#Generic, #Centimeters),
 seaao = #(32,color 255 255 255,color 0 0 0,1.0,50.0,0.5),
 sea3d = undefined,	
+seabuild = false,
 seaAssetNames = #(),
 seaErrors = #(),
 seaWarning = #(),
@@ -1369,6 +1370,8 @@ fn seaprogressUpdate p =
 	local actime = timeStamp()
 	
 	seaprogressbar.value = p
+	
+	if seabuild do seabuild = keyboard.escPressed == false
 	
 	if actime - seastarttime > 5000 and actime - seaupdatetime > 1000 then
 	(
@@ -7508,9 +7511,11 @@ function exportSEAObjects =
 	(
 		local anmAsset = undefined
 		local sea = seaObjectList[seaIndex]
-		local obj = sea.obj		
+		local obj = sea.obj
 		
 		seaprogressUpdate (((float seaIndex) / (float seaObjectList.count)) * 100.0)
+		
+		if seabuild == false do return 0
 		
 		if classof sea == SEAMesh then
 		(
@@ -7728,9 +7733,9 @@ fn exportList list =
 	(
 		seaWarning.count = 0
 	)
-		
+	
 	openSEAListener()
-		
+	
 	seaprogressEnd()
 	
 	set time off
@@ -8010,6 +8015,11 @@ rollout _SEA "SEA3D"
 		enabledExport true
 		
 		presetSave.enabled = presetSaveEnabled
+	)
+	
+	on cancelButton pressed do
+	(
+		seadispatchChange()
 	)
 )
 
