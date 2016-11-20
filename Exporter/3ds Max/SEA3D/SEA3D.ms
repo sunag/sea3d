@@ -15,7 +15,7 @@ if (LoadSEADLL() == false) then exit
 --
 
 global
-	-- Extensions (Max 4chars ASCII Compatible 32bit)
+-- Extensions (Max 4chars ASCII Compatible 32bit)
 	EXT_INFO = ".info",
 	EXT_GEOMETRY = ".geo",
 	EXT_GEOMETRY_DELTA = ".geDL",
@@ -88,7 +88,7 @@ global
 	BAKE_AO = "ao"
 
 global
-	-- READER --
+-- READER --
 	
 	-- GEOMETRY	
 	HEADER_BIGMESH = 1,		
@@ -105,13 +105,6 @@ global
 	HEADER_COLOR2 = 64,
 	HEADER_COLOR3 = 128,
 	HEADER_COLOR4 = 192,
-	
-	-- COMPRESSION QUALITY
-	HEADER_QCOMPRESSION_LOW = 0,
-	HEADER_QCOMPRESSION_HIGH = 1,	
-	
-	-- DELTA POLY
-	HEADER_DELTA_POLY = 2,
 	
 	-- ANIMATION
 	HEADER_ANIMATION_SEQUENCE = 1,
@@ -143,7 +136,7 @@ global
 	HEADER_MATERIAL = 256,		
 	HEADER_MODIFIERS = 512,
 	
-	-- SUB-READER --
+-- SUB-READER --
 	
 	-- HEADER_OBJECT_CONFIG
 	HEADER_STATIC = 1,
