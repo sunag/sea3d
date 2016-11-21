@@ -1,0 +1,17 @@
+{
+  "name": "sea3d",
+  "version": "1.8.1",
+  "description": "An open-source format and tools for game developers",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://sunag@github.com/sunag/sea3d.git"
+  },
+  "keywords": [],
+  "author": "sunag",
+  "license": "MIT",
+  "bugs": {
+    "url": "http://community.poonya.com/"
+  },
+  "homepage": "https://github.com/sunag/sea3d#readme"
+}
