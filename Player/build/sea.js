@@ -4518,7 +4518,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 		this.animations = [];
 		this.animationsData = {};
-		this.animNames = [];
+		this.animationsDict = [];
 
 		this.clips = ( this instanceof THREE.SEA3D.Animator ? this.clips : this.geometry.animations ) || [];
 
@@ -4535,11 +4535,9 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 	addAnimation: function ( clip ) {
 
 		var name = clip.name;
-		var i = this.animations.length;
 
-		this.animations[ i ] = clip;
-		this.animNames[ i ] = name;
-
+		this.animations.push( clip );
+		this.animationsDict[ name ] = clip;
 		this.animationsData[ name ] = {};
 
 		this.mixer.clipAction( clip );
@@ -4551,15 +4549,20 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 	removeAnimation: function ( clip ) {
 
 		var name = clip.name;
-		var i = this.animNames.indexOf( name );
 
+		delete this.animationsDict[ name ];
 		delete this.animationsData[ name ];
-		this.animations.splice( i, 1 );
-		this.animNames.splice( i, 1 );
+		this.animations.splice( this.animations.indexOf( clip ), 1 );
 
 		this.mixer.uncacheClip( clip );
 
 		return this;
+
+	},
+
+	getAnimation: function( name ) {
+
+		return this.animations[ name ] || this.animationsDict[ name ];
 
 	},
 
@@ -4615,9 +4618,11 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	},
 
+	
+
 	play: function ( name, crossfade, offset, weight ) {
 
-		var animation = this.animations[ name ] || this.animations[ this.animNames.indexOf( name ) ];
+		var animation = this.getAnimation( name );
 
 		name = animation.name;
 
@@ -4699,7 +4704,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 		if ( ! this.playing && ! this.paused ) THREE.SEA3D.AnimationHandler.addAnimator( this );
 
-		var animation = this.animations[ name ] || this.animations[ this.animNames.indexOf( name ) ];
+		var animation = this.getAnimation( name );
 
 		this.playing = true;
 
@@ -4729,7 +4734,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	setAnimTimeScale: function ( name, value ) {
 
-		var animation = this.animations[ name ] || this.animations[ this.animNames.indexOf( name ) ];
+		var animation = this.getAnimation( name );
 		animation.timeScale = value;
 
 	},
@@ -5029,14 +5034,14 @@ THREE.SEA3D.Mesh.prototype = Object.assign( Object.create( THREE.Mesh.prototype 
 
 	setWeight: function ( name, val ) {
 
-		if ( this.animations && ( this.animations[ name ] || this.animations[ this.animNames.indexOf( name ) ] ) ) this.mixer.clipAction( name ).setEffectiveWeight( val );
+		if ( this.animations && this.getAnimation( name ) ) this.mixer.clipAction( name ).setEffectiveWeight( val );
 		if ( this.morphTargetInfluences && this.morphTargetDictionary[ name ] !== undefined ) this.morphTargetInfluences[ this.morphTargetDictionary[ name ] ] = val;
 
 	},
 
 	getWeight: function ( name ) {
 
-		if ( this.animations && ( this.animations[ name ] || this.animations[ this.animNames.indexOf( name ) ] ) ) return this.mixer.clipAction( name ).getEffectiveWeight();
+		if ( this.animations && this.getAnimation( name ) ) return this.mixer.clipAction( name ).getEffectiveWeight();
 		if ( this.morphTargetDictionary && this.morphTargetDictionary[ name ] !== undefined ) return this.morphTargetInfluences[ this.morphTargetDictionary[ name ] ];
 
 	},
