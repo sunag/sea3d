@@ -589,6 +589,18 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	},
 
+	setAnimationWeight: function ( name, val ) {
+
+		this.mixer.clipAction( this.getAnimation( name ) ).setEffectiveWeight( val );
+
+	},
+
+	getAnimationWeight: function ( name ) {
+
+		return this.mixer.clipAction( this.getAnimation( name ) ).getEffectiveWeight();
+
+	},
+
 	getAnimation: function ( name ) {
 
 		return this.animationsDict[ name ] || this.animations[ name ];
@@ -657,7 +669,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 		var animation = this.getAnimation( name );
 
-		name = animation.name;
+		if ( ! animation ) throw new Error( 'Animation "' + name + '" not found.' );
 
 		if ( animation == this.currentAnimation ) {
 
@@ -671,8 +683,6 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 		} else {
 
-			if ( ! animation ) throw new Error( 'Animation "' + name + '" not found.' );
-
 			this.previousAnimation = this.currentAnimation;
 			this.currentAnimation = animation;
 
@@ -682,7 +692,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 			this.currentAnimationAction.paused = false;
 
 			this.previousAnimationData = this.currentAnimationData;
-			this.currentAnimationData = this.animationsData[ name ];
+			this.currentAnimationData = this.animationsData[ animation.name ];
 
 			this.updateTimeScale();
 
@@ -1061,7 +1071,7 @@ THREE.SEA3D.Mesh = function ( geometry, material ) {
 
 };
 
-THREE.SEA3D.Mesh.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), THREE.SEA3D.Mesh.prototype, THREE.SEA3D.Object3D.prototype, {
+THREE.SEA3D.Mesh.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), THREE.SEA3D.Object3D.prototype, {
 
 	constructor: THREE.SEA3D.Mesh,
 
