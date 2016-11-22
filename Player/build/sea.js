@@ -3980,7 +3980,7 @@ SEA3D.File.setDecompressionEngine( 2, "lzma", SEA3D.File.LZMAUncompress );
 //	Polyfills
 //
 
-if (THREE.Float32BufferAttribute === undefined) {
+if ( THREE.Float32BufferAttribute === undefined ) {
 
 	THREE.Float32BufferAttribute = THREE.Float32Attribute;
 
@@ -4560,9 +4560,15 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	},
 
-	getAnimation: function( name ) {
+	getAnimation: function ( name ) {
 
-		return this.animations[ name ] || this.animationsDict[ name ];
+		return this.animationsDict[ name ] || this.animations[ name ];
+
+	},
+
+	getAnimationData: function ( name ) {
+
+		return this.animationsData[ this.getAnimation( name ).name ];
 
 	},
 
@@ -4617,8 +4623,6 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 		return this;
 
 	},
-
-	
 
 	play: function ( name, crossfade, offset, weight ) {
 
