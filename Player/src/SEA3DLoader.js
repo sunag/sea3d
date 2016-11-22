@@ -753,9 +753,16 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	},
 
+	setAnimTimeScale: function ( name, value ) {
+
+		var animation = this.animations[ name ] || this.animationsIndex[ name ];
+		animation.timeScale = value;
+
+	},
+
 	setClipTimeScale: function ( name, value ) {
 
-		var anim = this.animations[ name ];
+		var anim = this.animations[ name ] || this.animationsIndex[ name ];
 		var clip = this.mixer.clipAction( anim );
 
 		clip.setEffectiveTimeScale( value );
