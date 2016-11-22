@@ -170,7 +170,14 @@
 
 				if( g_animation === null ) g_animation = gui.add('group', { name:'ANIMATIONS' });
 				o.material.skinning = true;
-				for(var a in o.animations ) g_animation.add('button', { name:a, p:0 }).onChange( function(n){ o.play(n);  } );
+				
+				var name, i;
+				for( i = 0; i < o.animations.length; i++){
+	                name = o.animations[i].name;
+	                g_animation.add('button', { name:name, p:0 }).onChange( function(n){  o.play(n, 0.5);  } );
+	            }
+
+				//for(var a in o.animations ) g_animation.add('button', { name:a, p:0 }).onChange( function(n){ o.play(n);  } );
 				
 				g_animation.open();
 

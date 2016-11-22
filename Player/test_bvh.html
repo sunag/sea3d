@@ -514,7 +514,14 @@
         function addAnimator(){
 
             if( g_animation === null ) g_animation = gui.add('group', { name:'ANIMATIONS' });
-            for(var a in blendMesh.animations ) g_animation.add('button', { name:a, p:0 }).onChange( function(n){ blendMesh.stopAll(); blendMesh.playw(n, 1);  } );
+            var name;
+            for(var i = 0; i<blendMesh.animations.length; i++){
+                name = blendMesh.animations[i].name;
+                g_animation.add('button', { name:name, p:0 }).onChange( function(n){  blendMesh.stopAll(); blendMesh.play(n);  } );
+
+            }
+
+            //for(var a in blendMesh.animations ) g_animation.add('button', { name:a, p:0 }).onChange( function(n){ blendMesh.stopAll(); blendMesh.playw(n, 1);  } );
             g_animation.open();
 
         }
