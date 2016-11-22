@@ -242,7 +242,7 @@
 
 				for ( var i = 0; i < anims.length; ++i ) {
 
-					blendMesh.setWeight( anims[ i ], settings[ anims[ i ] ] );
+					blendMesh.setAnimationWeight( anims[ i ], settings[ anims[ i ] ] );
 
 				}
 
@@ -274,9 +274,9 @@
 			function start() {
 
 				// Set default weights
-				blendMesh.setWeight( 'idle', 1 / 3 );
-				blendMesh.setWeight( 'walk', 1 / 3 );
-				blendMesh.setWeight( 'run', 1 / 3 );
+				blendMesh.setAnimationWeight( 'idle', 1 / 3 );
+				blendMesh.setAnimationWeight( 'walk', 1 / 3 );
+				blendMesh.setAnimationWeight( 'run', 1 / 3 );
 
 				// Create the debug visualization
 
