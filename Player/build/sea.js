@@ -4560,18 +4560,6 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	},
 
-	setAnimationWeight: function ( name, val ) {
-
-		this.mixer.clipAction( this.getAnimation( name ) ).setEffectiveWeight( val );
-
-	},
-
-	getAnimationWeight: function ( name ) {
-
-		return this.mixer.clipAction( this.getAnimation( name ) ).getEffectiveWeight();
-
-	},
-
 	getAnimation: function ( name ) {
 
 		return this.animationsDict[ name ] || this.animations[ name ];
@@ -4581,6 +4569,18 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 	getAnimationData: function ( name ) {
 
 		return this.animationsData[ this.getAnimation( name ).name ];
+
+	},
+
+	setAnimationWeight: function ( name, val ) {
+
+		this.mixer.clipAction( this.getAnimation( name ) ).setEffectiveWeight( val );
+
+	},
+
+	getAnimationWeight: function ( name ) {
+
+		return this.mixer.clipAction( this.getAnimation( name ) ).getEffectiveWeight();
 
 	},
 
@@ -4696,8 +4696,6 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 			this.currentAnimationAction.stop();
 
-			//THREE.SEA3D.AnimationHandler.removeAnimator( this );
-
 			this.previousAnimation = this.currentAnimation;
 			this.previousAnimationData = this.currentAnimationData;
 			this.previousAnimationAction = this.currentAnimationAction;
@@ -4743,13 +4741,6 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 		fromAction.crossFadeTo( toAction, duration, wrap !== undefined ? wrap : false );
 
 		return this;
-
-	},
-
-	setAnimTimeScale: function ( name, value ) {
-
-		var animation = this.getAnimation( name );
-		animation.timeScale = value;
 
 	},
 
@@ -5048,15 +5039,13 @@ THREE.SEA3D.Mesh.prototype = Object.assign( Object.create( THREE.Mesh.prototype 
 
 	setWeight: function ( name, val ) {
 
-		if ( this.animations && this.getAnimation( name ) ) this.mixer.clipAction( name ).setEffectiveWeight( val );
-		if ( this.morphTargetInfluences && this.morphTargetDictionary[ name ] !== undefined ) this.morphTargetInfluences[ this.morphTargetDictionary[ name ] ] = val;
+		this.morphTargetInfluences[ this.morphTargetDictionary[ name ] ] = val;
 
 	},
 
 	getWeight: function ( name ) {
 
-		if ( this.animations && this.getAnimation( name ) ) return this.mixer.clipAction( name ).getEffectiveWeight();
-		if ( this.morphTargetDictionary && this.morphTargetDictionary[ name ] !== undefined ) return this.morphTargetInfluences[ this.morphTargetDictionary[ name ] ];
+		return this.morphTargetInfluences[ this.morphTargetDictionary[ name ] ];
 
 	},
 
