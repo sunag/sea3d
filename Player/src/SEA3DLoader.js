@@ -591,6 +591,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	getAnimation: function ( name ) {
 
+		return typeof name === "number" ? this.animations[ name ] : this.animation[ name ];
 
 	},
 
@@ -1067,13 +1068,17 @@ THREE.SEA3D.Mesh.prototype = Object.assign( Object.create( THREE.Mesh.prototype 
 
 	setWeight: function ( name, val ) {
 
-		this.morphTargetInfluences[ this.morphTargetDictionary[ name ] ] = val;
+		var index = typeof name === "number" ? name : this.morphTargetDictionary[ name ];
+
+		this.morphTargetInfluences[ index ] = val;
 
 	},
 
 	getWeight: function ( name ) {
 
-		return this.morphTargetInfluences[ this.morphTargetDictionary[ name ] ];
+		var index = typeof name === "number" ? name : this.morphTargetDictionary[ name ];
+
+		return this.morphTargetInfluences[ index ];
 
 	},
 
