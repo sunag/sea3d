@@ -7687,7 +7687,7 @@ THREE.SEA3D.prototype.applyDefaultAnimation = function ( sea, animatorClass ) {
 
 	if ( this.isLegacy( sea ) && sea.tag.animation ) {
 
-		this.updateAnimationSet( sea.tag );
+		//this.updateAnimationSet( sea.tag );
 
 	}
 
