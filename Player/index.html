@@ -60,7 +60,7 @@
 				clock = new THREE.Clock();
 
 				scene = new THREE.Scene();
-				scene.background = backImage();
+				scene.background = Grad.texture();
 
 				container = document.createElement( 'div' );
 				document.body.appendChild( container );
@@ -124,26 +124,6 @@
 				seaPlayer.load( './assets/mascot.tjs.sea' );
 
 			}
-
-			// BACKGROUND
-
-			function backImage(){
-
-                var c = document.createElement( 'canvas' );
-                var res = 1;
-                c.width = c.height = 512*res;
-
-                var ctx = c.getContext( '2d' );
-                var dgrad = new Grad.Radial( 256*res, 1024*res, 512*res, 256*res, 1024*res, 1024*res );     
-                dgrad.addColorStop(0.1,45,45,45);
-                dgrad.addColorStop(0.8,20,20,20);
-                dgrad.fillRect( ctx, 0, 0, 512*res, 512*res );
-
-                var tx = new THREE.Texture( c );
-                tx.needsUpdate = true;
-                return tx;
-
-            };
 
             // GUI
 

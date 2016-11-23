@@ -121,7 +121,7 @@
 			
 
 			scene = new THREE.Scene();
-            scene.background = backImage();
+            scene.background = Grad.texture();
 
 			renderer = new THREE.WebGLRenderer( { antialias: true, alpha: false } );
             //renderer = new THREE.WebGL2Renderer( { antialias: true, alpha: true } );
@@ -365,27 +365,6 @@
             loader.load( seaModel );
 
 		}
-
-        function backImage(){
-
-            var c = document.createElement( 'canvas' );
-            var res = 1;
-
-            c.width = c.height = 512*res;
-
-            var ctx = c.getContext( '2d' );
-            var dgrad = new Grad.Radial( 256*res, 1024*res, 512*res, 256*res, 1024*res, 1024*res );     
-            dgrad.addColorStop(0.1,45,45,45);
-            dgrad.addColorStop(1,20,20,20);
-            dgrad.fillRect( ctx, 0, 0, 512*res, 512*res );
-
-            var tx = new THREE.Texture( c );
-            tx.anisotropy = 16;
-            tx.format = THREE.RGBFormat;
-            tx.needsUpdate = true;
-
-            return tx;
-        };
 
         function testAnimationLoad(){
 

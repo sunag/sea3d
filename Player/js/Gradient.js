@@ -8,6 +8,40 @@ Uses Floyd-Steinberg dither algorithm.
 
 var Grad = {};
 
+Grad.texture = function ( o ){
+
+    o = o || {};
+
+    var type = o.type || 'radial';
+    var res = o.res || 1;
+    var colors = o.colors || [ [0.1,45,45,45], [1,20,20,20] ];
+
+    var c = document.createElement( 'canvas' );
+    c.width = 512*res;
+    c.height = 512*res;
+    var color, dgrad;
+
+    if( type === 'radial' ) dgrad = new Grad.Radial( 256*res, 1024*res, 512*res, 256*res, 1024*res, 1024*res );
+    else dgrad = new Grad.Linear( 0, 0, 512*res, 512*res );
+
+    for( var i = 0; i < colors.length; i++ ){
+        color = colors[i];
+        dgrad.addColorStop( color[0], color[1], color[2], color[3], color[4] || 255 );
+    }
+
+    dgrad.fillRect( c.getContext( '2d' ), 0, 0, 512*res, 512*res );
+
+    var tx = new THREE.Texture( c );
+    
+    //tx.anisotropy = 16;
+    //tx.format = THREE.RGBFormat;
+    tx.magFilter = THREE.NearestFilter;
+    tx.minFilter = THREE.LinearMipMapLinearFilter;
+    tx.needsUpdate = true;
+
+    return tx;
+};
+
 
 Grad.fix = function ( n ) {
 
@@ -87,7 +121,7 @@ Grad.buffer.prototype.clear = function() {
 
 // LINEAR
 
-Grad.Linear = function ( _x0,_y0,_x1,_y1 ) {
+Grad.Linear = function ( _x0, _y0, _x1, _y1 ) {
 
     this.x0 = _x0;
     this.y0 = _y0;
@@ -134,7 +168,7 @@ Grad.Linear.prototype.addColorStop = function( ratio, r, g, b, a ) {
     }
 }
 
-Grad.Linear.prototype.fillRect = function(ctx, rectX0, rectY0, rectW, rectH) {
+Grad.Linear.prototype.fillRect = function( ctx, rectX0, rectY0, rectW, rectH ) {
     
     if (this.colorStops.length == 0) return;
     
