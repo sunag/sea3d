@@ -4517,8 +4517,8 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 		this.timeScale = 1;
 
 		this.animations = [];
-		this.animationsData = {};
-		this.animationsDict = [];
+		this.animation = {};
+		this.animationData = {};
 
 		this.clips = ( this instanceof THREE.SEA3D.Animator ? this.clips : this.geometry.animations ) || [];
 
@@ -4537,8 +4537,8 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 		var name = clip.name;
 
 		this.animations.push( clip );
-		this.animationsDict[ name ] = clip;
-		this.animationsData[ name ] = {};
+		this.animation[ name ] = clip;
+		this.animationData[ name ] = {};
 
 		this.mixer.clipAction( clip );
 
@@ -4550,8 +4550,8 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 		var name = clip.name;
 
-		delete this.animationsDict[ name ];
-		delete this.animationsData[ name ];
+		delete this.animation[ name ];
+		delete this.animationData[ name ];
 		this.animations.splice( this.animations.indexOf( clip ), 1 );
 
 		this.mixer.uncacheClip( clip );
@@ -4562,13 +4562,13 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	getAnimation: function ( name ) {
 
-		return this.animationsDict[ name ] || this.animations[ name ];
+		return typeof name === "number" ? this.animations[ name ] : this.animation[ name ];
 
 	},
 
 	getAnimationData: function ( name ) {
 
-		return this.animationsData[ this.getAnimation( name ).name ];
+		return this.animationData[ this.getAnimation( name ).name ];
 
 	},
 
@@ -4663,7 +4663,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 			this.currentAnimationAction.paused = false;
 
 			this.previousAnimationData = this.currentAnimationData;
-			this.currentAnimationData = this.animationsData[ animation.name ];
+			this.currentAnimationData = this.animationData[ animation.name ];
 
 			this.updateTimeScale();
 
@@ -5039,13 +5039,17 @@ THREE.SEA3D.Mesh.prototype = Object.assign( Object.create( THREE.Mesh.prototype 
 
 	setWeight: function ( name, val ) {
 
-		this.morphTargetInfluences[ this.morphTargetDictionary[ name ] ] = val;
+		var index = typeof name === "number" ? name : this.morphTargetDictionary[ name ];
+
+		this.morphTargetInfluences[ index ] = val;
 
 	},
 
 	getWeight: function ( name ) {
 
-		return this.morphTargetInfluences[ this.morphTargetDictionary[ name ] ];
+		var index = typeof name === "number" ? name : this.morphTargetDictionary[ name ];
+
+		return this.morphTargetInfluences[ index ];
 
 	},
 
@@ -7272,7 +7276,7 @@ THREE.SEA3D.prototype.load = function ( data ) {
 
 	if ( data === undefined ) return;
 
-	if ( typeof data == "string" ) this.file.load( data );
+	if ( typeof data === "string" ) this.file.load( data );
 	else this.file.read( data );
 
 };
