@@ -3,5 +3,5 @@
     "src/SEA3D.js",
     "src/SEA3DLZMA.js",
     "src/SEA3DLoader.js",
-    "src/-SEA3DLegacy.js"
+    "src/SEA3DLegacyZ.js"
 ]

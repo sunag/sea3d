@@ -519,7 +519,7 @@ THREE.SEA3D.AnimationClip = function ( name, duration, tracks, repeat ) {
 
 };
 
-THREE.SEA3D.AnimationClip.fromClip = function ( clip, repeat, timeScale ) {
+THREE.SEA3D.AnimationClip.fromClip = function ( clip, repeat ) {
 
 	return new THREE.SEA3D.AnimationClip( clip.name, clip.duration, clip.tracks, repeat );
 
@@ -1694,9 +1694,9 @@ THREE.SEA3D.prototype.parsePath = function ( url ) {
 
 };
 
-THREE.SEA3D.prototype.applyDefaultAnimation = function ( sea, animatorClass ) {
+THREE.SEA3D.prototype.addDefaultAnimation = function ( sea, animatorClass ) {
 
-	var obj = sea.tag;
+	var scope = sea.tag;
 
 	for ( var i = 0, count = sea.animations ? sea.animations.length : 0; i < count; i ++ ) {
 
@@ -1705,168 +1705,29 @@ THREE.SEA3D.prototype.applyDefaultAnimation = function ( sea, animatorClass ) {
 		switch ( anm.tag.type ) {
 
 			case SEA3D.Animation.prototype.type:
-				obj.animator = new animatorClass( anm.tag.tag, obj );
-				obj.animator.setRelative( anm.relative );
+
+				var animation = anm.tag.tag || this.getAnimationType( { 				
+					sea : anm.tag,
+					scope : scope,
+					relative : anm.relative
+				} );
+
+				scope.animator = new animatorClass( animation, scope );
+				scope.animator.setRelative( anm.relative );
 
 				if ( this.config.autoPlay ) {
 
-					obj.animator.play( 0 );
+					scope.animator.play( 0 );
 
 				}
 
-				return obj.animator;
+				return scope.animator;
+				
 				break;
 
 		}
 
 	}
-
-};
-
-//
-//	Animation
-//
-
-THREE.SEA3D.prototype.readAnimation = function ( sea ) {
-
-	var animations = [], delta = ( 1000 / sea.frameRate ) / 1000;
-
-	for ( var i = 0; i < sea.sequence.length; i ++ ) {
-
-		var seq = sea.sequence[ i ];
-
-		var tracks = [];
-
-		for ( var j = 0; j < sea.dataList.length; j ++ ) {
-
-			var anm = sea.dataList[ j ],
-				t, k, times, values,
-				data = anm.data,
-				start = seq.start * anm.blockSize,
-				end = start + ( seq.count * anm.blockSize ),
-				intrpl = seq.intrpl ? THREE.InterpolateLinear : false,
-				name = null;
-
-			switch ( anm.kind ) {
-
-				case SEA3D.Animation.POSITION:
-					name = '.position';
-					break;
-
-				case SEA3D.Animation.ROTATION:
-					name = '.quaternion';
-					break;
-
-				case SEA3D.Animation.SCALE:
-					name = '.scale';
-					break;
-
-				case SEA3D.Animation.COLOR:
-					name = '.color';
-					break;
-
-				case SEA3D.Animation.MULTIPLIER:
-					name = '.intensity';
-					break;
-
-				case SEA3D.Animation.FOV:
-					name = '.fov';
-					break;
-
-			}
-
-			if ( ! name ) continue;
-
-			switch ( anm.type ) {
-
-				case SEA3D.Stream.BYTE:
-				case SEA3D.Stream.UBYTE:
-				case SEA3D.Stream.INT:
-				case SEA3D.Stream.UINT:
-				case SEA3D.Stream.FLOAT:
-				case SEA3D.Stream.DOUBLE:
-				case SEA3D.Stream.DECIMAL:
-
-					values = data.subarray( start, end );
-					times = new Float32Array( values.length );
-					t = 0;
-
-					for ( k = 0; k < times.length; k ++ ) {
-
-						times[ k ] = t;
-						t += delta;
-
-					}
-
-					tracks.push( new THREE.VectorKeyframeTrack( name, times, values, intrpl ) );
-
-					break;
-
-				case SEA3D.Stream.VECTOR3D:
-
-					values = data.subarray( start, end );
-					times = new Float32Array( values.length / anm.blockSize );
-					t = 0;
-
-					for ( k = 0; k < times.length; k ++ ) {
-
-						times[ k ] = t;
-						t += delta;
-
-					}
-
-					tracks.push( new THREE.VectorKeyframeTrack( name, times, values, intrpl ) );
-
-					break;
-
-				case SEA3D.Stream.VECTOR4D:
-
-					values = data.subarray( start, end );
-					times = new Float32Array( values.length / anm.blockSize );
-					t = 0;
-
-					for ( k = 0; k < times.length; k ++ ) {
-
-						times[ k ] = t;
-						t += delta;
-
-					}
-
-					tracks.push( new THREE.QuaternionKeyframeTrack( name, times, values, intrpl ) );
-
-					break;
-
-				case SEA3D.Stream.INT24:
-				case SEA3D.Stream.UINT24:
-
-					values = new Float32Array( ( end - start ) * 3 );
-					times = new Float32Array( values.length / 3 );
-					t = 0;
-
-					for ( k = 0; k < times.length; k ++ ) {
-
-						values[ ( k * 3 ) ] = ( ( data[ k ] >> 16 ) & 0xFF ) / 255;
-						values[ ( k * 3 ) + 1 ] = ( ( data[ k ] >> 8 ) & 0xFF ) / 255;
-						values[ ( k * 3 ) + 2 ] = ( data[ k ] & 0xFF ) / 255;
-						times[ k ] = t;
-						t += delta;
-
-					}
-
-					tracks.push( new THREE.VectorKeyframeTrack( name, times, values, intrpl ) );//ColorKeyframeTrack
-
-					break;
-
-			}
-
-		}
-
-		animations.push( new THREE.SEA3D.AnimationClip( seq.name, - 1, tracks, seq.repeat ) );
-
-	}
-
-	this.domain.clips = this.clips = this.clips || [];
-	this.clips.push( this.objects[ sea.name + '.anm' ] = sea.tag = animations );
 
 };
 
@@ -1939,7 +1800,7 @@ THREE.SEA3D.prototype.readDummy = function ( sea ) {
 	this.addSceneObject( sea );
 	this.updateTransform( dummy, sea );
 
-	this.applyDefaultAnimation( sea, THREE.SEA3D.Object3DAnimator );
+	this.addDefaultAnimation( sea, THREE.SEA3D.Object3DAnimator );
 
 };
 
@@ -1965,7 +1826,7 @@ THREE.SEA3D.prototype.readLine = function ( sea ) {
 	this.addSceneObject( sea );
 	this.updateTransform( line, sea );
 
-	this.applyDefaultAnimation( sea, THREE.SEA3D.Object3DAnimator );
+	this.addDefaultAnimation( sea, THREE.SEA3D.Object3DAnimator );
 
 };
 
@@ -1983,7 +1844,7 @@ THREE.SEA3D.prototype.readContainer3D = function ( sea ) {
 	this.addSceneObject( sea );
 	this.updateTransform( container, sea );
 
-	this.applyDefaultAnimation( sea, THREE.SEA3D.Object3DAnimator );
+	this.addDefaultAnimation( sea, THREE.SEA3D.Object3DAnimator );
 
 };
 
@@ -2068,7 +1929,11 @@ THREE.SEA3D.prototype.readMesh = function ( sea ) {
 			case SEA3D.SkeletonAnimation.prototype.type:
 				skeletonAnimation = anm.tag;
 
-				geo.animations = this.getSkeletonAnimation( skeletonAnimation, skeleton );
+				geo.animations = skeletonAnimation.tag || this.getAnimationType( { 				
+					sea : skeletonAnimation,
+					skeleton : skeleton,
+					relative : true
+				} );
 				break;
 
 			case SEA3D.VertexAnimation.prototype.type:
@@ -2157,7 +2022,7 @@ THREE.SEA3D.prototype.readMesh = function ( sea ) {
 	this.addSceneObject( sea );
 	this.updateTransform( mesh, sea );
 
-	this.applyDefaultAnimation( sea, THREE.SEA3D.Object3DAnimator );
+	this.addDefaultAnimation( sea, THREE.SEA3D.Object3DAnimator );
 
 };
 
@@ -2201,7 +2066,7 @@ THREE.SEA3D.prototype.readSoundPoint = function ( sea ) {
 	this.addSceneObject( sea );
 	this.updateTransform( sound3d, sea );
 
-	this.applyDefaultAnimation( sea, THREE.SEA3D.SoundAnimator );
+	this.addDefaultAnimation( sea, THREE.SEA3D.SoundAnimator );
 
 };
 
@@ -2765,7 +2630,7 @@ THREE.SEA3D.prototype.readPointLight = function ( sea ) {
 
 	this.updateTransform( light, sea );
 
-	this.applyDefaultAnimation( sea, THREE.SEA3D.LightAnimator );
+	this.addDefaultAnimation( sea, THREE.SEA3D.LightAnimator );
 
 	this.updateScene();
 
@@ -2786,7 +2651,7 @@ THREE.SEA3D.prototype.readHemisphereLight = function ( sea ) {
 
 	this.addSceneObject( sea );
 
-	this.applyDefaultAnimation( sea, THREE.SEA3D.LightAnimator );
+	this.addDefaultAnimation( sea, THREE.SEA3D.LightAnimator );
 
 	this.updateScene();
 
@@ -2806,7 +2671,7 @@ THREE.SEA3D.prototype.readAmbientLight = function ( sea ) {
 
 	this.addSceneObject( sea );
 
-	this.applyDefaultAnimation( sea, THREE.SEA3D.LightAnimator );
+	this.addDefaultAnimation( sea, THREE.SEA3D.LightAnimator );
 
 	this.updateScene();
 
@@ -2834,7 +2699,7 @@ THREE.SEA3D.prototype.readDirectionalLight = function ( sea ) {
 
 	this.updateTransform( light, sea );
 
-	this.applyDefaultAnimation( sea, THREE.SEA3D.LightAnimator );
+	this.addDefaultAnimation( sea, THREE.SEA3D.LightAnimator );
 
 	this.updateScene();
 
@@ -2855,7 +2720,7 @@ THREE.SEA3D.prototype.readCamera = function ( sea ) {
 	this.addSceneObject( sea );
 	this.updateTransform( camera, sea );
 
-	this.applyDefaultAnimation( sea, THREE.SEA3D.CameraAnimator );
+	this.addDefaultAnimation( sea, THREE.SEA3D.CameraAnimator );
 
 };
 
@@ -2895,7 +2760,7 @@ THREE.SEA3D.prototype.readOrthographicCamera = function ( sea ) {
 	this.addSceneObject( sea );
 	this.updateTransform( camera, sea );
 
-	this.applyDefaultAnimation( sea, THREE.SEA3D.CameraAnimator );
+	this.addDefaultAnimation( sea, THREE.SEA3D.CameraAnimator );
 
 };
 
@@ -2971,12 +2836,157 @@ THREE.SEA3D.prototype.readMorpher = function ( sea ) {
 };
 
 //
+//	Animation
+//
+
+THREE.SEA3D.prototype.readAnimation = function ( sea ) {
+
+	var animations = [], delta = ( 1000 / sea.frameRate ) / 1000;
+
+	for ( var i = 0; i < sea.sequence.length; i ++ ) {
+
+		var seq = sea.sequence[ i ];
+
+		var tracks = [];
+
+		for ( var j = 0; j < sea.dataList.length; j ++ ) {
+
+			var anm = sea.dataList[ j ],
+				t, k, times, values,
+				data = anm.data,
+				start = seq.start * anm.blockSize,
+				end = start + ( seq.count * anm.blockSize ),
+				intrpl = seq.intrpl ? THREE.InterpolateLinear : false,
+				name = null;
+
+			switch ( anm.kind ) {
+
+				case SEA3D.Animation.POSITION:
+					name = '.position';
+					break;
+
+				case SEA3D.Animation.ROTATION:
+					name = '.quaternion';
+					break;
+
+				case SEA3D.Animation.SCALE:
+					name = '.scale';
+					break;
+
+				case SEA3D.Animation.COLOR:
+					name = '.color';
+					break;
+
+				case SEA3D.Animation.MULTIPLIER:
+					name = '.intensity';
+					break;
+
+				case SEA3D.Animation.FOV:
+					name = '.fov';
+					break;
+
+			}
+
+			if ( ! name ) continue;
+
+			switch ( anm.type ) {
+
+				case SEA3D.Stream.BYTE:
+				case SEA3D.Stream.UBYTE:
+				case SEA3D.Stream.INT:
+				case SEA3D.Stream.UINT:
+				case SEA3D.Stream.FLOAT:
+				case SEA3D.Stream.DOUBLE:
+				case SEA3D.Stream.DECIMAL:
+
+					values = data.subarray( start, end );
+					times = new Float32Array( values.length );
+					t = 0;
+
+					for ( k = 0; k < times.length; k ++ ) {
+
+						times[ k ] = t;
+						t += delta;
+
+					}
+
+					tracks.push( new THREE.VectorKeyframeTrack( name, times, values, intrpl ) );
+
+					break;
+
+				case SEA3D.Stream.VECTOR3D:
+
+					values = data.subarray( start, end );
+					times = new Float32Array( values.length / anm.blockSize );
+					t = 0;
+
+					for ( k = 0; k < times.length; k ++ ) {
+
+						times[ k ] = t;
+						t += delta;
+
+					}
+
+					tracks.push( new THREE.VectorKeyframeTrack( name, times, values, intrpl ) );
+
+					break;
+
+				case SEA3D.Stream.VECTOR4D:
+
+					values = data.subarray( start, end );
+					times = new Float32Array( values.length / anm.blockSize );
+					t = 0;
+
+					for ( k = 0; k < times.length; k ++ ) {
+
+						times[ k ] = t;
+						t += delta;
+
+					}
+
+					tracks.push( new THREE.QuaternionKeyframeTrack( name, times, values, intrpl ) );
+
+					break;
+
+				case SEA3D.Stream.INT24:
+				case SEA3D.Stream.UINT24:
+
+					values = new Float32Array( ( end - start ) * 3 );
+					times = new Float32Array( values.length / 3 );
+					t = 0;
+
+					for ( k = 0; k < times.length; k ++ ) {
+
+						values[ ( k * 3 ) ] = ( ( data[ k ] >> 16 ) & 0xFF ) / 255;
+						values[ ( k * 3 ) + 1 ] = ( ( data[ k ] >> 8 ) & 0xFF ) / 255;
+						values[ ( k * 3 ) + 2 ] = ( data[ k ] & 0xFF ) / 255;
+						times[ k ] = t;
+						t += delta;
+
+					}
+
+					tracks.push( new THREE.VectorKeyframeTrack( name, times, values, intrpl ) );//ColorKeyframeTrack
+
+					break;
+
+			}
+
+		}
+
+		animations.push( new THREE.SEA3D.AnimationClip( seq.name, - 1, tracks, seq.repeat ) );
+
+	}
+
+	this.domain.clips = this.clips = this.clips || [];
+	this.clips.push( this.objects[ sea.name + '.anm' ] = sea.tag = animations );
+
+};
+
+//
 //	Skeleton Animation
 //
 
-THREE.SEA3D.prototype.getSkeletonAnimation = function ( sea, skl ) {
-
-	if ( sea.tag ) return sea.tag;
+THREE.SEA3D.prototype.readSkeletonAnimation = function ( sea, skl ) {
 
 	var animations = [], delta = ( 1000 / sea.frameRate ) / 1000;
 
@@ -3030,8 +3040,6 @@ THREE.SEA3D.prototype.getSkeletonAnimation = function ( sea, skl ) {
 	this.domain.clips = this.clips = this.clips || [];
 	this.clips.push( this.objects[ sea.name + '.skla' ] = sea.tag = animations );
 
-	return animations;
-
 };
 
 //
@@ -3083,6 +3091,28 @@ THREE.SEA3D.prototype.readVertexAnimation = function ( sea ) {
 	this.domain.clips = this.clips = this.clips || [];
 	this.clips.push( this.objects[ sea.name + '.vtxa' ] = sea.tag );
 
+};
+
+//
+//	Animation Selector
+//
+
+THREE.SEA3D.prototype.getAnimationType = function ( req ) {
+	
+	var sea = req.sea;
+	
+	switch( sea.type ) {
+		
+		case SEA3D.SkeletonAnimation.prototype.type:
+		
+			this.readSkeletonAnimation( sea, req.skeleton );
+		
+			break;
+		
+	}
+	
+	return sea.tag;
+	
 };
 
 //
