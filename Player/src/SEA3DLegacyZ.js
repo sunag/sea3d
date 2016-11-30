@@ -151,7 +151,7 @@ THREE.SEA3D.prototype.flipZIndex = function ( v ) {
 
 };
 
-THREE.SEA3D.prototype.flipMatrixBone = function ( mtx ) {
+THREE.SEA3D.prototype.flipMatrixBone = function () {
 
 	var zero = new THREE.Vector3();
 	var buf1 = new THREE.Matrix4();
@@ -174,7 +174,7 @@ THREE.SEA3D.prototype.flipMatrixBone = function ( mtx ) {
 
 }();
 
-THREE.SEA3D.prototype.flipMatrixScale = function ( local, global, parent, parentGlobal ) {
+THREE.SEA3D.prototype.flipMatrixScale = function () {
 
 	var pos = new THREE.Vector3();
 	var qua = new THREE.Quaternion();
@@ -440,7 +440,7 @@ THREE.SEA3D.prototype.getAnimationType = function ( req ) {
 
 };
 
-THREE.SEA3D.prototype.updateTransform = function ( obj3d, sea ) {
+THREE.SEA3D.prototype.updateTransform = function () {
 
 	var buf1 = new THREE.Matrix4();
 	var identity = new THREE.Matrix4();
@@ -478,7 +478,7 @@ THREE.SEA3D.prototype.updateTransform = function ( obj3d, sea ) {
 
 }();
 
-THREE.SEA3D.prototype.readSkeleton = function ( sea ) {
+THREE.SEA3D.prototype.readSkeleton = function () {
 
 	var mtx_tmp_inv = new THREE.Matrix4(),
 		mtx_local = new THREE.Matrix4(),
@@ -546,7 +546,7 @@ THREE.SEA3D.prototype.readSkeleton = function ( sea ) {
 
 }();
 
-THREE.SEA3D.prototype.readSkeletonAnimationLegacy = function ( sea, skl ) {
+THREE.SEA3D.prototype.readSkeletonAnimationLegacy = function () {
 
 	var mtx_tmp_inv = new THREE.Matrix4(),
 		mtx_local = new THREE.Matrix4(),
@@ -642,15 +642,12 @@ THREE.SEA3D.prototype.readSkeletonAnimationLegacy = function ( sea, skl ) {
 
 			}
 
-			var anm = THREE.AnimationClip.parseAnimation( animation, skl.tag );
-			anm.loop = seq.repeat;
-			anm.timeScale = 1;
-
-			animations.push( anm );
+			animations.push( THREE.SEA3D.AnimationClip.fromClip( THREE.AnimationClip.parseAnimation( animation, skl.tag ), seq.repeat ) );
 
 		}
 
-		return sea.tag = animations;
+		this.domain.clips = this.clips = this.clips || [];
+		this.clips.push( this.objects[ sea.name + '.anm' ] = sea.tag = animations );
 
 	};
 
