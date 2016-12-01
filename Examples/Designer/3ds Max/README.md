@@ -35,7 +35,7 @@
 - TransparentTexture.max
 - VertexAnimation.max
 
-Notes
+Note
 --
 
 - Extract in `C:\Sunag\SEA3D-Examples\` to preserve the filename of the textures
