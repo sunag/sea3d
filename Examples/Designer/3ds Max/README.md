@@ -38,4 +38,4 @@
 Notes
 --
 
-- Extract in the folder "C:\Sunag\SEA3D-Examples\" to preserve the filename of the textures
+- Extract in "C:\Sunag\SEA3D-Examples\" to preserve the filename of the textures
