@@ -1,9 +1,11 @@
-== 3dsMax 9 ==
+3dsMax 9
+--
 
 - FlatMirror.max
 - Morpher.max
 
-== 3dsMax 2011 ==
+3dsMax 2011
+--
 
 - AnimationSequence.max
 - ATF_Textures.max
@@ -33,6 +35,7 @@
 - TransparentTexture.max
 - VertexAnimation.max
 
-== Notes ==
+Notes
+--
 
 - Extract in the folder "C:\Sunag\SEA3D-Examples\" to preserve the filename of the textures
