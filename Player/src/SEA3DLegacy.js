@@ -228,10 +228,10 @@ THREE.SEA3D.prototype.flipDefaultAnimation = function () {
 	return function ( animation, obj3d, relative ) {
 
 		if ( animation.isFliped ) return;
-		
+
 		var dataList = animation.dataList,
 			t_anm = [];
-		
+
 		for ( var i = 0; i < dataList.length; i ++ ) {
 
 			var data = dataList[ i ],
@@ -244,11 +244,13 @@ THREE.SEA3D.prototype.flipDefaultAnimation = function () {
 				case SEA3D.Animation.POSITION:
 				case SEA3D.Animation.ROTATION:
 				case SEA3D.Animation.SCALE:
+
 					t_anm.push( {
 						kind: kind,
 						numFrames: numFrames,
 						raw: raw
 					} );
+
 					break;
 
 			}
@@ -389,12 +391,12 @@ THREE.SEA3D.prototype.flipDefaultAnimation = function () {
 
 THREE.SEA3D.prototype.readAnimation = function ( sea ) {
 
-	if ( !this.isLegacy( sea ) ) {
+	if ( ! this.isLegacy( sea ) ) {
 
 		this._readAnimation( sea );
 
 	}
-	
+
 };
 
 THREE.SEA3D.prototype.getAnimationType = function ( req ) {
@@ -403,34 +405,34 @@ THREE.SEA3D.prototype.getAnimationType = function ( req ) {
 
 	if ( this.isLegacy( sea ) ) {
 
-		switch(sea.type) {
+		switch ( sea.type ) {
 
 			case SEA3D.SkeletonAnimation.prototype.type:
-		
+
 				this.readSkeletonAnimationLegacy( sea, req.skeleton );
-				
+
 				return sea.tag;
-		
+
 				break;
-		
+
 			case SEA3D.Animation.prototype.type:
-		
+
 				if ( req.scope instanceof THREE.Object3D ) {
 
 					this.flipDefaultAnimation( sea, req.scope, req.relative );
 
 				}
-				
+
 				this._readAnimation( sea );
-				
+
 				return sea.tag;
-				
+
 				break;
-			
+
 		}
-		
+
 	}
-	
+
 	return this._getAnimationType( req );
 
 };

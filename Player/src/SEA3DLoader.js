@@ -1706,10 +1706,10 @@ THREE.SEA3D.prototype.addDefaultAnimation = function ( sea, animatorClass ) {
 
 			case SEA3D.Animation.prototype.type:
 
-				var animation = anm.tag.tag || this.getAnimationType( { 				
-					sea : anm.tag,
-					scope : scope,
-					relative : anm.relative
+				var animation = anm.tag.tag || this.getAnimationType( {
+					sea: anm.tag,
+					scope: scope,
+					relative: anm.relative
 				} );
 
 				scope.animator = new animatorClass( animation, scope );
@@ -1722,7 +1722,7 @@ THREE.SEA3D.prototype.addDefaultAnimation = function ( sea, animatorClass ) {
 				}
 
 				return scope.animator;
-				
+
 				break;
 
 		}
@@ -1904,16 +1904,20 @@ THREE.SEA3D.prototype.readMesh = function ( sea ) {
 
 			case SEA3D.Skeleton.prototype.type:
 			case SEA3D.SkeletonLocal.prototype.type:
+
 				skeleton = mod;
 
 				geo.bones = skeleton.tag;
+
 				break;
 
 			case SEA3D.Morph.prototype.type:
+
 				morpher = mod;
 
 				geo.morphAttributes = morpher.tag.attribs;
 				geo.morphTargets = morpher.tag.targets;
+
 				break;
 
 		}
@@ -1927,21 +1931,25 @@ THREE.SEA3D.prototype.readMesh = function ( sea ) {
 		switch ( anm.tag.type ) {
 
 			case SEA3D.SkeletonAnimation.prototype.type:
+
 				skeletonAnimation = anm.tag;
 
-				geo.animations = skeletonAnimation.tag || this.getAnimationType( { 				
-					sea : skeletonAnimation,
-					skeleton : skeleton,
-					relative : true
+				geo.animations = skeletonAnimation.tag || this.getAnimationType( {
+					sea: skeletonAnimation,
+					skeleton: skeleton,
+					relative: true
 				} );
+
 				break;
 
 			case SEA3D.VertexAnimation.prototype.type:
+
 				vertexAnimation = anm.tag;
 
 				geo.morphAttributes = vertexAnimation.tag.attribs;
 				geo.morphTargets = vertexAnimation.tag.targets;
 				geo.animations = vertexAnimation.tag.animations;
+
 				break;
 
 		}
@@ -2549,22 +2557,30 @@ THREE.SEA3D.prototype.setBlending = function ( mat, blendMode ) {
 	switch ( blendMode ) {
 
 		case "add":
+
 			mat.blending = THREE.AdditiveBlending;
+
 			break;
 
 		case "subtract":
+
 			mat.blending = THREE.SubtractiveBlending;
+
 			break;
 
 		case "multiply":
+
 			mat.blending = THREE.MultiplyBlending;
+
 			break;
 
 		case "screen":
+
 			mat.blending = THREE.CustomBlending;
 			mat.blendSrc = THREE.OneFactor;
 			mat.blendDst = THREE.OneMinusSrcColorFactor;
 			mat.blendEquation = THREE.AddEquation;
+
 			break;
 
 	}
@@ -2862,27 +2878,39 @@ THREE.SEA3D.prototype.readAnimation = function ( sea ) {
 			switch ( anm.kind ) {
 
 				case SEA3D.Animation.POSITION:
+
 					name = '.position';
+
 					break;
 
 				case SEA3D.Animation.ROTATION:
+
 					name = '.quaternion';
+
 					break;
 
 				case SEA3D.Animation.SCALE:
+
 					name = '.scale';
+
 					break;
 
 				case SEA3D.Animation.COLOR:
+
 					name = '.color';
+
 					break;
 
 				case SEA3D.Animation.MULTIPLIER:
+
 					name = '.intensity';
+
 					break;
 
 				case SEA3D.Animation.FOV:
+
 					name = '.fov';
+
 					break;
 
 			}
@@ -3098,21 +3126,21 @@ THREE.SEA3D.prototype.readVertexAnimation = function ( sea ) {
 //
 
 THREE.SEA3D.prototype.getAnimationType = function ( req ) {
-	
+
 	var sea = req.sea;
-	
-	switch( sea.type ) {
-		
+
+	switch ( sea.type ) {
+
 		case SEA3D.SkeletonAnimation.prototype.type:
-		
+
 			this.readSkeletonAnimation( sea, req.skeleton );
-		
+
 			break;
-		
+
 	}
-	
+
 	return sea.tag;
-	
+
 };
 
 //
