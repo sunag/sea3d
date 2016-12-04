@@ -29,9 +29,9 @@
 		<script src="../Source/Three.JS/SEA3DLZMA.js"></script>
 		<script src="../Source/Three.JS/SEA3DLegacy.js"></script>
 		
-		<script src="../Source/Three.JS/physics/ammo.js"></script>
-		<script src="../Source/Three.JS/physics/ammo.three.js"></script>
+		<script src="../Source/Three.JS/libs/ammo.js"></script>
 		<script src="../Source/Three.JS/physics/SEA3DRigidBody.js"></script>
+		<script src="../Source/Three.JS/physics/SEA3DAmmo.js"></script>
 		<script src="../Source/Three.JS/physics/SEA3DAmmoLoader.js"></script>
 		
 		<script src="js/uil.min.js"></script>
@@ -58,7 +58,7 @@
 
 			function init() {
 
-				THREE.AMMO.init(); // init physics engine
+				SEA3D.AMMO.init(); // init physics engine
 
 				clock = new THREE.Clock();
 
@@ -367,7 +367,7 @@
 				var delta = clock.getDelta();
 
 				// Update sea3d physics
-				if( isPhysics ) THREE.AMMO.update( delta );
+				if( isPhysics ) SEA3D.AMMO.update( delta );
 
 				// Update sea3d Animations
 				THREE.SEA3D.AnimationHandler.update( delta );

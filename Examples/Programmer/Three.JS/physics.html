@@ -28,10 +28,9 @@
 	</head>
 	<body>
 		<div id="info">
-			<a href="http://threejs.org" target="_blank">Three.JS</a> - Exported by <a href="https://github.com/sunag/sea3d" style="color:#FFFFFF" target="_blank">SEA3D Exporter</a> edited by <a href="https://github.com/sunag/sea3d" style="color:#FFFFFF" target="_blank">SEA3D Studio</a>
+			<a href="http://threejs.org" target="_blank">Three.JS</a> - Ammo Physics Example - Exported by <a href="https://github.com/sunag/sea3d" style="color:#FFFFFF" target="_blank">SEA3D Exporter</a> edited by <a href="https://github.com/sunag/sea3d" style="color:#FFFFFF" target="_blank">SEA3D Studio</a>
 			<br/>
-			<br/><div id="description">Ammo Physics Example</div>
-			<br/>Right click to clone
+			<br/><div id="description">Right click to clone</div>
 		</div>
 
 		<script src="js/three.js"></script>
@@ -50,9 +49,9 @@
 		<script src="../../../Source/Three.JS/SEA3DLZMA.js"></script>
 		<script src="../../../Source/Three.JS/SEA3DLoader.js"></script>
 
-		<script src="../../../Source/Three.JS/physics/ammo.js"></script>
-		<script src="../../../Source/Three.JS/physics/ammo.three.js"></script>
+		<script src="../../../Source/Three.JS/libs/ammo.js"></script>
 		<script src="../../../Source/Three.JS/physics/SEA3DRigidBody.js"></script>
+		<script src="../../../Source/Three.JS/physics/SEA3DAmmo.js"></script>
 		<script src="../../../Source/Three.JS/physics/SEA3DAmmoLoader.js"></script>
 		
 		<script src="js/stats.min.js"></script>
@@ -69,9 +68,9 @@
 
 			init();
 			
-			// Init physics engine
+			// Initialize Physics Engine
 			
-			THREE.AMMO.init(); 
+			SEA3D.AMMO.init(); 
 
 			//
 			// SEA3D Loader
@@ -103,7 +102,7 @@
 
 					var domain = this.loader.clone( { lights : false, runScripts : false, autoPlay: false, enabledPhysics : false } );
 
-					offset -= 180;
+					offset += 180;
 
 					domain.container.position.x += offset;
 					domain.applyContainerTransform();
@@ -114,7 +113,7 @@
 				
 				}
 			
-			}()
+			}();
 			
 			function init() {
 
@@ -124,7 +123,7 @@
 				document.body.appendChild( container );
 
 				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
-				camera.position.set( 400, 300, 400 );
+				camera.position.set( -300, 200, 300 );
 
 				renderer = new THREE.WebGLRenderer({antialias:false});
 				renderer.setPixelRatio( window.devicePixelRatio );
@@ -190,9 +189,12 @@
 
 				requestAnimationFrame( animate );
 
-				THREE.AMMO.update( delta );
+				// Update Physics Engine
+
+				SEA3D.AMMO.update( delta );
 
 				// Update SEA3D Animations
+
 				THREE.SEA3D.AnimationHandler.update( delta );
 
 				render( delta );

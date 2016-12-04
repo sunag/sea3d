@@ -84,11 +84,11 @@ THREE.SEA3D.prototype.readConvexGeometry = function ( sea ) {
 
 	if ( this.config.convexHull ) {
 
-		var shape = THREE.AMMO.createConvexHull( sea.geometry.tag, sea.subGeometryIndex );
+		var shape = SEA3D.AMMO.createConvexHull( sea.geometry.tag, sea.subGeometryIndex );
 
 	} else {
 
-		var triMesh = THREE.AMMO.createTriangleMesh( sea.geometry.tag, sea.subGeometryIndex );
+		var triMesh = SEA3D.AMMO.createTriangleMesh( sea.geometry.tag, sea.subGeometryIndex );
 
 		var shape = new Ammo.btConvexTriangleMeshShape( triMesh, true );
 
@@ -105,7 +105,7 @@ THREE.SEA3D.prototype.readConvexGeometry = function ( sea ) {
 
 THREE.SEA3D.prototype.readTriangleGeometry = function ( sea ) {
 
-	var triMesh = THREE.AMMO.createTriangleMesh( sea.geometry.tag, sea.subGeometryIndex );
+	var triMesh = SEA3D.AMMO.createTriangleMesh( sea.geometry.tag, sea.subGeometryIndex );
 
 	var shape = new Ammo.btBvhTriangleMeshShape( triMesh, true, true );
 
@@ -128,7 +128,7 @@ THREE.SEA3D.prototype.readCompound = function ( sea ) {
 
 		THREE.SEA3D.MTXBUF.elements = compound.transform;
 
-		var transform = THREE.AMMO.getTransformFromMatrix( THREE.SEA3D.MTXBUF );
+		var transform = SEA3D.AMMO.getTransformFromMatrix( THREE.SEA3D.MTXBUF );
 
 		shape.addChildShape( transform, compound.shape.tag );
 
@@ -150,13 +150,13 @@ THREE.SEA3D.prototype.readRigidBodyBase = function ( sea ) {
 
 	if ( sea.target ) {
 
-		transform = THREE.AMMO.getTransformFromMatrix( sea.target.tag.matrix );
+		transform = SEA3D.AMMO.getTransformFromMatrix( sea.target.tag.matrix );
 
 	} else {
 
 		THREE.SEA3D.MTXBUF.elements.set( sea.transform );
 
-		transform = THREE.AMMO.getTransformFromMatrix( THREE.SEA3D.MTXBUF );
+		transform = SEA3D.AMMO.getTransformFromMatrix( THREE.SEA3D.MTXBUF );
 
 	}
 
@@ -188,7 +188,7 @@ THREE.SEA3D.prototype.readRigidBody = function ( sea ) {
 
 	var rb = this.readRigidBodyBase( sea );
 
-	THREE.AMMO.addRigidBody( rb, sea.target ? sea.target.tag : undefined, sea.offset ? new THREE.Matrix4().elements.set( sea.offset ) : undefined, this.config.enabledPhysics );
+	SEA3D.AMMO.addRigidBody( rb, sea.target ? sea.target.tag : undefined, sea.offset ? new THREE.Matrix4().elements.set( sea.offset ) : undefined, this.config.enabledPhysics );
 
 };
 
@@ -200,11 +200,11 @@ THREE.SEA3D.prototype.readCarController = function ( sea ) {
 
 	var body = this.readRigidBodyBase( sea );
 
-	body.setActivationState( THREE.AMMO.DISABLE_DEACTIVATION );
+	body.setActivationState( SEA3D.AMMO.DISABLE_DEACTIVATION );
 
 	// Car
 
-	var vehicleRayCaster = new Ammo.btDefaultVehicleRaycaster( THREE.AMMO.world );
+	var vehicleRayCaster = new Ammo.btDefaultVehicleRaycaster( SEA3D.AMMO.world );
 
 	var tuning = new Ammo.btVehicleTuning();
 
@@ -259,8 +259,8 @@ THREE.SEA3D.prototype.readCarController = function ( sea ) {
 
 	}
 
-	THREE.AMMO.addVehicle( vehicle, wheels );
-	THREE.AMMO.addRigidBody( body, sea.target ? sea.target.tag : undefined, sea.offset ? new THREE.Matrix4().elements.set( sea.offset ) : undefined, this.config.enabledPhysics );
+	SEA3D.AMMO.addVehicle( vehicle, wheels );
+	SEA3D.AMMO.addRigidBody( body, sea.target ? sea.target.tag : undefined, sea.offset ? new THREE.Matrix4().elements.set( sea.offset ) : undefined, this.config.enabledPhysics );
 
 	this.domain.vehicles = this.vehicles = this.vehicles || [];
 	this.vehicles.push( this.objects[ "vhc/" + sea.name ] = sea.tag = vehicle );
@@ -293,7 +293,7 @@ THREE.SEA3D.prototype.readP2PConstraint = function ( sea ) {
 
 	}
 
-	THREE.AMMO.addConstraint( ctrt );
+	SEA3D.AMMO.addConstraint( ctrt );
 
 	this.domain.constraints = this.constraints = this.constraints || [];
 	this.constraints.push( this.objects[ "ctnt/" + sea.name ] = sea.tag = ctrt );
@@ -343,7 +343,7 @@ THREE.SEA3D.prototype.readHingeConstraint = function ( sea ) {
 
 	}
 
-	THREE.AMMO.addConstraint( ctrt );
+	SEA3D.AMMO.addConstraint( ctrt );
 
 	this.domain.constraints = this.constraints = this.constraints || [];
 	this.constraints.push( this.objects[ "ctnt/" + sea.name ] = sea.tag = ctrt );
@@ -378,7 +378,7 @@ THREE.SEA3D.prototype.readConeTwistConstraint = function ( sea ) {
 
 	}
 
-	THREE.AMMO.addConstraint( ctrt );
+	SEA3D.AMMO.addConstraint( ctrt );
 
 	this.domain.constraints = this.constraints = this.constraints || [];
 	this.constraints.push( this.objects[ "ctnt/" + sea.name ] = sea.tag = ctrt );
@@ -395,7 +395,7 @@ THREE.SEA3D.Domain.prototype.enabledPhysics = function ( enabled ) {
 
 	while ( i -- ) {
 
-		THREE.AMMO.setEnabledRigidBody( this.rigidBodies[ i ], enabled );
+		SEA3D.AMMO.setEnabledRigidBody( this.rigidBodies[ i ], enabled );
 
 	}
 
@@ -426,13 +426,13 @@ THREE.SEA3D.Domain.prototype.applyTransform = function ( matrix ) {
 	while ( i -- ) {
 
 		var rb = this.rigidBodies[ i ],
-			target = THREE.AMMO.getTargetByRigidBody( rb ),
+			target = SEA3D.AMMO.getTargetByRigidBody( rb ),
 			transform = rb.getWorldTransform(),
-			transformMatrix = THREE.AMMO.getMatrixFromTransform( transform );
+			transformMatrix = SEA3D.AMMO.getMatrixFromTransform( transform );
 
 		transformMatrix.multiplyMatrices( transformMatrix, matrix );
 
-		transform = THREE.AMMO.getTransformFromMatrix( transformMatrix );
+		transform = SEA3D.AMMO.getTransformFromMatrix( transformMatrix );
 
 		rb.setWorldTransform( transform );
 
@@ -541,13 +541,13 @@ THREE.SEA3D.EXTENSIONS_DOMAIN.push( {
 		var i;
 
 		i = this.rigidBodies ? this.rigidBodies.length : 0;
-		while ( i -- ) THREE.AMMO.removeRigidBody( this.rigidBodies[ i ], true );
+		while ( i -- ) SEA3D.AMMO.removeRigidBody( this.rigidBodies[ i ], true );
 
 		i = this.vehicles ? this.vehicles.length : 0;
-		while ( i -- ) THREE.AMMO.removeVehicle( this.vehicles[ i ], true );
+		while ( i -- ) SEA3D.AMMO.removeVehicle( this.vehicles[ i ], true );
 
 		i = this.constraints ? this.constraints.length : 0;
-		while ( i -- ) THREE.AMMO.removeConstraint( this.constraints[ i ], true );
+		while ( i -- ) SEA3D.AMMO.removeConstraint( this.constraints[ i ], true );
 
 		i = this.shapes ? this.shapes.length : 0;
 		while ( i -- ) Ammo.destroy( this.shapes[ i ] );

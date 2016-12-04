@@ -5,12 +5,12 @@
 *
 *    @author LoTh / http://3dflashlo.wordpress.com/
 *    @author SUNAG / http://www.sunag.com.br/
-*    @reference Ammo.lab / https://github.com/lo-th/Ammo.lab/
+*    @author Ammo.lab / https://github.com/lo-th/Ammo.lab/
 */
 
 'use strict';
 
-THREE.AMMO = {
+SEA3D.AMMO = {
 	world: null,
 	rigidBodies: [],
 	rigidBodiesTarget: [],
@@ -41,19 +41,25 @@ THREE.AMMO = {
 		switch ( this.broadphase ) {
 
 			case 'bvt':
+
 				this.broadphase = new Ammo.btDbvtBroadphase();
+
 				break;
 
 			case 'sap':
+
 				this.broadphase = new Ammo.btAxisSweep3(
 					new Ammo.btVector3( - this.worldScale, - this.worldScale, - this.worldScale ),
 					new Ammo.btVector3( this.worldScale, this.worldScale, this.worldScale ),
 					4096
 				);
+
 				break;
 
 			case 'simple':
+
 				this.broadphase = new Ammo.btSimpleBroadphase();
+
 				break;
 
 		}
