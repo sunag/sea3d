@@ -65,7 +65,7 @@ a {
 .panel {
 	position: fixed;
 	left: 0px;
-	width: 310px;
+	width: 320px;
 	height: 100%;
 	overflow: auto;
 	background: #222;	
@@ -73,7 +73,7 @@ a {
 
 .panel bg  {
 	position: absolute;
-	left: 140px;
+	left: 160px;
 	top: 10px;
 	opacity: .10;
 }
@@ -114,10 +114,25 @@ a {
 #stage {
 	position: absolute;
 	border: 0px;
-	left: 310px;
-	width: calc(100% - 310px);
+	left: 320px;
+	width: calc(100% - 320px);
 	height: 100%;
 	overflow: auto;
+}
+::-webkit-scrollbar {
+    height: 12px;
+    width: 12px;
+    background: #000;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #303030;
+    -webkit-border-radius: 1ex;
+    -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);
+}
+
+::-webkit-scrollbar-corner {
+    background: #000;
 }
 	</style>
 </head>
@@ -126,94 +141,64 @@ a {
 		
 		<bg><img src="Media/Logo.png"></bg>
 		<h1><a href="https://github.com/sunag/sea3d">SEA3D</a></h1>
-		<d>Open-source format and tools for games.</d>
+		<d>Open-source format and tools for games</d>
 		
 		<div class="content">			
 			<h2>Projects</h2>
 			<div>
-				<a href="http://cyrilmacisaac.com/Portfolio/HappyStudio/happystudio.shtml" target="_blank">McDonalds - Happy Studio</a>
-				<a href="http://www.vrsurus.com/" target="_blank">Tangible Virtual-Reality</a>
 				<a href="https://futureself.orange.com/" target="_blank">Orange #futureself</a>
-				<a href="http://is.muni.cz/th/325233/fi_m/web/pages/3d-prohlizec.html" target="stage">Medical 3D Viewer</a>
-				<a href="http://lo-th.github.io/3d.city/" target="stage">City 3D</a>
-				<a href="http://www.lego.com/en-us/city/games/web-games/thief-raid" target="stage">Lego Thief Raid</a>				
-				<a href="https://player.vimeo.com/video/98192168" target="stage">Vivo Avatar - World Cup 2014</a>				
+				<a href="http://www.vrsurus.com/" target="_blank">Tangible Virtual-Reality</a>
+				<a href="http://cyrilmacisaac.com/Portfolio/HappyStudio/happystudio.shtml" target="_blank">McDonalds - Happy Studio</a>
+				<a href="http://is.muni.cz/th/325233/fi_m/web/pages/3d-prohlizec.html" target="_blank">Medical 3D Viewer</a>
+				<a href="http://lo-th.github.io/3d.city/" target="_blank">City 3D</a>
+				<a href="http://www.lego.com/en-us/city/games/web-games/thief-raid" target="_blank">Lego Thief Raid</a>				
+				<a href="https://player.vimeo.com/video/98192168" target="_blank">Vivo Avatar - World Cup 2014</a>				
 				<a href="http://www.kotobee.com/" target="_blank">Kotobee Ebook</a>
-				<a href="http://lo-th.github.io/Oimo.js/index.html" target="stage">Oimo.js - Physics Engine</a>						
-				<a href="http://lo-th.github.io/Ammo.lab/" target="stage">Ammo Lab</a>									
-				<a href="http://lo-th.github.io/labs/index.html" target="stage">Loth Portfolio</a>		
-				<a href="http://lo-th.github.io/olympe/" target="stage">Olympe</a>		
-				<a href="http://arn-o.github.io/kuk-A-droid/demo/index.html" target="stage">Kuk-a-droid</a>	
+				<a href="http://lo-th.github.io/Oimo.js/index.html" target="_blank">Oimo.js - Physics Engine</a>						
+				<a href="http://lo-th.github.io/Ammo.lab/" target="_blank">Ammo Lab</a>									
+				<a href="http://lo-th.github.io/labs/index.html" target="_blank">Loth Portfolio</a>		
+				<a href="http://lo-th.github.io/olympe/" target="_blank">Olympe</a>		
 			</div>
 			<h2>Tools</h2>
 			<div>
-				<a href="http://www.youtube.com/embed/lQ-VIni5Q68?autoplay=1" target="stage">SEA3D Studio</a>				
-				<a href="http://sea3d.poonya.com/player" target="stage">SEA3D Player</a>								
-				<a href="http://www.youtube.com/embed/dTCztYwwEdE?autoplay=1" target="stage">3dsMax Exporter</a>
+				<a href="http://community.poonya.com/252">SEA3D Studio 1.8 - Windows</a>
+				<a href="http://www.youtube.com/embed/lQ-VIni5Q68?autoplay=1" target="stage">SEA3D Studio 1.1 - Web</a>				
+				<a href="http://www.youtube.com/embed/dTCztYwwEdE?autoplay=1" target="stage">SEA3D Exporter - 3ds Max</a>
+				<a href="./Player/index.html">SEA3D Player</a>		
 				<a href="https://github.com/sunag/sea3d" style="color:#fa6800;">Download</a>
 			</div>
 			<h2>Help</h2>
 			<div>				
-				<a href="http://community.poonya.com/sea3d-tutorials" target="stage">Tutorials</a>
-				<a href="http://community.poonya.com/sea3d" target="stage">Help, bugs and others</a>
+				<a href="http://community.poonya.com/sea3d-tutorials">Tutorials</a>
+				<a href="http://community.poonya.com/sea3d">Help, bugs and others</a>
 			</div>		
 			<div>
-				<h3>WebGL<d>Basics - Three.JS</d></h3>
-				<a href="./Examples/Programmer/WebGL/Three.JS/Basics/mascot.html" target="stage">Mascot</a>
-				<a href="./Examples/Programmer/WebGL/Three.JS/Basics/keyframe.html" target="stage">Keyframe Animation</a>						
-				<a href="./Examples/Programmer/WebGL/Three.JS/Basics/skin.html" target="stage">Skeleton Animation + Bone Obj.</a>
-				<a href="./Examples/Programmer/WebGL/Three.JS/Basics/hierarchy.html" target="stage">Scene Hierarchy + Animation</a>
-				<a href="./Examples/Programmer/WebGL/Three.JS/Basics/vertex-animation.html" target="stage">Vertex Animation</a>
-				<a href="./Examples/Programmer/WebGL/Three.JS/Basics/physics.html" target="stage">Physics + Ammo.JS</a>
-				<a href="./Examples/Programmer/WebGL/Three.JS/Basics/car.html" target="stage">Car + Reflection</a>
-				<a href="./Examples/Programmer/WebGL/Three.JS/Basics/morpher.html" target="stage">Morpher</a>
-				<a href="./Examples/Programmer/WebGL/Three.JS/Basics/sound.html" target="stage">Sound 3D</a>			
-				<a href="./Examples/Programmer/WebGL/Three.JS/Basics/lightmap.html" target="stage">Light Map</a>
-				<a href="./Examples/Programmer/WebGL/Three.JS/Basics/dummy.html" target="stage">Sprite 3D / Lines / Dummy</a>
-				<a href="./Examples/Programmer/WebGL/Three.JS/Basics/bigmodel.html" target="stage">Big Model</a>				
-				<a href="./Examples/Programmer/WebGL/Three.JS/Basics/hello-world.html" target="stage">Hello World</a>
+				<h3>Three.JS<d>Examples</d></h3>
+				<a href="./Examples/Programmer/Three.JS/mascot.html" target="stage">Mascot</a>
+				<a href="./Examples/Programmer/Three.JS/keyframe.html" target="stage">Character</a>						
+				<a href="./Examples/Programmer/Three.JS/character.html" target="stage">Keyframe Animation</a>
+				<a href="./Examples/Programmer/Three.JS/robot_o3dgc.html" target="stage">Scene Hierarchy + Open3DGC</a>
+				<a href="./Examples/Programmer/Three.JS/morph.html" target="stage">Morph + Vertex Animation</a>
+				<a href="./Examples/Programmer/Three.JS/sound.html" target="stage">Sounds</a>
 			</div>	
 			<div>
-				<h3><d>Advanced</d></h3>
-				<a href="./Examples/Programmer/WebGL/Three.JS/Advanced/car.html" target="stage">Car</a>
-				<a href="./Examples/Programmer/WebGL/Three.JS/Advanced/dianna.html" target="stage">Dianna</a>
-				<a href="./Examples/Programmer/WebGL/Three.JS/Advanced/dragon.html" target="stage">Dragon</a>
-				<a href="./Examples/Programmer/WebGL/Three.JS/Advanced/droid.html" target="stage">Droid</a>
-				<a href="./Examples/Programmer/WebGL/Three.JS/Advanced/game_assets.html" target="stage">Game Assets</a>
-				<a href="./Examples/Programmer/WebGL/Three.JS/Advanced/spider_cloud.html" target="stage">Spider Cloud</a>
-				<a href="./Examples/Programmer/WebGL/Three.JS/Advanced/wargame.html" target="stage">Wargame</a>							
+				<h3><d>Demos</d></h3>
+				<a href="./Examples/Programmer/Three.JS/demos/car.html" target="stage">Car</a>
+				<a href="./Examples/Programmer/Three.JS/demos/dianna.html" target="stage">Dianna</a>
+				<a href="./Examples/Programmer/Three.JS/demos/dragon.html" target="stage">Dragon</a>
+				<a href="./Examples/Programmer/Three.JS/demos/droid.html" target="stage">Droid</a>
+				<a href="./Examples/Programmer/Three.JS/demos/game_assets.html" target="stage">Game Assets</a>
+				<a href="./Examples/Programmer/Three.JS/demos/spider_cloud.html" target="stage">Spider Cloud</a>						
+				<a href="./Examples/Programmer/Three.JS/demos/wargame.html" target="stage">Wargame</a>							
 			</div>
 			<div>
-				<h3>Flash<d>Design (no programmer) - Away3D</d></h3>
-				<a href="http://www.poonya.com/embed/GnLv7w5WAZa" target="stage">Mascot</a>
-				<a href="http://sea3d.poonya.com/player/?load=http://developers.poonya.com/forum/download/file.php?id=158" target="stage">Particles</a>
-				<a href="http://www.poonya.com/embed/4qr9dMNEIbw" target="stage">Runtime Planar Reflection</a>
-				<a href="http://www.poonya.com/embed/VyR04NKpAFH" target="stage">Runtime Cube Reflection</a>
-				<a href="http://www.poonya.com/embed/m54QrIWeKqG" target="stage">Teapot in Bone + InkPaint</a>
-				<a href="http://www.poonya.com/embed/R8eBsX4FTI3" target="stage">Vertex Animation</a>
-				<a href="http://www.poonya.com/embed/qgnmyBxJ0MR" target="stage">Blend Texture</a>
-				<a href="http://www.poonya.com/embed/5YLst7z2QqR" target="stage">Layered Texture Animation</a>
-				<a href="http://www.poonya.com/embed/eSL7o95xPKR" target="stage">Hierarchy Animation (no bones)</a>
-				<a href="http://www.poonya.com/embed/L8X03mUBKaR" target="stage">Skeleton Animation</a>
-				<a href="http://www.poonya.com/embed/iYdtETK0xf6" target="stage">Texture Animation</a>
-				<a href="http://www.poonya.com/embed/hDsMvfgerIG" target="stage">Sound3D</a>
-				<a href="http://www.poonya.com/embed/7t2ImRakEf3" target="stage">Reflect Shaders</a>
-				<a href="http://www.poonya.com/embed/UfnX4AscCQz" target="stage">Keyframe Animation</a>
-				<a href="http://www.poonya.com/embed/XBkEcP5DHwR" target="stage">Morpher Animation</a>
-				<a href="http://www.poonya.com/embed/afKbpINo9xh" target="stage">LightMap</a>
-				<a href="http://www.poonya.com/embed/6Un2ZHBNesw" target="stage">Light Animation</a>
-				<a href="http://www.poonya.com/embed/NGhj0ge8bML" target="stage">DetailMap</a>
-				<a href="http://www.poonya.com/embed/B5rTyiR6PUX" target="stage">Transparent Texture</a>				
-				<a href="http://www.poonya.com/embed/j0TuOHp8UVv" target="stage">Camera Animation</a>				
-			</div>			
-			<div>
-				<h3><d>Advanced</d></h3>				
+				<h3>Away3D<d></d></h3>
 				<a href="http://lo-th.github.io/loth/diana/index2.html" target="stage">Diana</a>
-				<a href="http://orange-suzuki.com/labs/sea3d/morph/" target="stage">Morpher + Skin</a>
-			</div>	
+				<a href="http://orange-suzuki.com/labs/sea3d/morph/" target="stage">Morpher + Skin</a>			
+			</div>
 			<h3> </h3>
 		</div>
 	</div>
-	<iframe id="stage" name="stage" src="./Examples/Programmer/WebGL/Three.JS/Basics/mascot.html" allowfullscreen="" onmousewheel=""></iframe>
+	<iframe id="stage" name="stage" onload="this.contentWindow.focus()" src="./Examples/Programmer/Three.JS/mascot.html" allowfullscreen="" onmousewheel=""></iframe>
 </body>
 </html>

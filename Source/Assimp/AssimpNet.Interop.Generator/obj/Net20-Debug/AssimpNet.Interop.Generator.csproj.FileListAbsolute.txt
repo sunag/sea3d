@@ -1,0 +1,7 @@
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\AssimpNet.Interop.Generator\bin\Net20-Debug\AssimpNet.Interop.Generator.exe.config
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\AssimpNet.Interop.Generator\bin\Net20-Debug\AssimpNet.Interop.Generator.exe
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\AssimpNet.Interop.Generator\bin\Net20-Debug\AssimpNet.Interop.Generator.pdb
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\AssimpNet.Interop.Generator\bin\Net20-Debug\Mono.Cecil.dll
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\AssimpNet.Interop.Generator\bin\Net20-Debug\Mono.Cecil.Pdb.dll
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\AssimpNet.Interop.Generator\obj\Net20-Debug\AssimpNet.Interop.Generator.exe
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\AssimpNet.Interop.Generator\obj\Net20-Debug\AssimpNet.Interop.Generator.pdb

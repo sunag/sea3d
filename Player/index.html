@@ -20,24 +20,27 @@
 
 	<body>		
 		
-		<script src="build/three.dev.min.js"></script>	
-		<script src="build/sea.js"></script>
-
-		<script src="js/controls/OrbitControls.js"></script>
+		<script src="../Examples/Programmer/Three.JS/js/three.js"></script>
+		<script src="../Examples/Programmer/Three.JS/js/controls/OrbitControls.js"></script>
+		
+		<script src="../Source/Three.JS/SEA3D.js"></script>
+		<script src="../Source/Three.JS/SEA3DLoader.js"></script>
+		<script src="../Source/Three.JS/SEA3DDeflate.js"></script>
+		<script src="../Source/Three.JS/SEA3DLZMA.js"></script>
+		<script src="../Source/Three.JS/SEA3DLegacy.js"></script>
+		
+		<script src="../Source/Three.JS/physics/ammo.js"></script>
+		<script src="../Source/Three.JS/physics/ammo.three.js"></script>
+		<script src="../Source/Three.JS/physics/SEA3DRigidBody.js"></script>
+		<script src="../Source/Three.JS/physics/SEA3DAmmoLoader.js"></script>
+		
 		<script src="js/uil.min.js"></script>
 		<script src="js/Gradient.js"></script>
 		<script src="js/ShaderShadow.js"></script>
 
 		<script src="js/seaPlayer.js"></script>
 
-		<script src="src/ammo.js"></script>
-		<script src="src/ammo.three.js"></script>
-		
-		<script src="js/Detector.js"></script>
-		
 		<script>
-
-			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 			var container, gui;
 
@@ -68,7 +71,7 @@
 				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
 				camera.position.set( 1000, - 300, 1000 );
 
-				renderer = new THREE.WebGLRenderer();
+				renderer = new THREE.WebGLRenderer( {antialias: false } );
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				renderer.setClearColor( 0x171717, 1 );
@@ -89,7 +92,7 @@
 
 				controls = new THREE.OrbitControls( camera, container );
 
-				envMap = new THREE.TextureLoader().load( './assets/textures/metal.jpg' );
+				envMap = new THREE.TextureLoader().load( '../Examples/Programmer/Three.JS/assets/textures/metal.jpg' );
                 envMap.mapping = THREE.SphericalReflectionMapping;
 
 				// events
@@ -121,7 +124,7 @@
 				// SEA LOADER
 
 				seaPlayer.init( scene, seaEndLoad, clearAll );
-				seaPlayer.load( './assets/mascot.tjs.sea' );
+				seaPlayer.load( '../Examples/Programmer/Three.JS/assets/babe.tjs.sea' );
 
 			}
 
@@ -131,15 +134,18 @@
 
 				gui = new UIL.Gui( { width:200, bg:'rgba(23,23,23,0.5)' } );
 				
-				gui.add( 'fps', { res:70 } );
+				gui.add( 'fps', { res:70 } ).show();
 				gui.add('button', { name:'LOAD', fontColor:'#D4B87B', height:30, drag:true, p:0 }).onChange( seaPlayer.read );
 
 				g_example = gui.add('group', { name:'EXAMPLE' })
-				g_example.add('button', { name:'MASCOT', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( './assets/mascot.tjs.sea' );  } );
-				g_example.add('button', { name:'BABE', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( './assets/babe.tjs.sea' );  } );
-				g_example.add('button', { name:'ANDROID', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( './assets/droid.sea' );  } );
-				g_example.add('button', { name:'MECK', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( './assets/meck.sea' );  } );
-				g_example.add('button', { name:'PHYSICS', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( './assets/physics.tjs.sea' );  } );
+				//g_example.add('button', { name:'MASCOT.SEA', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( '../Examples/Programmer/Three.JS/assets/mascot.sea' );  } );
+				//g_example.add('button', { name:'MASCOT', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( '../Examples/Programmer/Three.JS/assets/mascot.tjs.sea' );  } );
+				g_example.add('button', { name:'BABE', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( '../Examples/Programmer/Three.JS/assets/babe.tjs.sea' );  } );
+				g_example.add('button', { name:'ANDROID', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( '../Examples/Programmer/Three.JS/assets/droid.sea' );  } );
+				//g_example.add('button', { name:'KEYFRAME.SEA', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( '../Examples/Programmer/Three.JS/assets/keyframe.sea' );  } );
+				g_example.add('button', { name:'KEYFRAME', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( '../Examples/Programmer/Three.JS/assets/keyframe.tjs.sea' );  } );
+				g_example.add('button', { name:'MECK', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( '../Examples/Programmer/Three.JS/assets/meck.sea' );  } );
+				g_example.add('button', { name:'PHYSICS', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( '../Examples/Programmer/Three.JS/assets/physics.tjs.sea' );  } );
 				g_example.open();
 
 			}
@@ -214,6 +220,8 @@
 
 				loader = seaPlayer.getLoader();
 
+				loader.meshes[0].clone();
+				
 				//console.log( loader )
 
 				loadPic.style.display = 'none';
@@ -362,7 +370,7 @@
 				if( isPhysics ) THREE.AMMO.update( delta );
 
 				// Update sea3d Animations
-				if( isAnimations ) THREE.SEA3D.AnimationHandler.update( delta );
+				THREE.SEA3D.AnimationHandler.update( delta );
 
 				renderer.render( scene, camera );
 

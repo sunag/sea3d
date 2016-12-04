@@ -1,0 +1,15 @@
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\SEA3D_Encoder\bin\Release\Assimp32.dll
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\SEA3D_Encoder\bin\Release\Assimp64.dll
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\SEA3D_Encoder\bin\Release\AssimpLicense.txt
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\SEA3D_Encoder\bin\Release\AssimpNet.dll
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\SEA3D_Encoder\bin\Release\SEA3D.dll
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\SEA3D_Encoder\bin\Release\AssimpNet.pdb
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\SEA3D_Encoder\bin\Release\AssimpNet.xml
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\SEA3D_Encoder\bin\Release\SEA3D.pdb
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\SEA3D_Encoder\obj\x86\Release\SEA3D_Encoder.csprojResolveAssemblyReference.cache
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\SEA3D_Encoder\bin\Release\SEA3DAssimp.dll
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\SEA3D_Encoder\bin\Release\SEA3DAssimp.pdb
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\SEA3D_Encoder\bin\Release\SEA3DEncoder.exe
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\SEA3D_Encoder\bin\Release\SEA3DEncoder.pdb
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\SEA3D_Encoder\obj\x86\Release\SEA3DEncoder.exe
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\SEA3D_Encoder\obj\x86\Release\SEA3DEncoder.pdb

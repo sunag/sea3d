@@ -1,0 +1,7 @@
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\AssimpNet\bin\Net45-Debug\Assimp32.dll
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\AssimpNet\bin\Net45-Debug\Assimp64.dll
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\AssimpNet\bin\Net45-Debug\AssimpLicense.txt
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\AssimpNet\bin\Net45-Debug\AssimpNet.dll
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\AssimpNet\bin\Net45-Debug\AssimpNet.pdb
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\AssimpNet\obj\Net45-Debug\AssimpNet.dll
+D:\Sunag\SEA3D\SDK\C#\SEA3D_SDK\AssimpNet\obj\Net45-Debug\AssimpNet.pdb

@@ -26,25 +26,29 @@
             <p style="font-size:14px"><a href="https://github.com/sunag/sea3d" style="color:#0099FF" target="_blank">SEA3D Format</a> • <a href="http://threejs.org"  style="color:#f90" target="_blank">THREE.JS</a></p>BHL loading test.
         </div>
 
-		<script src="build/three.dev.min.js"></script>
-		<script src="build/sea.js"></script>
-		<script src="js/uil.min.js"></script>
-		<script src="js/controls/OrbitControls.js"></script>
+		<script src="../Examples/Programmer/Three.JS/js/three.js"></script>
+		<script src="../Examples/Programmer/Three.JS/js/controls/OrbitControls.js"></script>
+		
+		<script src="../Source/Three.JS/SEA3D.js"></script>
+		<script src="../Source/Three.JS/SEA3DLoader.js"></script>
+		<script src="../Source/Three.JS/SEA3DLZMA.js"></script>
+		<script src="../Source/Three.JS/deprecated/SEA3DLegacyZ.js"></script>
+		
+		<script src="js/BVHLoader.js"></script>
+		
 		<script src="js/ShaderShadow.js"></script>
         <script src="js/ShaderAvatar.js"></script>
-        <script src="js/BVHLoader.js"></script>
         <script src="js/Gradient.js"></script>
-        <script src="js/Detector.js"></script>
 
+		<script src="js/uil.min.js"></script>
+		
 		<script>
-
-        if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
         var container = document.getElementById( 'container' );
 
         var bvhFile = 'bvh/base.z';
-        var seaModel = './assets/avatar.sea';
-        var path = './assets/textures/';
+        var seaModel = '../Examples/Programmer/Three.JS/assets/avatar.sea';
+        var path = '../Examples/Programmer/Three.JS/assets/textures/';
 
 	    var animation = [];
 
@@ -123,8 +127,7 @@
 			scene = new THREE.Scene();
             scene.background = Grad.texture();
 
-			renderer = new THREE.WebGLRenderer( { antialias: true, alpha: false } );
-            //renderer = new THREE.WebGL2Renderer( { antialias: true, alpha: true } );
+			renderer = new THREE.WebGLRenderer( { antialias: false, alpha: false } );
 			renderer.setClearColor( 0x171717, 1 );
 			renderer.setPixelRatio( window.devicePixelRatio );
 			renderer.setSize( window.innerWidth, window.innerHeight );

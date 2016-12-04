@@ -27,18 +27,18 @@
             <p style="font-size:14px"><a href="https://github.com/sunag/sea3d" style="color:#0099FF" target="_blank">SEA3D Format</a> • <a href="http://threejs.org"  style="color:#f90" target="_blank">THREE.JS</a></p>Animation Blending test.
         </div>
 
-		<script src="build/three.min.js"></script>
-		<script src="build/sea.js"></script>
-
+		<script src="../Examples/Programmer/Three.JS/js/three.js"></script>
+		<script src="../Examples/Programmer/Three.JS/js/controls/OrbitControls.js"></script>
+		
+		<script src="../Source/Three.JS/SEA3D.js"></script>
+		<script src="../Source/Three.JS/SEA3DLoader.js"></script>
+		<script src="../Source/Three.JS/SEA3DLZMA.js"></script>
+		<script src="../Source/Three.JS/SEA3DLegacy.js"></script>
+		
 		<script src="js/Gradient.js"></script>
 		<script src="js/uil.min.js"></script>
 
-		<script src="js/Detector.js"></script>
-		<script src="js/controls/OrbitControls.js"></script>
-
 		<script>
-
-			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 			var anims = ['idle', 'walk', 'run'];
 
@@ -75,7 +75,7 @@
 				scene = new THREE.Scene();
 				scene.background = Grad.texture();
 
-				renderer = new THREE.WebGLRenderer( { antialias: true, alpha: false } );
+				renderer = new THREE.WebGLRenderer( { antialias: false, alpha: false } );
 				renderer.setClearColor( 0x171717 );
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
@@ -86,7 +86,7 @@
 				var radius = 30;
 
 				camera = new THREE.PerspectiveCamera( 45, aspect, 1, 10000 );
-				camera.position.set( 0.0, radius, radius * 3.5 );
+				camera.position.set( 0.0, radius, radius * -3.5 );
 
 				controls = new THREE.OrbitControls( camera );
 				controls.target.set( 0, radius, 0 );
@@ -95,11 +95,11 @@
 				var ambient = new THREE.AmbientLight( 0x282824 );
 
 	            var light = new THREE.DirectionalLight( 0xffffff, 1 );
-	            light.position.set(2,10,6).multiplyScalar( 10 );
+	            light.position.set(-2,10,-6).multiplyScalar( 10 );
 	            light.lookAt( new THREE.Vector3(0,0,0) );
 
 	            var point = new THREE.PointLight( 0x3344EE, 1, 200);
-	            point.position.set( -2,-10,-6 ).multiplyScalar( 10 );
+	            point.position.set( 2,-10,6 ).multiplyScalar( 10 );
 
 	            scene.add( ambient );
 	            scene.add( light );
@@ -116,14 +116,14 @@
 
 				loader.onComplete = function( e ) {
 
-					var envMap = new THREE.TextureLoader().load( 'assets/textures/metal.jpg' );
+					var envMap = new THREE.TextureLoader().load( '../Examples/Programmer/Three.JS/assets/textures/metal.jpg' );
                     envMap.mapping = THREE.SphericalReflectionMapping;
 
-					var txt =  new THREE.TextureLoader().load( 'assets/textures/dva.png' );
+					var txt =  new THREE.TextureLoader().load( '../Examples/Programmer/Three.JS/assets/textures/dva.png' );
 					txt.wrapS = THREE.MirroredRepeatWrapping;
 					txt.flipY = false;
 
-					var tn =  new THREE.TextureLoader().load( 'assets/textures/dva_n.png' );
+					var tn =  new THREE.TextureLoader().load( '../Examples/Programmer/Three.JS/assets/textures/dva_n.png' );
 					tn.wrapS = THREE.MirroredRepeatWrapping;
 					tn.flipY = false;
 
@@ -140,7 +140,7 @@
 
 				}
 
-				loader.load( 'assets/dva.sea' );
+				loader.load( '../Examples/Programmer/Three.JS/assets/dva.sea' );
 
 			}
 

@@ -35,6 +35,16 @@
 - TransparentTexture.max
 - VertexAnimation.max
 
+3dsMax 2012
+--
+
+- car.max
+- dianna.max
+- dragon.max
+- droid.max
+- game.max
+- spider.max
+
 Note
 --
 
