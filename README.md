@@ -3,6 +3,10 @@
 SEA3D 1.8
 ==
 
+[![build](https://img.shields.io/wercker/ci/wercker/docs.svg)]()
+[![version](https://img.shields.io/badge/version-1.8.1-blue.svg)]()
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)]()
+
 Open-source format and tools for game developers.
 
 **List of Features**
