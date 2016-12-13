@@ -4,9 +4,6 @@ python build.py --include sea --include sea_deflate --include sea_legacy --minif
 python build.py --include sea --output ../Build/Three.JS/sea3d.tjs.js
 python build.py --include sea --minify --output ../Build/Three.JS/sea3d.tjs.min.js
 
-python build.py --include sea --include sea_deflate --include sea_legacy_z --output ../Build/Three.JS/sea3d.z.js
-python build.py --include sea --include sea_deflate --include sea_legacy_z --minify --output ../Build/Three.JS/sea3d.z.min.js
-
 python build.py --nocheckvars --include sea_physics --output ../Build/Three.JS/sea3d.physics.js
 python build.py --nocheckvars --include sea_physics --minify --output ../Build/Three.JS/sea3d.physics.min.js
 

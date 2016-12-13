@@ -168,6 +168,12 @@ SEA3D.Physics = function ( name, data, sea3d ) {
 	if ( this.attrib & 1 ) this.target = sea3d.getObject( data.readUInt() );
 	else this.transform = data.readMatrix();
 
+	if ( this.attrib & 2 ) this.offset = data.readMatrix();
+
+	if ( this.attrib & 4 ) this.scripts = data.readScriptList( sea3d );
+
+	if ( this.attrib & 16 ) this.attributes = sea3d.getObject( data.readUInt() );
+
 };
 
 SEA3D.Physics.prototype.readTag = function ( kind, data, size ) {
@@ -257,11 +263,21 @@ SEA3D.CarController.Wheel = function ( data, sea3d ) {
 	this.data = data;
 	this.sea3d = sea3d;
 
-	var attrib = data.readUShort();
+	this.attrib = data.readUShort();
 
-	this.isFront = ( attrib & 1 ) != 0,
+	this.isFront = ( this.attrib & 1 ) != 0;
 
-	this.target = sea3d.getObject( data.readUInt() );
+	if ( this.attrib & 2 ) {
+
+		this.target = sea3d.getObject( data.readUInt() );
+
+	}
+
+	if ( this.attrib & 4 ) {
+
+		this.offset = data.readMatrix();
+
+	}
 
 	this.pos = data.readVector3();
 	this.dir = data.readVector3();
@@ -438,12 +454,15 @@ SEA3D.File.setExtension( function () {
 'use strict';
 
 SEA3D.AMMO = {
+
 	world: null,
+
 	rigidBodies: [],
 	rigidBodiesTarget: [],
-	rigidBodiesOffset: [],
 	rigidBodiesEnabled: [],
+
 	constraints: [],
+
 	vehicles: [],
 	vehiclesWheels: [],
 
@@ -529,13 +548,12 @@ SEA3D.AMMO = {
 		return this.rigidBodiesEnabled[ this.rigidBodies.indexOf( rb ) ] === true;
 
 	},
-	addRigidBody: function ( rb, target, offset, enabled ) {
+	addRigidBody: function ( rb, target, enabled ) {
 
 		enabled = enabled !== undefined ? enabled : true;
 
 		this.rigidBodies.push( rb );
 		this.rigidBodiesTarget.push( target );
-		this.rigidBodiesOffset.push( offset );
 		this.rigidBodiesEnabled.push( false );
 
 		this.setEnabledRigidBody( rb, enabled );
@@ -551,7 +569,6 @@ SEA3D.AMMO = {
 
 		this.rigidBodies.splice( index, 1 );
 		this.rigidBodiesTarget.splice( index, 1 );
-		this.rigidBodiesOffset.splice( index, 1 );
 		this.rigidBodiesEnabled.splice( index, 1 );
 
 		if ( destroy ) Ammo.destroy( rb );
@@ -759,12 +776,7 @@ SEA3D.AMMO = {
 			var pos = transform.getOrigin(),
 				quat = transform.getRotation();
 
-			if ( offset == undefined ) {
-
-				obj3d.position.set( pos.x(), pos.y(), pos.z() );
-				obj3d.quaternion.set( quat.x(), quat.y(), quat.z(), quat.w() );
-
-			} else {
+			if ( offset ) {
 
 				position.set( pos.x(), pos.y(), pos.z() );
 				quaternion.set( quat.x(), quat.y(), quat.z(), quat.w() );
@@ -775,6 +787,11 @@ SEA3D.AMMO = {
 
 				obj3d.position.setFromMatrixPosition( matrix );
 				obj3d.quaternion.setFromRotationMatrix( matrix );
+
+			} else {
+
+				obj3d.position.set( pos.x(), pos.y(), pos.z() );
+				obj3d.quaternion.set( quat.x(), quat.y(), quat.z(), quat.w() );
 
 			}
 
@@ -804,7 +821,7 @@ SEA3D.AMMO = {
 
 				if ( wheelTarget ) {
 
-					this.updateTargetTransform( wheelTarget, wheelsTransform );
+					this.updateTargetTransform( wheelTarget, wheelsTransform, target.physics ? wheelTarget.physics.offset : null );
 
 				}
 
@@ -815,12 +832,11 @@ SEA3D.AMMO = {
 		for ( i = 0; i < this.rigidBodies.length; i ++ ) {
 
 			var rb = this.rigidBodies[ i ],
-				target = this.rigidBodiesTarget[ i ],
-				offset = this.rigidBodiesOffset[ i ];
+				target = this.rigidBodiesTarget[ i ];
 
 			if ( target && rb.isActive() ) {
 
-				this.updateTargetTransform( target, rb.getWorldTransform(), offset );
+				this.updateTargetTransform( target, rb.getWorldTransform(), target.physics ? target.physics.offset : null );
 
 			}
 
@@ -979,9 +995,14 @@ THREE.SEA3D.prototype.readCompound = function ( sea ) {
 THREE.SEA3D.prototype.readRigidBodyBase = function ( sea ) {
 
 	var shape = sea.shape.tag,
-		transform;
+		transform, target;
 
 	if ( sea.target ) {
+
+		target = sea.target.tag;
+
+		target.physics = { enabled: true };
+		target.updateMatrix();
 
 		transform = SEA3D.AMMO.getTransformFromMatrix( sea.target.tag.matrix );
 
@@ -1006,6 +1027,21 @@ THREE.SEA3D.prototype.readRigidBodyBase = function ( sea ) {
 
 	var rb = new Ammo.btRigidBody( info );
 
+	if ( target ) {
+
+		target.physics.rigidBody = rb;
+
+		if ( sea.offset ) {
+
+			var offset = new THREE.Matrix4();
+			offset.elements.set( sea.offset );
+
+			target.physics.offset = offset;
+
+		}
+
+	}
+
 	this.domain.rigidBodies = this.rigidBodies = this.rigidBodies || [];
 	this.rigidBodies.push( this.objects[ "rb/" + sea.name ] = sea.tag = rb );
 
@@ -1021,7 +1057,7 @@ THREE.SEA3D.prototype.readRigidBody = function ( sea ) {
 
 	var rb = this.readRigidBodyBase( sea );
 
-	SEA3D.AMMO.addRigidBody( rb, sea.target ? sea.target.tag : undefined, sea.offset ? new THREE.Matrix4().elements.set( sea.offset ) : undefined, this.config.enabledPhysics );
+	SEA3D.AMMO.addRigidBody( rb, sea.target ? sea.target.tag : undefined, this.config.enabledPhysics );
 
 };
 
@@ -1071,6 +1107,17 @@ THREE.SEA3D.prototype.readCarController = function ( sea ) {
 
 		if ( target ) {
 
+			target.physics = { enabled: true, rigidBody: wheelInfo };
+
+			if ( wheel.offset ) {
+
+				var offset = new THREE.Matrix4();
+				offset.elements.set( wheel.offset );
+
+				target.physics.offset = offset;
+
+			}
+
 			if ( target.parent ) {
 
 				target.parent.remove( target );
@@ -1093,7 +1140,7 @@ THREE.SEA3D.prototype.readCarController = function ( sea ) {
 	}
 
 	SEA3D.AMMO.addVehicle( vehicle, wheels );
-	SEA3D.AMMO.addRigidBody( body, sea.target ? sea.target.tag : undefined, sea.offset ? new THREE.Matrix4().elements.set( sea.offset ) : undefined, this.config.enabledPhysics );
+	SEA3D.AMMO.addRigidBody( body, sea.target ? sea.target.tag : undefined, this.config.enabledPhysics );
 
 	this.domain.vehicles = this.vehicles = this.vehicles || [];
 	this.vehicles.push( this.objects[ "vhc/" + sea.name ] = sea.tag = vehicle );
