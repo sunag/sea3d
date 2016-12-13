@@ -102,7 +102,7 @@
 
 					var domain = this.loader.clone( { lights : false, runScripts : false, autoPlay: false, enabledPhysics : false } );
 
-					offset += 180;
+					offset -= 180;
 
 					domain.container.position.x += offset;
 					domain.applyContainerTransform();
@@ -123,7 +123,7 @@
 				document.body.appendChild( container );
 
 				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
-				camera.position.set( -300, 200, 300 );
+				camera.position.set( 300, 200, -300 );
 
 				renderer = new THREE.WebGLRenderer({antialias:false});
 				renderer.setPixelRatio( window.devicePixelRatio );

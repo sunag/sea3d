@@ -86,7 +86,7 @@
 				var radius = 30;
 
 				camera = new THREE.PerspectiveCamera( 45, aspect, 1, 10000 );
-				camera.position.set( 0.0, radius, radius * -3.5 );
+				camera.position.set( 0.0, radius, radius * 3.5 );
 
 				controls = new THREE.OrbitControls( camera );
 				controls.target.set( 0, radius, 0 );
@@ -95,11 +95,11 @@
 				var ambient = new THREE.AmbientLight( 0x282824 );
 
 	            var light = new THREE.DirectionalLight( 0xffffff, 1 );
-	            light.position.set(-2,10,-6).multiplyScalar( 10 );
+	            light.position.set( 2, 10, 6 ).multiplyScalar( 10 );
 	            light.lookAt( new THREE.Vector3(0,0,0) );
 
 	            var point = new THREE.PointLight( 0x3344EE, 1, 200);
-	            point.position.set( 2,-10,6 ).multiplyScalar( 10 );
+	            point.position.set( -2, -10, -6 ).multiplyScalar( 10 );
 
 	            scene.add( ambient );
 	            scene.add( light );

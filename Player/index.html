@@ -29,6 +29,9 @@
 		<script src="../Source/Three.JS/SEA3DLZMA.js"></script>
 		<script src="../Source/Three.JS/SEA3DLegacy.js"></script>
 		
+		<script src="../Source/Three.JS/libs/o3dgc.js"></script>
+		<script src="../Source/Three.JS/o3dgc/SEA3DGC.js"></script>
+		
 		<script src="../Source/Three.JS/libs/ammo.js"></script>
 		<script src="../Source/Three.JS/physics/SEA3DRigidBody.js"></script>
 		<script src="../Source/Three.JS/physics/SEA3DAmmo.js"></script>
@@ -76,13 +79,6 @@
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				renderer.setClearColor( 0x171717, 1 );
 
-				renderer.gammaInput = true;
-				renderer.gammaOutput = true;
-
-				renderer.toneMapping = THREE.Uncharted2ToneMapping;
-                renderer.toneMappingExposure = 3.0;
-                renderer.toneMappingWhitePoint = 5.0;
-
                 renderer.shadowMap.enabled = true;
 				renderer.shadowMap.soft = true;
 			    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -124,7 +120,7 @@
 				// SEA LOADER
 
 				seaPlayer.init( scene, seaEndLoad, clearAll );
-				seaPlayer.load( '../Examples/Programmer/Three.JS/assets/babe.tjs.sea' );
+				seaPlayer.load( '../Examples/Programmer/Three.JS/assets/mascot.sea' );
 
 			}
 
@@ -138,14 +134,13 @@
 				gui.add('button', { name:'LOAD', fontColor:'#D4B87B', height:30, drag:true, p:0 }).onChange( seaPlayer.read );
 
 				g_example = gui.add('group', { name:'EXAMPLE' })
-				//g_example.add('button', { name:'MASCOT.SEA', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( '../Examples/Programmer/Three.JS/assets/mascot.sea' );  } );
-				//g_example.add('button', { name:'MASCOT', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( '../Examples/Programmer/Three.JS/assets/mascot.tjs.sea' );  } );
+				g_example.add('button', { name:'MASCOT', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( '../Examples/Programmer/Three.JS/assets/mascot.sea' );  } );
 				g_example.add('button', { name:'BABE', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( '../Examples/Programmer/Three.JS/assets/babe.tjs.sea' );  } );
 				g_example.add('button', { name:'ANDROID', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( '../Examples/Programmer/Three.JS/assets/droid.sea' );  } );
-				//g_example.add('button', { name:'KEYFRAME.SEA', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( '../Examples/Programmer/Three.JS/assets/keyframe.sea' );  } );
 				g_example.add('button', { name:'KEYFRAME', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( '../Examples/Programmer/Three.JS/assets/keyframe.tjs.sea' );  } );
 				g_example.add('button', { name:'MECK', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( '../Examples/Programmer/Three.JS/assets/meck.sea' );  } );
 				g_example.add('button', { name:'PHYSICS', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( '../Examples/Programmer/Three.JS/assets/physics.tjs.sea' );  } );
+				g_example.add('button', { name:'CAR', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( '../Examples/Programmer/Three.JS/assets/car.tjs.sea' );  } );
 				g_example.open();
 
 			}
@@ -193,24 +188,7 @@
 
 				cancelAnimationFrame( req );
 				
-				var o;
-				for ( var i = scene.children.length - 1; i >= 0 ; i-- ) {
-
-					o = scene.children[i];
-					if( o.children.length > 0 ){
-						for (var j = o.children.length - 1; j >= 0 ; j--) clear( o.children[j], o ); 
-					}
-					clear( o, scene );
-
-				}
-
-			}
-
-			function clear( obj, parent ) {
-
-				if( obj.material ) obj.material.dispose();
-				if( obj.geometry ) obj.geometry.dispose();
-				parent.remove( obj );
+				if (loader) loader.domain.dispose();
 
 			}
 
@@ -305,7 +283,7 @@
 
 				if( !loader.lights ){
 
-					var light = new THREE.DirectionalLight( 0xffffff, 1.3 );
+					var light = new THREE.DirectionalLight( 0xffffff, 1.0 );
 		            light.position.copy(centroid).add( new THREE.Vector3(-1,2,0.5).multiplyScalar( radius ) );
 		            light.lookAt( centroid );
 		            scene.add( light );
