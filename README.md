@@ -3,7 +3,7 @@
 SEA3D 1.8
 ==
 
-[![Build](https://img.shields.io/wercker/ci/wercker/docs.svg)](http://sunag.github.io/sea3d/)
+[![Build](https://img.shields.io/badge/build-passing-green.svg)](http://sunag.github.io/sea3d/)
 [![Version](https://img.shields.io/badge/version-1.8.1-blue.svg)](https://github.com/sunag/sea3d/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sunag/sea3d/blob/master/LICENSE)
 
