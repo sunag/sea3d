@@ -11,12 +11,15 @@
 'use strict';
 
 SEA3D.AMMO = {
+
 	world: null,
+
 	rigidBodies: [],
 	rigidBodiesTarget: [],
-	rigidBodiesOffset: [],
 	rigidBodiesEnabled: [],
+
 	constraints: [],
+
 	vehicles: [],
 	vehiclesWheels: [],
 
@@ -102,13 +105,12 @@ SEA3D.AMMO = {
 		return this.rigidBodiesEnabled[ this.rigidBodies.indexOf( rb ) ] === true;
 
 	},
-	addRigidBody: function ( rb, target, offset, enabled ) {
+	addRigidBody: function ( rb, target, enabled ) {
 
 		enabled = enabled !== undefined ? enabled : true;
 
 		this.rigidBodies.push( rb );
 		this.rigidBodiesTarget.push( target );
-		this.rigidBodiesOffset.push( offset );
 		this.rigidBodiesEnabled.push( false );
 
 		this.setEnabledRigidBody( rb, enabled );
@@ -124,7 +126,6 @@ SEA3D.AMMO = {
 
 		this.rigidBodies.splice( index, 1 );
 		this.rigidBodiesTarget.splice( index, 1 );
-		this.rigidBodiesOffset.splice( index, 1 );
 		this.rigidBodiesEnabled.splice( index, 1 );
 
 		if ( destroy ) Ammo.destroy( rb );
@@ -332,12 +333,7 @@ SEA3D.AMMO = {
 			var pos = transform.getOrigin(),
 				quat = transform.getRotation();
 
-			if ( offset == undefined ) {
-
-				obj3d.position.set( pos.x(), pos.y(), pos.z() );
-				obj3d.quaternion.set( quat.x(), quat.y(), quat.z(), quat.w() );
-
-			} else {
+			if ( offset ) {
 
 				position.set( pos.x(), pos.y(), pos.z() );
 				quaternion.set( quat.x(), quat.y(), quat.z(), quat.w() );
@@ -348,6 +344,11 @@ SEA3D.AMMO = {
 
 				obj3d.position.setFromMatrixPosition( matrix );
 				obj3d.quaternion.setFromRotationMatrix( matrix );
+
+			} else {
+
+				obj3d.position.set( pos.x(), pos.y(), pos.z() );
+				obj3d.quaternion.set( quat.x(), quat.y(), quat.z(), quat.w() );
 
 			}
 
@@ -377,7 +378,7 @@ SEA3D.AMMO = {
 
 				if ( wheelTarget ) {
 
-					this.updateTargetTransform( wheelTarget, wheelsTransform );
+					this.updateTargetTransform( wheelTarget, wheelsTransform, target.physics ? wheelTarget.physics.offset : null );
 
 				}
 
@@ -388,12 +389,11 @@ SEA3D.AMMO = {
 		for ( i = 0; i < this.rigidBodies.length; i ++ ) {
 
 			var rb = this.rigidBodies[ i ],
-				target = this.rigidBodiesTarget[ i ],
-				offset = this.rigidBodiesOffset[ i ];
+				target = this.rigidBodiesTarget[ i ];
 
 			if ( target && rb.isActive() ) {
 
-				this.updateTargetTransform( target, rb.getWorldTransform(), offset );
+				this.updateTargetTransform( target, rb.getWorldTransform(), target.physics ? target.physics.offset : null );
 
 			}
 
