@@ -193,6 +193,8 @@ THREE.SEA3D.prototype.readRigidBodyBase = function ( sea ) {
 
 	}
 
+	Ammo.destroy( info );
+
 	this.domain.rigidBodies = this.rigidBodies = this.rigidBodies || [];
 	this.rigidBodies.push( this.objects[ "rb/" + sea.name ] = sea.tag = rb );
 
