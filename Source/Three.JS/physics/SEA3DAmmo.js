@@ -92,17 +92,21 @@ SEA3D.AMMO = {
 
 	setEnabledRigidBody: function ( rb, enabled ) {
 
-		if ( this.getEnabledRigidBody( rb ) == enabled ) return;
+		var index = this.rigidBodies.indexOf( rb );
+
+		if ( this.rigidBodiesEnabled[ index ] == enabled ) return;
 
 		if ( enabled ) this.world.addRigidBody( rb );
 		else this.world.removeRigidBody( rb );
+
+		this.rigidBodiesEnabled[ index ] = true;
 
 		return this;
 
 	},
 	getEnabledRigidBody: function ( rb ) {
 
-		return this.rigidBodiesEnabled[ this.rigidBodies.indexOf( rb ) ] === true;
+		return this.rigidBodiesEnabled[ this.rigidBodies.indexOf( rb ) ];
 
 	},
 	addRigidBody: function ( rb, target, enabled ) {
