@@ -378,7 +378,7 @@ SEA3D.AMMO = {
 
 				if ( wheelTarget ) {
 
-					this.updateTargetTransform( wheelTarget, wheelsTransform, target.physics ? wheelTarget.physics.offset : null );
+					this.updateTargetTransform( wheelTarget, wheelsTransform, wheelTarget.physics ? wheelTarget.physics.offset : null );
 
 				}
 
