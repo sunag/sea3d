@@ -2110,9 +2110,6 @@ SEA3D.Material = function ( name, data, sea3d ) {
 	this.alpha = 1;
 	this.blendMode = "normal";
 
-	this.physical = false;
-	this.anisotropy = false;
-
 	this.bothSides = ( this.attrib & 1 ) != 0;
 
 	this.receiveLights = ( this.attrib & 2 ) == 0;
@@ -6612,6 +6609,9 @@ THREE.SEA3D.prototype.readMaterial = function ( sea ) {
 
 	var mat = this.createMaterial( sea );
 	mat.name = sea.name;
+
+	mat.lights = sea.receiveLights;
+	mat.fog = sea.receiveFog;
 
 	mat.depthWrite = sea.depthWrite;
 	mat.depthTest = sea.depthTest;
