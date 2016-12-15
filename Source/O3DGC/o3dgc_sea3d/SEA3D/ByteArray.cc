@@ -6,7 +6,11 @@
 #include <malloc.h>
 #include <string>
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #ifdef WIN32
+
+#pragma warning(disable:4996)
 
 #include <windows.h>
 
@@ -312,7 +316,7 @@ bool ByteArray::fromFile( const char *filename )
 	if ( mSize == 0 ) return false;
 
 	if (_wfopen_s( &file, mFileName, L"rb" )) 
-	{		
+	{
 		fputs ("File not found",stderr); 
 		return false; 
 	} 

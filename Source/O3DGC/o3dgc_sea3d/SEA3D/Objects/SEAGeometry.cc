@@ -141,7 +141,7 @@ void SEAGeometry::read(ByteArray & stream)
 
 	for (i = 0, k = 0; i < numGroups; i++)
 	{
-		int size = counts[i] * 3;
+		unsigned int size = counts[i] * 3;
 
 		for (j = 0; j < size; j++)
 		{

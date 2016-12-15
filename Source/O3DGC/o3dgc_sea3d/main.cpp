@@ -53,7 +53,7 @@ using namespace std;
 
 void print(string str) 
 {
-	for (int i = 0; i < str.size(); i++) cout << str[i];
+	for (unsigned int i = 0; i < str.size(); i++) cout << str[i];
 	cout << endl;
 }
 
@@ -85,9 +85,9 @@ unsigned char * convertToGeometryGC(
 	{
 		unsigned long *groups = (unsigned long*)malloc(sizeof(unsigned long) * geo->numIndexes);
 
-		for (int i = 0, offset = 0; i < geo->numGroups; i++) 
+		for (unsigned int i = 0, offset = 0; i < geo->numGroups; i++) 
 		{
-			int total = geo->counts[i];
+			unsigned int total = geo->counts[i];
 
 			total += offset;
 
@@ -121,7 +121,7 @@ unsigned char * convertToGeometryGC(
 
 	if (geo->numUV > 0)
 	{
-		for (int i = 0; i < geo->numUV; i++) 
+		for (unsigned int i = 0; i < geo->numUV; i++) 
 		{
 			params.SetFloatAttributeQuantBits(nFloatAttributes, qtexCoord);
 			params.SetFloatAttributePredMode(nFloatAttributes, O3DGC_SC3DMC_PARALLELOGRAM_PREDICTION);
@@ -190,7 +190,7 @@ unsigned char * convertToGeometryGC(
 
 		buffer[bufferPos++] = geo->numGroups;
 
-		for (int i = 0; i < geo->numGroups; i++)
+		for (unsigned int i = 0; i < geo->numGroups; i++)
 		{
 			unsigned int numTris = geo->counts[i];
 
@@ -213,7 +213,7 @@ unsigned char * convertToGeometryGC(
 
 		buffer[bufferPos++] = geo->numUV;
 
-		for (int i = 0; i < geo->numUV; i++)
+		for (unsigned int i = 0; i < geo->numUV; i++)
 		{
 			buffer[bufferPos++] = nFloatAttributes++;
 		}
@@ -277,8 +277,9 @@ int main(int argc, char * argv[])
         }
 	}
 
-	//input = "D:\\Sunag\\o3dgc\\Debug\\temp-0.geo";
-	//output = "D:\\Sunag\\o3dgc\\Debug\\temp-0.s3D";
+	input = "D:\\Sunag\\Github\\sea3d_sdk\\Source\\O3DGC\\Debug\\Object002.geo";
+	input = "D:\\Sunag\\Github\\sea3d_sdk\\Source\\O3DGC\\Debug\\temp-14.geo";
+	output = "D:\\Sunag\\Github\\sea3d_sdk\\Source\\O3DGC\\Debug\\Object002.s3D";
 
 	if (input.empty() || output.empty())
 	{
