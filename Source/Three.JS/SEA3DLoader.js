@@ -2633,6 +2633,9 @@ THREE.SEA3D.prototype.readMaterial = function ( sea ) {
 	var mat = this.createMaterial( sea );
 	mat.name = sea.name;
 
+	mat.lights = sea.receiveLights;
+	mat.fog = sea.receiveFog;
+
 	mat.depthWrite = sea.depthWrite;
 	mat.depthTest = sea.depthTest;
 
