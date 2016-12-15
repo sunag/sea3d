@@ -873,7 +873,7 @@
 
                 //var newClip = new THREE.AnimationClip( clipName, timeEnd-timeStart, tracks );
                 var newClip = new THREE.AnimationClip( clipName, -1, tracks );
-                newClip.loop = true;
+                newClip.repeat = true;
                 newClip.timeScale = 1;
 
                 model.addAnimation( newClip );
