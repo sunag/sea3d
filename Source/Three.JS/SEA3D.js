@@ -2110,9 +2110,6 @@ SEA3D.Material = function ( name, data, sea3d ) {
 	this.alpha = 1;
 	this.blendMode = "normal";
 
-	this.physical = false;
-	this.anisotropy = false;
-
 	this.bothSides = ( this.attrib & 1 ) != 0;
 
 	this.receiveLights = ( this.attrib & 2 ) == 0;
