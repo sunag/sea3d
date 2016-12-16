@@ -8002,7 +8002,12 @@ rollout _SEA "SEA3D"
 		
 		if filename != undefined do
 		(
-			exportSEA3D (filename + ".sea")
+			if (getFilenameType (toLower filename)) != ".sea" do
+			(
+				filename += ".sea"
+			)
+			
+			exportSEA3D filename
 		)
 		
 		enabledExport true
