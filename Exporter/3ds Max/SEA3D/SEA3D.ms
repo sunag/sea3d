@@ -62,7 +62,7 @@ global
 	EXT_RTT_PLANAR = ".rttp",	
 	EXT_ACTIONS = ".act"
 
-global	
+global
 	DT_NONE = "none",
 	DT_UINT = "uint",
 	DT_FLOAT = "float",
@@ -231,6 +231,113 @@ global skinops_getBoneNameByListID = skinops.getBoneName
 
 if (hasProperty skinops #getBoneNameByListID) do
 	skinops_getBoneNameByListID = skinops.getBoneNameByListID
+
+-- DisableProcessWindowsGhosting
+-- @Source: http://forums.cgsociety.org/archive/index.php?t-1045092.html
+
+fn getDisplayTopologyDependenceWarning =
+(
+	local enabled = (getIniSetting (getMAXIniFile()) #performance #TopoMessage)
+	
+	if enabled == "" do return true
+	
+	return (enabled as integer) != 0
+)
+
+fn setDisplayTopologyDependenceWarning enabled =
+(
+	global seaSetDisplayTopologyDependenceWarning = enabled
+	
+	fn PreferenceCallback =
+	(
+		-- http://forums.cgsociety.org/showpost.php?p=6973531&postcount=13
+		fn setCheckBoxState hwnd state =
+		(
+			local BN_CLICKED = 0
+			local BM_SETCHECK = 241
+			local WM_COMMAND = 273
+
+			local parent = UIAccessor.getParentWindow hwnd
+			local id = UIAccessor.getWindowResourceID hwnd
+
+			windows.sendMessage hwnd BM_SETCHECK (if state then 1 else 0) 0
+			windows.sendMessage parent WM_COMMAND ((bit.shift BN_CLICKED 16) + id) hwnd
+			
+			ok
+		)
+		
+		local hWND = DialogMonitorOPS.GetWindowHandle()
+
+		if (UIAccessor.GetWindowText hWND) != "Preference Settings" do return true
+		
+		local bt = windows.getchildhwnd hWND "Display Topology-Dependence Warning"
+		
+		global seaSetDisplayTopologyDependenceWarning
+		
+		setCheckBoxState bt[1] seaSetDisplayTopologyDependenceWarning
+
+		UIAccessor.SendMessageID hWND #IDOK
+		
+		true
+	)
+
+	DialogMonitorOPS.RegisterNotification PreferenceCallback id:#preferencesConfigure
+	DialogMonitorOPS.Enabled = true
+	
+	max file preferences
+	
+	DialogMonitorOPS.unRegisterNotification id:#preferencesConfigure
+	DialogMonitorOPS.Enabled = false
+)
+
+try 
+(
+	if getDisplayTopologyDependenceWarning() do setDisplayTopologyDependenceWarning false
+)
+catch()
+
+-- DisableProcessWindowsGhosting
+-- @Source: http://aarondabelow.com/wp/2014/01/08/3ds-max-ui-freezing-during-scripts-disable-window-ghosting/
+
+fn DisableProcessWindowsGhosting =
+(
+	local source = StringStream ("using System.Runtime.InteropServices; public class DisableWindowsGhosting{ [DllImport(\"user32.dll\")]  public static extern bool DisableProcessWindowsGhosting();  }")
+
+	compilerParams = dotnetobject "System.CodeDom.Compiler.CompilerParameters"
+	compilerParams.ReferencedAssemblies.Add("System.dll");
+	compilerParams.GenerateInMemory = on
+	csharpProvider = dotnetobject "Microsoft.CSharp.CSharpCodeProvider"
+	compilerResults = csharpProvider.CompileAssemblyFromSource compilerParams #(source as String)
+	flush source
+	close source
+	if (compilerResults.Errors.Count > 0 ) then
+	(
+		local errs = stringstream ""
+		for i = 0 to (compilerResults.Errors.Count-1) do
+		(
+			local err = compilerResults.Errors.Item[i]
+			format "Error:% Line:% Column:% %\n" err.ErrorNumber err.Line err.Column err.ErrorText to:errs
+		)
+		format "%\n" errs
+		undefined
+	)
+	else
+	(
+		compilerResults.CompiledAssembly.CreateInstance "DisableWindowsGhosting"
+	)
+)
+
+try 
+(
+	global DisableWindowsGhosting
+	
+	if DisableWindowsGhosting == undefined do
+	(
+		DisableWindowsGhosting = DisableProcessWindowsGhosting()
+		DisableWindowsGhosting.DisableProcessWindowsGhosting()
+	)
+)
+catch()
 
 --
 --	Config
@@ -2553,6 +2660,20 @@ function getAssetIndex obj type =
 
 function seaDispose =
 (
+	function disposeMesh obj =
+	(
+		while true do
+		(
+			if (substring obj.modifiers[1].name 1 5) == "SEA3D" then
+			(
+				deleteModifier obj obj.modifiers[1]
+			)
+			else exit
+		)
+		
+		delete obj
+	)
+
 	removeTempObject()
 	
 	for file in seaTempFileList do
@@ -2573,13 +2694,13 @@ function seaDispose =
 		(
 			if sea.temp != undefined do
 			(
-				delete sea.temp
+				disposeMesh sea.temp
 				sea.temp = undefined
 			)
 			
 			if sea.normalNObj != undefined do
 			(
-				delete sea.normalNObj
+				disposeMesh sea.normalNObj
 				sea.normalNObj = undefined
 			)									
 		)
@@ -4469,11 +4590,11 @@ fn compileObject n =
 						
 						try
 						(
-							while (true) do
+							while true do
 							(
 								meshop.getMapVert obj uvCh uvCount
 								uvCount+=1
-							)			
+							)
 						)
 						catch()
 						
@@ -7705,7 +7826,7 @@ fn exportList list =
 	
 	if seaconfig_exceptionprotection then
 	(
-		try (			
+		try (
 			if ((compileObjects list) == 0) then
 			(
 				exportSEAObjects()
@@ -9632,16 +9753,6 @@ rollout _ATFExtension "ATF Extension"
 --
 -- Initializer
 --
-
-try 
-(
-	if DisableWindowsGhosting == undefined do
-	(
-		DisableWindowsGhosting = DisableProcessWindowsGhosting()
-		DisableWindowsGhosting.DisableProcessWindowsGhosting()
-	)
-)
-catch()
 
 if sea_floater != undefined do
 (
