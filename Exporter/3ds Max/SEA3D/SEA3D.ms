@@ -2662,7 +2662,7 @@ function seaDispose =
 (
 	function disposeMesh obj =
 	(
-		while true do
+		while obj.modifiers.count > 0 do
 		(
 			if (substring obj.modifiers[1].name 1 5) == "SEA3D" then
 			(
