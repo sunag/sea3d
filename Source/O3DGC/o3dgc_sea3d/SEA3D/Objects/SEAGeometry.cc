@@ -96,56 +96,98 @@ void SEAGeometry::read(ByteArray & stream)
 	counts = new sea_uint32[numGroups];
 	
 	// INDEXES
-	if (isBig)
+	if (attrib & 1024)
 	{
-		for (i = 0; i < numGroups; i++)
+		if (isBig)
 		{
-			sea_uint32 triLen = stream.readUInt();
+			for (i = 0; i < numGroups; i++)
+			{
+				sea_uint32 triLen = stream.readUInt();
 
-			starts[ i ] = numIndexes;
-			counts[ i ] = triLen;
+				starts[ i ] = numIndexes;
+				counts[ i ] = triLen;
 
-			numIndexes += triLen;
+				numIndexes += triLen;
+			}
 
-			triLen *= 3;
-				
-			indexes[i] = new sea_uint32[triLen];
+			this->indexes = new sea_uint32[numIndexes * 3];
 
-			j = 0; 
-			while(j < triLen) 
-				indexes[i][j++] = stream.readUInt();
+			i = 0, k = numIndexes * 3;
+			while(i < k) 
+				this->indexes[i++] = stream.readUInt();
+		}
+		else
+		{
+			for (i = 0; i < numGroups; i++)
+			{
+				sea_uint32 triLen = stream.readUShort();
+
+				starts[ i ] = numIndexes;
+				counts[ i ] = triLen;
+
+				numIndexes += triLen;
+			}
+
+			this->indexes = new sea_uint32[numIndexes * 3];
+
+			i = 0, k = numIndexes * 3;
+			while(i < k) 
+				this->indexes[i++] = stream.readUShort();
 		}
 	}
 	else
 	{
-		for (i = 0; i < numGroups; i++)
+		if (isBig)
 		{
-			sea_uint32 triLen = stream.readUShort();
+			for (i = 0; i < numGroups; i++)
+			{
+				sea_uint32 triLen = stream.readUInt();
 
-			starts[ i ] = numIndexes;
-			counts[ i ] = triLen;
+				starts[ i ] = numIndexes;
+				counts[ i ] = triLen;
 
-			numIndexes += triLen;
+				numIndexes += triLen;
 
-			triLen *= 3;
+				triLen *= 3;
+				
+				indexes[i] = new sea_uint32[triLen];
 
-			indexes[i] = new sea_uint32[triLen];
-
-			j = 0; 
-			while(j < triLen) 
-				indexes[i][j++] = stream.readUShort();
+				j = 0; 
+				while(j < triLen) 
+					indexes[i][j++] = stream.readUInt();
+			}
 		}
-	}
-
-	this->indexes = new sea_uint32[numIndexes * 3];
-
-	for (i = 0, k = 0; i < numGroups; i++)
-	{
-		unsigned int size = counts[i] * 3;
-
-		for (j = 0; j < size; j++)
+		else
 		{
-			this->indexes[k++] = indexes[i][j];
+			for (i = 0; i < numGroups; i++)
+			{
+				sea_uint32 triLen = stream.readUShort();
+
+				starts[ i ] = numIndexes;
+				counts[ i ] = triLen;
+
+				numIndexes += triLen;
+
+				triLen *= 3;
+
+				indexes[i] = new sea_uint32[triLen];
+
+				j = 0; 
+				while(j < triLen) 
+					indexes[i][j++] = stream.readUShort();
+			}
+		}
+
+		this->indexes = new sea_uint32[numIndexes * 3];
+
+		for (i = 0, k = 0; i < numGroups; i++)
+		{
+			unsigned int size = counts[i] * 3;
+
+			for (j = 0; j < size; j++)
+			{
+				this->indexes[k++] = indexes[i][j];
+			}
 		}
 	}
 }
