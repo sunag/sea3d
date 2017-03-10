@@ -137,7 +137,6 @@ unsigned char * convertToGeometryGC(
 
 	if (geo->jointPerVertex > 0)
 	{
-        params.SetFloatAttributePredMode(nIntAttributes, O3DGC_SC3DMC_DIFFERENTIAL_PREDICTION);
         ifs.SetNIntAttribute(nIntAttributes, geo->numVertex);
 		ifs.SetIntAttributeDim(nIntAttributes, geo->jointPerVertex);
         ifs.SetIntAttributeType(nIntAttributes, O3DGC_IFS_INT_ATTRIBUTE_TYPE_JOINT_ID);
