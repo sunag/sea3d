@@ -253,11 +253,9 @@ int main(int argc, char * argv[])
 {
 	string input, output;
 
-	int qcoord    = 12;
-    int qtexCoord = 10;
-    int qnormal   = 8;
-	int qcolor   = 10;
-    int qweights = 8;
+	float 
+		qposition_quality = 1,
+		qgradient_quality = 1;
 
 	for(int i = 1; i < argc; ++i)
     {
@@ -275,11 +273,37 @@ int main(int argc, char * argv[])
                 output = argv[i];
             }
         }
+		else if ( !strcmp(argv[i], "-qp"))
+        {
+            if (++i < argc)
+            {
+                qposition_quality = atof(argv[i]);
+            }
+        }
+		else if ( !strcmp(argv[i], "-qg"))
+        {
+            if (++i < argc)
+            {
+                qgradient_quality = atof(argv[i]);
+            }
+        }
 	}
 
-	input = "D:\\Sunag\\Github\\sea3d_sdk\\Source\\O3DGC\\Debug\\Object002.geo";
-	input = "D:\\Sunag\\Github\\sea3d_sdk\\Source\\O3DGC\\Debug\\temp-14.geo";
-	output = "D:\\Sunag\\Github\\sea3d_sdk\\Source\\O3DGC\\Debug\\Object002.s3D";
+	int qcoord = (int)(12 * qposition_quality);
+    int qtexCoord = (int)(10 * qgradient_quality);
+    int qnormal = (int)(10 * qgradient_quality);
+	int qcolor = (int)(10 * qgradient_quality);
+    int qweights = (int)(8 * qgradient_quality);
+
+	if (qposition_quality < 0.1) qposition_quality = 0.1;
+	else if (qposition_quality > 2) qposition_quality = 2;
+
+	if (qgradient_quality < 0.1) qgradient_quality = 0.1;
+	else if (qgradient_quality > 2) qgradient_quality = 2;
+
+	//input = "D:\\Sunag\\Github\\sea3d_sdk\\Source\\O3DGC\\Debug\\Object002.geo";
+	//input = "D:\\Sunag\\Github\\sea3d_sdk\\Source\\O3DGC\\Debug\\temp-14.geo";
+	//output = "D:\\Sunag\\Github\\sea3d_sdk\\Source\\O3DGC\\Debug\\Object002.s3D";
 
 	if (input.empty() || output.empty())
 	{
