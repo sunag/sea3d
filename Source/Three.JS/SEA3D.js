@@ -5,7 +5,7 @@
 
 'use strict';
 
-var SEA3D = { VERSION: 18100 };
+var SEA3D = { VERSION: 18110 };
 
 SEA3D.getVersion = function () {
 
@@ -105,7 +105,6 @@ SEA3D.Stream.prototype = {
 	set buffer( val ) {
 
 		this.buf = val;
-		this.length = val.byteLength;
 		this.data = new DataView( val );
 
 	},
@@ -120,7 +119,14 @@ SEA3D.Stream.prototype = {
 
 		return this.length - this.position;
 
+	},
+
+	get length() {
+
+		return this.buf.byteLength;
+
 	}
+
 };
 
 SEA3D.Stream.prototype.getByte = function ( pos ) {
@@ -592,7 +598,7 @@ SEA3D.Stream.prototype.readToken = function ( type, sea3d ) {
 
 		case SEA3D.Stream.ASSET:
 			var asset = this.readUInt();
-			return asset > 0 ? sea3d.getObject( asset - 1 ).tag : null;
+			return asset > 0 ? sea3d.getObject( asset - 1 ) : null;
 			break;
 
 		default:
@@ -728,8 +734,8 @@ SEA3D.UByteArray.prototype = {
 //
 
 SEA3D.Math = {
-	DEGREES: 180 / Math.PI,
-	RADIANS: Math.PI / 180
+	RAD_TO_DEG: 180 / Math.PI,
+	DEG_TO_RAD: Math.PI / 180
 };
 
 SEA3D.Math.angle = function ( val ) {
@@ -746,6 +752,81 @@ SEA3D.Math.angle = function ( val ) {
 	}
 
 	return ( inv ? - val : val );
+
+};
+
+SEA3D.Math.angleDiff = function ( a, b ) {
+
+	a *= this.DEG_TO_RAD;
+	b *= this.DEG_TO_RAD;
+
+	return Math.atan2( Math.sin( a - b ), Math.cos( a - b ) ) * this.RAD_TO_DEG;
+
+};
+
+SEA3D.Math.angleArea = function ( angle, target, area ) {
+
+	return Math.abs( this.angleDiff( angle, target ) ) <= area;
+
+};
+
+SEA3D.Math.direction = function ( x1, y1, x2, y2 ) {
+
+	return Math.atan2( y2 - y1, x2 - x1 );
+
+};
+
+SEA3D.Math.physicalLerp = function ( val, to, deltaTime, duration ) {
+
+	var t = deltaTime / duration;
+
+	if ( t > 1 ) t = 1;
+
+	return val + ( ( to - val ) * t );
+
+};
+
+SEA3D.Math.physicalAngle = function ( val, to, deltaTime, duration ) {
+
+	if ( Math.abs( val - to ) > 180 ) {
+
+		if ( val > to ) {
+
+			to += 360;
+
+		} else {
+
+			to -= 360;
+
+		}
+
+	}
+
+	var t = deltaTime / duration;
+
+	if ( t > 1 ) t = 1;
+
+	return this.angle( val + ( ( to - val ) * t ) );
+
+};
+
+SEA3D.Math.zero = function ( value, precision ) {
+
+	precision = precision || 1.0E-3;
+
+	var pValue = value < 0 ? - value : value;
+
+	if ( pValue - precision < 0 ) value = 0;
+
+	return value;
+
+};
+
+SEA3D.Math.round = function ( value, precision ) {
+
+	precision = Math.pow( 10, precision );
+
+	return Math.round( value * precision ) / precision;
 
 };
 
@@ -798,69 +879,6 @@ SEA3D.Math.lerp = function ( val, tar, t ) {
 
 };
 
-SEA3D.Math.lerp1x = function ( val, tar, t ) {
-
-	val[ 0 ] += ( tar[ 0 ] - val[ 0 ] ) * t;
-
-};
-
-SEA3D.Math.lerp3x = function ( val, tar, t ) {
-
-	val[ 0 ] += ( tar[ 0 ] - val[ 0 ] ) * t;
-	val[ 1 ] += ( tar[ 1 ] - val[ 1 ] ) * t;
-	val[ 2 ] += ( tar[ 2 ] - val[ 2 ] ) * t;
-
-};
-
-SEA3D.Math.lerpAng1x = function ( val, tar, t ) {
-
-	val[ 0 ] = SEA3D.Math.lerpAngle( val[ 0 ], tar[ 0 ], t );
-
-};
-
-SEA3D.Math.lerpColor1x = function ( val, tar, t ) {
-
-	val[ 0 ] = SEA3D.Math.lerpColor( val[ 0 ], tar[ 0 ], t );
-
-};
-
-SEA3D.Math.lerpQuat4x = function ( val, tar, t ) {
-
-	var x1 = val[ 0 ],
-		y1 = val[ 1 ],
-		z1 = val[ 2 ],
-		w1 = val[ 3 ];
-
-	var x2 = tar[ 0 ],
-		y2 = tar[ 1 ],
-		z2 = tar[ 2 ],
-		w2 = tar[ 3 ];
-
-	var x, y, z, w, l;
-
-	// shortest direction
-	if ( x1 * x2 + y1 * y2 + z1 * z2 + w1 * w2 < 0 ) {
-
-		x2 = - x2;
-		y2 = - y2;
-		z2 = - z2;
-		w2 = - w2;
-
-	}
-
-	x = x1 + t * ( x2 - x1 );
-	y = y1 + t * ( y2 - y1 );
-	z = z1 + t * ( z2 - z1 );
-	w = w1 + t * ( w2 - w1 );
-
-	l = 1.0 / Math.sqrt( w * w + x * x + y * y + z * z );
-	val[ 0 ] = x * l;
-	val[ 1 ] = y * l;
-	val[ 2 ] = z * l;
-	val[ 3 ] = w * l;
-
-};
-
 //
 //	Timer
 //
@@ -872,6 +890,7 @@ SEA3D.Timer = function () {
 };
 
 SEA3D.Timer.prototype = {
+
 	constructor: SEA3D.Timer,
 
 	get now() {
@@ -1023,14 +1042,18 @@ SEA3D.Geometry = function ( name, data, sea3d ) {
 
 			this.groups.push( {
 				start: len,
-				count: j,
+				count: j
 			} );
 
 			len += j;
 
 		}
 
-		this.indexes = this.isBig ? data.readUIntArray( len ) : data.readUShortArray( len );
+		if ( ! ( this.attrib & 2048 ) ) {
+
+			this.indexes = this.isBig ? data.readUIntArray( len ) : data.readUShortArray( len );
+
+		}
 
 	} else {
 
@@ -1044,7 +1067,7 @@ SEA3D.Geometry = function ( name, data, sea3d ) {
 
 			this.groups.push( {
 				start: j,
-				count: len,
+				count: len
 			} );
 
 			j += len;
@@ -1384,8 +1407,8 @@ SEA3D.Properties = function ( name, data, sea3d ) {
 	this.data = data;
 	this.sea3d = sea3d;
 
-	this.tag = data.readProperties( sea3d );
-	this.tag.__name = name;
+	this.props = data.readProperties( sea3d );
+	this.props.__name = name;
 
 };
 
@@ -1401,10 +1424,10 @@ SEA3D.FileInfo = function ( name, data, sea3d ) {
 	this.data = data;
 	this.sea3d = sea3d;
 
-	this.tag = data.readProperties( sea3d );
-	this.tag.__name = name;
+	this.info = data.readProperties( sea3d );
+	this.info.__name = name;
 
-	sea3d.info = this.tag;
+	sea3d.info = this.info;
 
 };
 
@@ -1704,14 +1727,14 @@ SEA3D.AnimationBase = function ( name, data, sea3d ) {
 
 		for ( var i = 0; i < count; i ++ ) {
 
-			flag = data.readUByte();
+			var seqFlag = data.readUByte();
 
 			this.sequence[ i ] = {
 				name: data.readUTF8Tiny(),
 				start: data.readUInt(),
 				count: data.readUInt(),
-				repeat: ( flag & 1 ) != 0,
-				intrpl: ( flag & 2 ) == 0
+				repeat: ( seqFlag & 1 ) != 0,
+				intrpl: ( seqFlag & 2 ) == 0
 			};
 
 		}
@@ -1773,24 +1796,6 @@ SEA3D.Animation.SCALE_V = 11;
 SEA3D.Animation.ANGLE = 12;
 SEA3D.Animation.ALPHA = 13;
 SEA3D.Animation.VOLUME = 14;
-
-SEA3D.Animation.DefaultLerpFuncs = [
-	SEA3D.Math.lerp3x, // POSITION
-	SEA3D.Math.lerpQuat4x, // ROTATION
-	SEA3D.Math.lerp3x, // SCALE
-	SEA3D.Math.lerpColor1x, // COLOR
-	SEA3D.Math.lerp1x, // MULTIPLIER
-	SEA3D.Math.lerp1x, // ATTENUATION_START
-	SEA3D.Math.lerp1x, // ATTENUATION_END
-	SEA3D.Math.lerp1x, // FOV
-	SEA3D.Math.lerp1x, // OFFSET_U
-	SEA3D.Math.lerp1x, // OFFSET_V
-	SEA3D.Math.lerp1x, // SCALE_U
-	SEA3D.Math.lerp1x, // SCALE_V
-	SEA3D.Math.lerpAng1x, // ANGLE
-	SEA3D.Math.lerp1x, // ALPHA
-	SEA3D.Math.lerp1x // VOLUME
-];
 
 SEA3D.Animation.prototype = Object.create( SEA3D.AnimationBase.prototype );
 SEA3D.Animation.prototype.constructor = SEA3D.Animation;
@@ -2110,7 +2115,7 @@ SEA3D.Material = function ( name, data, sea3d ) {
 	this.alpha = 1;
 	this.blendMode = "normal";
 
-	this.bothSides = ( this.attrib & 1 ) != 0;
+	this.doubleSided = ( this.attrib & 1 ) != 0;
 
 	this.receiveLights = ( this.attrib & 2 ) == 0;
 	this.receiveShadows = ( this.attrib & 4 ) == 0;
@@ -2144,6 +2149,7 @@ SEA3D.Material = function ( name, data, sea3d ) {
 		switch ( kind ) {
 
 			case SEA3D.Material.PHONG:
+			
 				tech = {
 					ambientColor: data.readUInt24(),
 					diffuseColor: data.readUInt24(),
@@ -2152,45 +2158,48 @@ SEA3D.Material = function ( name, data, sea3d ) {
 					specular: data.readFloat(),
 					gloss: data.readFloat()
 				};
+				
 				break;
 
 			case SEA3D.Material.PHYSICAL:
+			
 				tech = {
 					color: data.readUInt24(),
 					roughness: data.readFloat(),
 					metalness: data.readFloat()
 				};
+				
 				break;
 
 			case SEA3D.Material.ANISOTROPIC:
 				break;
 
 			case SEA3D.Material.COMPOSITE_TEXTURE:
+			
 				tech = {
 					composite: sea3d.getObject( data.readUInt() )
 				};
+				
 				break;
 
 			case SEA3D.Material.DIFFUSE_MAP:
-				tech = {
-					texture: sea3d.getObject( data.readUInt() )
-				};
-				break;
-
 			case SEA3D.Material.SPECULAR_MAP:
-				tech = {
-					texture: sea3d.getObject( data.readUInt() )
-				};
-				break;
-
 			case SEA3D.Material.NORMAL_MAP:
+			case SEA3D.Material.AMBIENT_MAP:
+			case SEA3D.Material.ALPHA_MAP:
+			case SEA3D.Material.EMISSIVE_MAP:
+			case SEA3D.Material.ROUGHNESS_MAP:
+			case SEA3D.Material.METALNESS_MAP:
+			
 				tech = {
 					texture: sea3d.getObject( data.readUInt() )
 				};
+				
 				break;
 
 			case SEA3D.Material.REFLECTION:
 			case SEA3D.Material.FRESNEL_REFLECTION:
+			
 				tech = {
 					texture: sea3d.getObject( data.readUInt() ),
 					alpha: data.readFloat()
@@ -2202,42 +2211,52 @@ SEA3D.Material = function ( name, data, sea3d ) {
 					tech.normal = data.readFloat();
 
 				}
+				
 				break;
 
 			case SEA3D.Material.REFRACTION:
+			
 				tech = {
 					texture: sea3d.getObject( data.readUInt() ),
 					alpha: data.readFloat(),
 					ior: data.readFloat()
 				};
+				
 				break;
 
 			case SEA3D.Material.RIM:
+			
 				tech = {
 					color: data.readUInt24(),
 					strength: data.readFloat(),
 					power: data.readFloat(),
 					blendMode: data.readBlendMode()
 				};
+				
 				break;
 
 			case SEA3D.Material.LIGHT_MAP:
+			
 				tech = {
 					texture: sea3d.getObject( data.readUInt() ),
 					channel: data.readUByte(),
 					blendMode: data.readBlendMode()
 				};
+				
 				break;
 
 			case SEA3D.Material.DETAIL_MAP:
+			
 				tech = {
 					texture: sea3d.getObject( data.readUInt() ),
 					scale: data.readFloat(),
 					blendMode: data.readBlendMode()
 				};
+				
 				break;
 
 			case SEA3D.Material.CEL:
+			
 				tech = {
 					color: data.readUInt24(),
 					levels: data.readUByte(),
@@ -2245,16 +2264,20 @@ SEA3D.Material = function ( name, data, sea3d ) {
 					specularCutOff: data.readFloat(),
 					smoothness: data.readFloat()
 				};
+				
 				break;
 
 			case SEA3D.Material.TRANSLUCENT:
+			
 				tech = {
 					translucency: data.readFloat(),
 					scattering: data.readFloat()
 				};
+				
 				break;
 
 			case SEA3D.Material.BLEND_NORMAL_MAP:
+			
 				methodAttrib = data.readUByte();
 
 				tech = {
@@ -2278,60 +2301,51 @@ SEA3D.Material = function ( name, data, sea3d ) {
 				}
 
 				tech.animate = methodAttrib & 2;
+				
 				break;
 
 			case SEA3D.Material.MIRROR_REFLECTION:
+			
 				tech = {
 					texture: sea3d.getObject( data.readUInt() ),
 					alpha: data.readFloat()
 				};
 				break;
 
-			case SEA3D.Material.AMBIENT_MAP:
+			
 				tech = {
 					texture: sea3d.getObject( data.readUInt() )
 				};
-				break;
-
-			case SEA3D.Material.ALPHA_MAP:
-				tech = {
-					texture: sea3d.getObject( data.readUInt() )
-				};
+				
 				break;
 
 			case SEA3D.Material.EMISSIVE:
+			
 				tech = {
-					color: data.readUInt24()
+					color: data.readUInt24F()
 				};
-				break;
-
-			case SEA3D.Material.EMISSIVE_MAP:
-				tech = {
-					texture: sea3d.getObject( data.readUInt() )
-				};
-				break;
-
-			case SEA3D.Material.ROUGHNESS_MAP:
-			case SEA3D.Material.METALNESS_MAP:
-				tech = {
-					texture: sea3d.getObject( data.readUInt() )
-				};
+				
 				break;
 
 			case SEA3D.Material.VERTEX_COLOR:
+			
 				tech = {
 					blendMode: data.readBlendMode()
 				};
+				
 				break;
 
 			case SEA3D.Material.WRAP_LIGHTING:
+			
 				tech = {
 					color: data.readUInt24(),
 					strength: data.readFloat()
 				};
+				
 				break;
 
 			case SEA3D.Material.COLOR_REPLACE:
+			
 				methodAttrib = data.readUByte();
 
 				tech = {
@@ -2347,13 +2361,16 @@ SEA3D.Material = function ( name, data, sea3d ) {
 				break;
 
 			case SEA3D.Material.REFLECTION_SPHERICAL:
+			
 				tech = {
 					texture: sea3d.getObject( data.readUInt() ),
 					alpha: data.readFloat()
 				};
+				
 				break;
 
 			case SEA3D.Material.REFLECTIVITY:
+			
 				methodAttrib = data.readUByte();
 
 				tech = {
@@ -2365,16 +2382,35 @@ SEA3D.Material = function ( name, data, sea3d ) {
 				break;
 
 			case SEA3D.Material.CLEAR_COAT:
+			
 				tech = {
 					strength: data.readFloat(),
 					roughness: data.readFloat()
 				};
+				
 				break;
 
+			case SEA3D.Material.FLACCIDITY:
+			
+				methodAttrib = data.readUByte();
+
+				tech = {
+					target: sea3d.getObject( data.readUInt() ),
+					scale: data.readFloat(),
+					spring: data.readFloat(),
+					damping: data.readFloat()
+				};
+
+				if ( methodAttrib & 1 ) tech.mask = sea3d.getObject( data.readUInt() );
+
+				break;
+				
 			default:
+			
 				console.warn( "SEA3D: MaterialTechnique not found:", kind.toString( 16 ) );
 
 				data.position = pos += size;
+				
 				continue;
 
 		}
@@ -2419,6 +2455,7 @@ SEA3D.Material.ROUGHNESS_MAP = 25;
 SEA3D.Material.METALNESS_MAP = 26;
 SEA3D.Material.REFLECTIVITY = 27;
 SEA3D.Material.CLEAR_COAT = 28;
+SEA3D.Material.FLACCIDITY = 29;
 
 SEA3D.Material.prototype.type = "mat";
 
@@ -2553,7 +2590,7 @@ SEA3D.CubeMap = function ( name, data, sea3d ) {
 
 	this.transparent = false;
 
-	var ext = data.readExt();
+	this.extension = data.readExt();
 
 	this.faces = [];
 
@@ -2710,7 +2747,7 @@ SEA3D.File = function ( config ) {
 	this.addClass( SEA3D.Morph, true );
 	this.addClass( SEA3D.VertexAnimation, true );
 	this.addClass( SEA3D.CubeMap, true );
-	this.addClass( SEA3D.Animation );
+	this.addClass( SEA3D.Animation, true );
 	this.addClass( SEA3D.Dummy );
 	this.addClass( SEA3D.Line );
 	this.addClass( SEA3D.SoundPoint );
