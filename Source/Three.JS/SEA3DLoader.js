@@ -2067,7 +2067,7 @@ THREE.SEA3D.prototype.readMesh = function ( sea ) {
 
 			}
 
-			mat = new THREE.MultiMaterial( mats );
+			mat = mats;
 
 		} else {
 
