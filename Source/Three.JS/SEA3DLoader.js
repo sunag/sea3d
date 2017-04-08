@@ -1690,18 +1690,6 @@ THREE.SEA3D.prototype.createObjectURL = function ( raw, mime ) {
 
 };
 
-THREE.SEA3D.prototype.bufferToTexture = function ( raw ) {
-
-	return this.createObjectURL( raw, "image" );
-
-};
-
-THREE.SEA3D.prototype.bufferToSound = function ( raw ) {
-
-	return this.createObjectURL( raw, "audio" );
-
-};
-
 THREE.SEA3D.prototype.parsePath = function ( url ) {
 
 	var paths = this.config.paths;
@@ -2142,7 +2130,7 @@ THREE.SEA3D.prototype.readTexture = function ( sea ) {
 
 	};
 
-	image.src = this.bufferToTexture( sea.data.buffer );
+	image.src = this.createObjectURL( sea.data.buffer, "image/" + sea.type );
 
 	this.domain.textures = this.textures = this.textures || [];
 	this.textures.push( this.objects[ "tex/" + sea.name ] = sea.tag = texture );
@@ -2179,7 +2167,7 @@ THREE.SEA3D.prototype.readCubeMap = function ( sea ) {
 
 		var cubeImage = new Image();
 		cubeImage.onload = onLoaded;
-		cubeImage.src = this.bufferToTexture( faces[ i ].buffer );
+		cubeImage.src = this.createObjectURL( faces[ i ].buffer, "image/" + sea.extension );
 
 		texture.images[ i ] = cubeImage;
 
