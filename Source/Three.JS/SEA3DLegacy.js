@@ -537,7 +537,10 @@ THREE.SEA3D.prototype.readSkeleton = function () {
 
 		}
 
-		return sea.tag = bones;
+		this.domain.bones = this.bones = this.bones || [];
+		this.bones.push( this.objects[ sea.name + '.sklq' ] = sea.tag = bones );
+
+		return bones;
 
 	};
 
