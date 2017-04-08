@@ -1,4 +1,71 @@
 //
+//	Extension
+//
+
+SEA3D.Math.lerp1x = function ( val, tar, t ) {
+
+	val[ 0 ] += ( tar[ 0 ] - val[ 0 ] ) * t;
+
+};
+
+SEA3D.Math.lerp3x = function ( val, tar, t ) {
+
+	val[ 0 ] += ( tar[ 0 ] - val[ 0 ] ) * t;
+	val[ 1 ] += ( tar[ 1 ] - val[ 1 ] ) * t;
+	val[ 2 ] += ( tar[ 2 ] - val[ 2 ] ) * t;
+
+};
+
+SEA3D.Math.lerpAng1x = function ( val, tar, t ) {
+
+	val[ 0 ] = SEA3D.Math.lerpAngle( val[ 0 ], tar[ 0 ], t );
+
+};
+
+SEA3D.Math.lerpColor1x = function ( val, tar, t ) {
+
+	val[ 0 ] = SEA3D.Math.lerpColor( val[ 0 ], tar[ 0 ], t );
+
+};
+
+SEA3D.Math.lerpQuat4x = function ( val, tar, t ) {
+
+	var x1 = val[ 0 ],
+		y1 = val[ 1 ],
+		z1 = val[ 2 ],
+		w1 = val[ 3 ];
+
+	var x2 = tar[ 0 ],
+		y2 = tar[ 1 ],
+		z2 = tar[ 2 ],
+		w2 = tar[ 3 ];
+
+	var x, y, z, w, l;
+
+	// shortest direction
+	if ( x1 * x2 + y1 * y2 + z1 * z2 + w1 * w2 < 0 ) {
+
+		x2 = - x2;
+		y2 = - y2;
+		z2 = - z2;
+		w2 = - w2;
+
+	}
+
+	x = x1 + t * ( x2 - x1 );
+	y = y1 + t * ( y2 - y1 );
+	z = z1 + t * ( z2 - z1 );
+	w = w1 + t * ( w2 - w1 );
+
+	l = 1.0 / Math.sqrt( w * w + x * x + y * y + z * z );
+	val[ 0 ] = x * l;
+	val[ 1 ] = y * l;
+	val[ 2 ] = z * l;
+	val[ 3 ] = w * l;
+
+};
+
+//
 //	Blend Method
 //
 
@@ -6,6 +73,24 @@ SEA3D.AnimationBlendMethod = {
 	LINEAR : 'linear',
 	EASING : 'easing'
 };
+
+SEA3D.Animation.DefaultLerpFuncs = [
+	SEA3D.Math.lerp3x, // POSITION
+	SEA3D.Math.lerpQuat4x, // ROTATION
+	SEA3D.Math.lerp3x, // SCALE
+	SEA3D.Math.lerpColor1x, // COLOR
+	SEA3D.Math.lerp1x, // MULTIPLIER
+	SEA3D.Math.lerp1x, // ATTENUATION_START
+	SEA3D.Math.lerp1x, // ATTENUATION_END
+	SEA3D.Math.lerp1x, // FOV
+	SEA3D.Math.lerp1x, // OFFSET_U
+	SEA3D.Math.lerp1x, // OFFSET_V
+	SEA3D.Math.lerp1x, // SCALE_U
+	SEA3D.Math.lerp1x, // SCALE_V
+	SEA3D.Math.lerpAng1x, // ANGLE
+	SEA3D.Math.lerp1x, // ALPHA
+	SEA3D.Math.lerp1x // VOLUME
+];
 
 //
 //	AnimationFrame
@@ -45,7 +130,7 @@ SEA3D.AnimationFrame.prototype.toAngles = function( d ) {
 
 SEA3D.AnimationFrame.prototype.toEuler = function() {
 
-	return this.toAngles( SEA3D.Math.DEGREES );
+	return this.toAngles( SEA3D.Math.RAD_TO_DEG );
 
 };
 
