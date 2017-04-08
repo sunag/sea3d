@@ -124,7 +124,7 @@ THREE.SEA3D.Domain = function ( id, objects, container ) {
 	this.container = container;
 
 	this.sources = [];
-	this.global = {};
+	this.local = {};
 
 	this.scriptTargets = [];
 
@@ -132,7 +132,11 @@ THREE.SEA3D.Domain = function ( id, objects, container ) {
 
 };
 
-Object.assign( THREE.SEA3D.Domain.prototype, {
+THREE.SEA3D.Domain.global = {};
+
+THREE.SEA3D.Domain.prototype = Object.assign( Object.create( THREE.EventDispatcher.prototype ), {
+
+	constructor: THREE.SEA3D.Domain,
 
 	add: function ( src ) {
 
@@ -208,8 +212,6 @@ Object.assign( THREE.SEA3D.Domain.prototype, {
 
 	runJSM: function ( target, script ) {
 
-		if ( target.local == undefined ) target.local = {};
-
 		var include = {
 			print: this.print,
 			watch: this.watch,
@@ -227,8 +229,8 @@ Object.assign( THREE.SEA3D.Domain.prototype, {
 			this.methods[ script.method ](
 				include,
 				this.getReference,
-				this.global,
-				target.local,
+				THREE.SEA3D.Domain.global,
+				this.local,
 				target,
 				script.params
 			);
@@ -316,7 +318,7 @@ Object.assign( THREE.SEA3D.Domain.prototype, {
 THREE.SEA3D.DomainManager = function ( autoDisposeRootDomain ) {
 
 	this.domains = [];
-	this.autoDisposeRootDomain = autoDisposeRootDomain == undefined ? true : false;
+	this.autoDisposeRootDomain = autoDisposeRootDomain !== undefined ? autoDisposeRootDomain : true;
 
 };
 
@@ -2328,7 +2330,7 @@ THREE.SEA3D.prototype.readJavaScriptMethod = function ( sea ) {
 			'var $METHOD = {}\n';
 
 		var declare =
-			'function($INC, $REF, global, local, $his, $PARAM) {\n' +
+			'function($INC, $REF, global, local, self, $PARAM) {\n' +
 			'var watch = $INC["watch"],\n' +
 			'scene = $INC["scene"],\n' +
 			'sea3d = $INC["sea3d"],\n' +
@@ -3220,7 +3222,7 @@ THREE.SEA3D.prototype.readActions = function ( sea ) {
 
 				this.domain.scripts = this.getJSMList( this.domain, act.scripts );
 
-				if ( this.config.runScripts ) this.domain.runJSMList( this.domain );
+				if ( this.config.scripts && this.config.runScripts ) this.domain.runJSMList( this.domain );
 
 				break;
 
