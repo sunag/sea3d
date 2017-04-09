@@ -6,16 +6,6 @@
 'use strict';
 
 //
-//	Polyfills
-//
-
-if ( THREE.Float32BufferAttribute === undefined ) {
-
-	THREE.Float32BufferAttribute = THREE.Float32Attribute;
-
-}
-
-//
 //
 //	SEA3D
 //
@@ -44,6 +34,18 @@ THREE.SEA3D = function ( config ) {
 	if ( config ) this.loadConfig( config );
 
 };
+
+//
+//	Polyfills
+//
+
+if ( THREE.Float32BufferAttribute === undefined ) {
+
+	THREE.Float32BufferAttribute = THREE.Float32Attribute;
+
+}
+
+THREE.SEA3D.useMultiMaterial = THREE.MultiMaterial.prototype.isMultiMaterial;
 
 //
 //	Config
@@ -2067,7 +2069,7 @@ THREE.SEA3D.prototype.readMesh = function ( sea ) {
 
 			}
 
-			mat = mats;
+			mat = THREE.SEA3D.useMultiMaterial ? new THREE.MultiMaterial( mats ) : mats;
 
 		} else {
 
