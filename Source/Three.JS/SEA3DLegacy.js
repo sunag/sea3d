@@ -446,7 +446,7 @@ THREE.SEA3D.prototype.updateTransform = function () {
 
 		if ( this.isLegacy( sea ) ) {
 
-			if ( sea.transform ) buf1.elements.set( sea.transform );
+			if ( sea.transform ) buf1.fromArray( sea.transform );
 			else buf1.makeTranslation( sea.position.x, sea.position.y, sea.position.z );
 
 			this.flipScaleMatrix(
@@ -494,7 +494,7 @@ THREE.SEA3D.prototype.readSkeleton = function () {
 
 			// get world inverse matrix
 
-			mtx_tmp_inv.elements = bone.inverseBindMatrix;
+			mtx_tmp_inv.fromArray( bone.inverseBindMatrix );
 
 			// convert to world matrix
 
@@ -508,7 +508,7 @@ THREE.SEA3D.prototype.readSkeleton = function () {
 
 				// to world
 
-				mtx_tmp_inv.elements = sea.joint[ bone.parentIndex ].inverseBindMatrix;
+				mtx_tmp_inv.fromArray( sea.joint[ bone.parentIndex ].inverseBindMatrix );
 				mtx_parent.getInverse( mtx_tmp_inv );
 
 				// convert parent to three.js order
@@ -598,7 +598,7 @@ THREE.SEA3D.prototype.readSkeletonAnimationLegacy = function () {
 
 						// to global
 
-						mtx_tmp_inv.elements = skl.joint[ bone.parentIndex ].inverseBindMatrix;
+						mtx_tmp_inv.fromArray( skl.joint[ bone.parentIndex ].inverseBindMatrix );
 
 						mtx_parent.getInverse( mtx_tmp_inv );
 
