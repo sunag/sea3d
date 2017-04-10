@@ -17,7 +17,7 @@ THREE.SEA3D.Exporter = function( params ) {
 	this.drop = {};
 	
 	this.sign = "TJS"; // THREE.JS
-	this.version = 18100;
+	this.version = 18110;
 	
 	this.frameRate = 30;
 
@@ -465,6 +465,10 @@ THREE.SEA3D.Exporter.prototype = Object.assign( Object.create( THREE.EventDispat
 			
 			return this.serializeMesh( obj );
 		
+		} if (obj instanceof THREE.Geometry) {
+
+			return this.serializeGeometry( obj );
+
 		} if (obj instanceof THREE.BufferGeometry) {
 
 			return this.serializeBufferGeometry( obj );
@@ -916,7 +920,18 @@ THREE.SEA3D.Exporter.prototype = Object.assign( Object.create( THREE.EventDispat
 		
 	},
 	
+	serializeGeometry: function( geo ) {
+
+		var buffer = new THREE.BufferGeometry().fromGeometry( geo );
+		buffer.name = geo.name;
+
+		return this.serializeBufferGeometry( buffer );
+
+	},
+	
 	serializeBufferGeometry: function( geo ) {
+		
+		// DROP
 		
 		var drop = this.getDrop( geo.uuid );
 		
@@ -924,11 +939,13 @@ THREE.SEA3D.Exporter.prototype = Object.assign( Object.create( THREE.EventDispat
 		
 		drop = this.regDrop( geo.uuid );
 		
-		const NORMAL = 4, UV = 32, JOINTS = 64, GROUP = 1024;
+		// SERIALIZE
+		
+		const NORMAL = 4, UV = 32, JOINTS = 64, GROUP = 1024, TRIANGLE_SOUP = 2048;
 		
 		var data = new SEA3D.Stream(), 
-			attrib = GROUP, 
-			numVertex = geo.attributes.position.count, 
+			attrib = GROUP,
+			numVertex = geo.attributes.position ? geo.attributes.position.count : 0,
 			isBig = numVertex >= THREE.SEA3D.Exporter.BIG_GEOMETRY,
 			i;
 		
@@ -937,6 +954,7 @@ THREE.SEA3D.Exporter.prototype = Object.assign( Object.create( THREE.EventDispat
 		if (geo.attributes.normal) attrib |= NORMAL;
 		if (geo.attributes.uv) attrib |= UV;
 		if (geo.attributes.skinIndex) attrib |= JOINTS;
+		if (!geo.index) attrib |= TRIANGLE_SOUP;
 		
 		// HEADER
 		
@@ -986,7 +1004,11 @@ THREE.SEA3D.Exporter.prototype = Object.assign( Object.create( THREE.EventDispat
 		
 		// VERTEX/POSITION
 		
-		data.writeBytes( geo.attributes.position.array.buffer );
+		if (numVertex > 0) {
+			
+			data.writeBytes( geo.attributes.position.array.buffer );
+			
+		}
 		
 		// GROUP
 		
@@ -1000,7 +1022,11 @@ THREE.SEA3D.Exporter.prototype = Object.assign( Object.create( THREE.EventDispat
 		
 		// INDEXES
 		
-		data.writeBytes( geo.index.array.buffer );
+		if (!(attrib & TRIANGLE_SOUP)) {
+			
+			data.writeBytes( geo.index.array.buffer );
+			
+		}
 		
 		// SEA/DROP
 		
