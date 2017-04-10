@@ -641,6 +641,45 @@ THREE.SEA3D.prototype.materialTechnique =
 
 	};
 
+		// FLACCIDITY
+	techniques[ SEA3D.Material.FLACCIDITY ] =
+	function ( mat, tech ) {
+
+		var scale = new THREE.FloatNode( tech.scale );
+
+		if ( tech.mask ) {
+
+			scale = new THREE.OperatorNode(
+				new THREE.TextureNode( tech.mask.tag ),
+				scale,
+				THREE.OperatorNode.MUL
+			);
+
+		}
+
+		var velocity = new THREE.VelocityNode( tech.target.tag, {
+			type: 'elastic',
+			spring: tech.spring,
+			damping: tech.damping,
+			moment: tech.moment
+		} );
+
+		var flaccidity = new THREE.OperatorNode(
+			velocity,
+			scale,
+			THREE.OperatorNode.MUL
+		);
+
+		var flaccidityPosition = new THREE.OperatorNode(
+			new THREE.PositionNode(),
+			flaccidity,
+			THREE.OperatorNode.ADD
+		);
+
+		mat.transform = flaccidityPosition;
+
+	};
+
 	return techniques;
 
 } )();
