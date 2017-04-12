@@ -981,16 +981,21 @@ SEA3D.Geometry = function ( name, data, sea3d ) {
 	// UV
 	if ( this.attrib & 32 ) {
 
-		this.uv = [];
-		this.uv.length = data.readUByte();
+		var uvCount = data.readUByte();
 
-		len = this.numVertex * 2;
+		if ( uvCount ) {
 
-		i = 0;
-		while ( i < this.uv.length ) {
+			this.uv = [];
 
-			// UV VERTEX DATA
-			this.uv[ i ++ ] = data.readFloatArray( len );
+			len = this.numVertex * 2;
+
+			i = 0;
+			while ( i < uvCount ) {
+
+				// UV VERTEX DATA
+				this.uv[ i ++ ] = data.readFloatArray( len );
+
+			}
 
 		}
 
@@ -1013,13 +1018,19 @@ SEA3D.Geometry = function ( name, data, sea3d ) {
 
 		var colorAttrib = data.readUByte();
 
-		this.numColor = ( ( ( colorAttrib & 64 ) >> 6 ) | ( ( colorAttrib & 128 ) >> 6 ) ) + 1;
+		var colorCount = data.readUByte();
 
-		this.color = [];
+		if ( colorCount ) {
 
-		for ( i = 0, len = colorAttrib & 15; i < len; i ++ ) {
+			this.numColor = ( ( ( colorAttrib & 64 ) >> 6 ) | ( ( colorAttrib & 128 ) >> 6 ) ) + 1;
 
-			this.color.push( data.readFloatArray( this.numVertex * this.numColor ) );
+			this.color = [];
+
+			for ( i = 0 & 15; i < colorCount; i ++ ) {
+
+				this.color.push( data.readFloatArray( this.numVertex * this.numColor ) );
+
+			}
 
 		}
 
