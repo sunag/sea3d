@@ -2719,13 +2719,15 @@ SEA3D.File = function ( config ) {
 
 	this.config = {
 		streaming: true,
-		timeLimit: 60
+		timeLimit: 60,
+		progressive: false
 	};
 
 	if ( config ) {
 
 		if ( config.streaming !== undefined ) this.config.streaming = config.streaming;
 		if ( config.timeLimit !== undefined ) this.config.timeLimit = config.timeLimit;
+		if ( config.progressive !== undefined ) this.config.progressive = config.progressive;
 
 	}
 
@@ -3006,7 +3008,7 @@ SEA3D.File.prototype.parse = function () {
 
 	this.initParse();
 
-	if ( isFinite( this.config.timeLimit ) ) setTimeout( this.parseObject.bind( this ), 10 );
+	if ( isFinite( this.config.timeLimit ) ) requestAnimationFrame( this.parseObject.bind( this ) );
 	else this.parseObject();
 
 };
@@ -3098,6 +3100,20 @@ SEA3D.File.prototype.readState = function () {
 
 };
 
+SEA3D.File.prototype.append = function( buffer ) {
+
+	if (this.state) {
+		
+		this.stream.append( buffer );
+		
+	} else {
+		
+		this.read( buffer );
+		
+	}
+
+};
+
 SEA3D.File.prototype.read = function ( buffer ) {
 
 	if ( ! buffer ) throw new Error( "No data found." );
@@ -3169,44 +3185,67 @@ SEA3D.File.prototype.dispatchError = function ( id, message ) {
 
 SEA3D.File.prototype.load = function ( url ) {
 
-	var file = this,
+	var self = this,
 		xhr = new XMLHttpRequest();
 
 	xhr.open( "GET", url, true );
-	xhr.responseType = 'arraybuffer';
+
+	if ( self.config.progressive ) {
+
+		var position = 0;
+
+		xhr.overrideMimeType( 'text/plain; charset=x-user-defined' );
+
+	} else {
+
+		xhr.responseType = 'arraybuffer';
+
+	}
 
 	xhr.onprogress = function ( e ) {
 
-		if ( e.lengthComputable ) {
+		if ( self.config.progressive ) {
 
-			file.dispatchDownloadProgress( e.loaded, e.total );
+			var binStr = xhr.responseText.substring( position ),
+				bytes = new Uint8Array( binStr.length );
 
-		}
+			for ( var i = 0; i < binStr.length; i ++ ) {
 
-	};
-
-	xhr.onreadystatechange = function () {
-
-		if ( xhr.readyState === 2 ) {
-			//xhr.getResponseHeader("Content-Length");
-		} else if ( xhr.readyState === 3 ) {
-			//	progress
-		} else if ( xhr.readyState === 4 ) {
-
-			if ( xhr.status === 200 || xhr.status === 0 ) {
-
-				// complete
-				file.read( this.response );
-
-			} else {
-
-				this.dispatchError( 1001, "Couldn't load [" + url + "] [" + xhr.status + "]" );
+				bytes[ i ] = binStr.charCodeAt( i ) & 0xFF;
 
 			}
 
+			position += binStr.length;
+
+			self.append( bytes.buffer );
+
 		}
 
+		self.dispatchDownloadProgress( e.loaded, e.total );
+
 	};
+
+	if ( ! self.config.progressive ) {
+
+		xhr.onreadystatechange = function () {
+
+			if ( xhr.readyState === 4 ) {
+
+				if ( xhr.status === 200 || xhr.status === 0 ) {
+
+					self.read( this.response );
+
+				} else {
+
+					this.dispatchError( 1001, "Couldn't load [" + url + "] [" + xhr.status + "]" );
+
+				}
+
+			}
+
+		};
+
+	}
 
 	xhr.send();
 
