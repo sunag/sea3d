@@ -666,10 +666,12 @@ SEA3D.Stream.prototype.readVector = function ( type, length, offset ) {
 
 SEA3D.Stream.prototype.append = function ( data ) {
 
-	var tmp = new ArrayBuffer( this.data.byteLength + data.byteLength );
-	tmp.set( new ArrayBuffer( this.data ), 0 );
-	tmp.set( new ArrayBuffer( data ), this.data.byteLength );
-	this.data = tmp;
+	var buffer = new ArrayBuffer( this.data.byteLength + data.byteLength );
+
+	SEA3D.Stream.memcpy( buffer, 0, this.data.buffer, 0, this.data.byteLength );
+	SEA3D.Stream.memcpy( buffer, this.data.byteLength, data, 0, data.byteLength );
+
+	this.buffer = buffer;
 
 };
 
@@ -704,6 +706,7 @@ SEA3D.UByteArray = function () {
 };
 
 SEA3D.UByteArray.prototype = {
+
 	constructor: SEA3D.UByteArray,
 
 	add: function ( ubytes ) {
@@ -2712,6 +2715,23 @@ SEA3D.MP3 = function ( name, data, sea3d ) {
 SEA3D.MP3.prototype.type = "mp3";
 
 //
+//	Texture Update
+//
+
+SEA3D.TextureUpdate = function ( name, data, sea3d ) {
+
+	this.name = name;
+	this.data = data;
+	this.sea3d = sea3d;
+
+	this.index = data.readUInt();
+	this.bytes = data.concat( data.position, data.length - data.position );
+
+};
+
+SEA3D.TextureUpdate.prototype.type = "uTex";
+
+//
 //	FILE FORMAT
 //
 
@@ -2786,8 +2806,10 @@ SEA3D.File = function ( config ) {
 	this.addClass( SEA3D.JavaScriptMethod, true );
 	this.addClass( SEA3D.GLSL, true );
 
-	// Extensions
+	// Updaters
+	this.addClass( SEA3D.TextureUpdate, true );
 
+	// Extensions
 	var i = SEA3D.File.Extensions.length;
 
 	while ( i -- ) {
@@ -2889,15 +2911,15 @@ SEA3D.File.prototype.readSEAObject = function () {
 	if ( this.stream.bytesAvailable < 4 )
 		return null;
 
-	var size = this.stream.readUInt();
-	var position = this.stream.position;
+	var size = this.stream.readUInt(),
+		position = this.stream.position;
 
 	if ( this.stream.bytesAvailable < size )
 		return null;
 
-	var flag = this.stream.readUByte();
-	var type = this.stream.readExt();
-	var meta = null;
+	var flag = this.stream.readUByte(),
+		type = this.stream.readExt(),
+		meta = null;
 
 	var name = flag & 1 ? this.stream.readUTF8Tiny() : "",
 		compressed = ( flag & 2 ) != 0,
@@ -3103,13 +3125,13 @@ SEA3D.File.prototype.readState = function () {
 SEA3D.File.prototype.append = function( buffer ) {
 
 	if (this.state) {
-		
+
 		this.stream.append( buffer );
-		
+
 	} else {
-		
+
 		this.read( buffer );
-		
+
 	}
 
 };
