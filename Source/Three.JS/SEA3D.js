@@ -1247,7 +1247,7 @@ SEA3D.TextureURL = function ( name, data, sea3d ) {
 	this.data = data;
 	this.sea3d = sea3d;
 
-	this.url = data.readUTF8( data.length );
+	this.url = sea3d.config.path + data.readUTF8( data.length );
 
 };
 
@@ -2748,6 +2748,7 @@ SEA3D.File = function ( config ) {
 		if ( config.streaming !== undefined ) this.config.streaming = config.streaming;
 		if ( config.timeLimit !== undefined ) this.config.timeLimit = config.timeLimit;
 		if ( config.progressive !== undefined ) this.config.progressive = config.progressive;
+		if ( config.path !== undefined ) this.config.path = config.path;
 
 	}
 
@@ -3211,6 +3212,12 @@ SEA3D.File.prototype.load = function ( url ) {
 		xhr = new XMLHttpRequest();
 
 	xhr.open( "GET", url, true );
+
+	if (!this.config.path) {
+
+		this.config.path = THREE.Loader.prototype.extractUrlBase( url );
+
+	}
 
 	if ( self.config.progressive ) {
 
