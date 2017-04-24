@@ -1828,7 +1828,7 @@ THREE.SEA3D.prototype.addDefaultAnimation = function ( sea, animatorClass ) {
 
 THREE.SEA3D.prototype.readGeometryBuffer = function ( sea ) {
 
-	var geo = new THREE.BufferGeometry();
+	var geo = sea.tag || new THREE.BufferGeometry();
 
 	for ( var i = 0; i < sea.groups.length; i ++ ) {
 

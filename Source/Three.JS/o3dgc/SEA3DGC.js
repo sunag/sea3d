@@ -138,6 +138,39 @@ SEA3D.GeometryGC = function ( name, data, sea3d ) {
 SEA3D.GeometryGC.prototype.type = "s3D";
 
 //
+//	Geometry Update
+//
+
+SEA3D.GeometryUpdateGC = function ( name, data, sea3d ) {
+
+	this.name = name;
+	this.data = data;
+	this.sea3d = sea3d;
+
+	this.index = data.readUInt();
+	this.bytes = data.concat( data.position, data.length - data.position );
+
+};
+
+SEA3D.GeometryUpdateGC.prototype.type = "us3D";
+
+//
+//	Updaters
+//
+
+THREE.SEA3D.prototype.readGeometryUpdateGC = function ( sea ) {
+
+	var obj = this.file.objects[ sea.index ],
+		geo = obj.tag;
+
+	var seaUpdate = new SEA3D.GeometryGC( "", sea.bytes, sea.sea3d );
+	seaUpdate.tag = geo;
+
+	this.readGeometryBuffer( seaUpdate );
+
+};
+
+//
 //	Extension
 //
 
@@ -146,8 +179,10 @@ THREE.SEA3D.EXTENSIONS_LOADER.push( {
 	setTypeRead: function () {
 
 		this.file.addClass( SEA3D.GeometryGC, true );
+		this.file.addClass( SEA3D.GeometryUpdateGC, true );
 
 		this.file.typeRead[ SEA3D.GeometryGC.prototype.type ] = this.readGeometryBuffer;
+		this.file.typeRead[ SEA3D.GeometryUpdateGC.prototype.type ] = this.readGeometryUpdateGC;
 
 	}
 
