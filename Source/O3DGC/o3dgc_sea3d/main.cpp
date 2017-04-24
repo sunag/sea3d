@@ -252,7 +252,7 @@ int main(int argc, char * argv[])
 {
 	string input, output;
 
-	float 
+	double 
 		qposition_quality = 1,
 		qgradient_quality = 1;
 
@@ -289,10 +289,10 @@ int main(int argc, char * argv[])
 	}
 
 	int qcoord = (int)(12 * qposition_quality);
-    int qtexCoord = (int)(10 * qgradient_quality);
-    int qnormal = (int)(10 * qgradient_quality);
-	int qcolor = (int)(10 * qgradient_quality);
-    int qweights = (int)(8 * qgradient_quality);
+    int qtexCoord = (int)(15 * qgradient_quality);
+    int qnormal = (int)(12 * qgradient_quality);
+	int qcolor = (int)(12 * qgradient_quality);
+    int qweights = (int)(10 * qgradient_quality);
 
 	if (qposition_quality < 0.1) qposition_quality = 0.1;
 	else if (qposition_quality > 2) qposition_quality = 2;
