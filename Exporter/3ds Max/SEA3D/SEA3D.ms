@@ -409,7 +409,7 @@ fn CreateSEAConfig =
 	seaconfig.AddString "bakeext" EXT_PNG
 	seaconfig.AddString "bakeoutput" "completemap"
 	seaconfig.AddBoolean "relativesize" false
-	seaconfig.AddBoolean "meshoptimizer" false	
+	seaconfig.AddBoolean "meshoptimizer" true	
 	seaconfig.AddBoolean "joinvertices" false	
 	seaconfig.AddBoolean "forcelights" false
 	seaconfig.AddBoolean "fileinfo" false
