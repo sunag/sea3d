@@ -30,6 +30,7 @@ using System.Threading;
 using Ionic.Zlib;
 using System.IO;
 
+#pragma warning disable
 
 namespace Ionic.Zlib
 {
@@ -1230,6 +1231,7 @@ namespace Ionic.Zlib
             {
                 lock(_outputLock)
                 {
+#if CONSOLE
                     int tid = Thread.CurrentThread.GetHashCode();
 #if !SILVERLIGHT
                     Console.ForegroundColor = (ConsoleColor) (tid % 8 + 8);
@@ -1238,6 +1240,8 @@ namespace Ionic.Zlib
                     Console.WriteLine(format, varParams);
 #if !SILVERLIGHT
                     Console.ResetColor();
+#endif
+
 #endif
                 }
             }

@@ -272,9 +272,9 @@ namespace Ionic.Zlib
         internal short[] dyn_dtree;         // distance tree
         internal short[] bl_tree;           // Huffman tree for bit lengths
 
-        internal Tree treeLiterals = new Tree();  // desc for literal tree
-        internal Tree treeDistances = new Tree();  // desc for distance tree
-        internal Tree treeBitLengths = new Tree(); // desc for bit length tree
+        internal TreeZlib treeLiterals = new TreeZlib();  // desc for literal tree
+        internal TreeZlib treeDistances = new TreeZlib();  // desc for distance tree
+        internal TreeZlib treeBitLengths = new TreeZlib(); // desc for bit length tree
 
         // number of codes at each bit length for an optimal tree
         internal short[] bl_count = new short[InternalConstants.MAX_BITS + 1];
@@ -512,7 +512,7 @@ namespace Ionic.Zlib
             // 3 but the actual value used is 4.)
             for (max_blindex = InternalConstants.BL_CODES - 1; max_blindex >= 3; max_blindex--)
             {
-                if (bl_tree[Tree.bl_order[max_blindex] * 2 + 1] != 0)
+                if (bl_tree[TreeZlib.bl_order[max_blindex] * 2 + 1] != 0)
                     break;
             }
             // Update opt_len to include the bit length tree and counts
@@ -534,7 +534,7 @@ namespace Ionic.Zlib
             send_bits(blcodes - 4, 4); // not -3 as stated in appnote.txt
             for (rank = 0; rank < blcodes; rank++)
             {
-                send_bits(bl_tree[Tree.bl_order[rank] * 2 + 1], 3);
+                send_bits(bl_tree[TreeZlib.bl_order[rank] * 2 + 1], 3);
             }
             send_tree(dyn_ltree, lcodes - 1); // literal tree
             send_tree(dyn_dtree, dcodes - 1); // distance tree
@@ -721,8 +721,8 @@ namespace Ionic.Zlib
                 matches++;
                 // Here, lc is the match length - MIN_MATCH
                 dist--; // dist = match distance - 1
-                dyn_ltree[(Tree.LengthCode[lc] + InternalConstants.LITERALS + 1) * 2]++;
-                dyn_dtree[Tree.DistanceCode(dist) * 2]++;
+                dyn_ltree[(TreeZlib.LengthCode[lc] + InternalConstants.LITERALS + 1) * 2]++;
+                dyn_dtree[TreeZlib.DistanceCode(dist) * 2]++;
             }
 
             if ((last_lit & 0x1fff) == 0 && (int)compressionLevel > 2)
@@ -733,7 +733,7 @@ namespace Ionic.Zlib
                 int dcode;
                 for (dcode = 0; dcode < InternalConstants.D_CODES; dcode++)
                 {
-                    out_length = (int)(out_length + (int)dyn_dtree[dcode * 2] * (5L + Tree.ExtraDistanceBits[dcode]));
+                    out_length = (int)(out_length + (int)dyn_dtree[dcode * 2] * (5L + TreeZlib.ExtraDistanceBits[dcode]));
                 }
                 out_length >>= 3;
                 if ((matches < (last_lit / 2)) && out_length < in_length / 2)
@@ -776,28 +776,28 @@ namespace Ionic.Zlib
                     {
                         // literal or match pair
                         // Here, lc is the match length - MIN_MATCH
-                        code = Tree.LengthCode[lc];
+                        code = TreeZlib.LengthCode[lc];
 
                         // send the length code
                         send_code(code + InternalConstants.LITERALS + 1, ltree);
-                        extra = Tree.ExtraLengthBits[code];
+                        extra = TreeZlib.ExtraLengthBits[code];
                         if (extra != 0)
                         {
                             // send the extra length bits
-                            lc -= Tree.LengthBase[code];
+                            lc -= TreeZlib.LengthBase[code];
                             send_bits(lc, extra);
                         }
                         distance--; // dist is now the match distance - 1
-                        code = Tree.DistanceCode(distance);
+                        code = TreeZlib.DistanceCode(distance);
 
                         // send the distance code
                         send_code(code, dtree);
 
-                        extra = Tree.ExtraDistanceBits[code];
+                        extra = TreeZlib.ExtraDistanceBits[code];
                         if (extra != 0)
                         {
                             // send the extra distance bits
-                            distance -= Tree.DistanceBase[code];
+                            distance -= TreeZlib.DistanceBase[code];
                             send_bits(distance, extra);
                         }
                     }

@@ -58,7 +58,7 @@
     <Compile Include="Ionic.Zlib\Inflate.cs" />
     <Compile Include="Ionic.Zlib\InfTree.cs" />
     <Compile Include="Ionic.Zlib\ParallelDeflateOutputStream.cs" />
-    <Compile Include="Ionic.Zlib\Tree.cs" />
+    <Compile Include="Ionic.Zlib\TreeZlib.cs" />
     <Compile Include="Ionic.Zlib\Zlib.cs" />
     <Compile Include="Ionic.Zlib\ZlibBaseStream.cs" />
     <Compile Include="Ionic.Zlib\ZlibCodec.cs" />

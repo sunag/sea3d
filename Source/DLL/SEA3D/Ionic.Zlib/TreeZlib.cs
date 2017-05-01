@@ -65,7 +65,7 @@ using System;
 
 namespace Ionic.Zlib
 {
-    sealed class Tree
+    sealed class TreeZlib
     {
         private static readonly int HEAP_SIZE = (2 * InternalConstants.L_CODES + 1);
                 

@@ -53,7 +53,7 @@
       <Project>{3415FF29-C0BE-44FC-AD34-94796118E690}</Project>
       <Name>AssimpNet</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SEA3D\SEA3D.csproj">
+    <ProjectReference Include="..\..\DLL\SEA3D\SEA3D.csproj">
       <Project>{649E8A40-51B9-4D2F-86CA-F9F1FA080EC9}</Project>
       <Name>SEA3D</Name>
     </ProjectReference>
