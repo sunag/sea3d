@@ -159,9 +159,9 @@ THREE.SEA3D.prototype.readRigidBodyBase = function ( sea ) {
 
 	} else {
 
-		THREE.SEA3D.MTXBUF.elements.set( sea.transform );
-
+		THREE.SEA3D.MTXBUF.fromArray( sea.transform );
 		transform = SEA3D.AMMO.getTransformFromMatrix( THREE.SEA3D.MTXBUF );
+
 
 	}
 
@@ -184,10 +184,7 @@ THREE.SEA3D.prototype.readRigidBodyBase = function ( sea ) {
 
 		if ( sea.offset ) {
 
-			var offset = new THREE.Matrix4();
-			offset.elements.set( sea.offset );
-
-			target.physics.offset = offset;
+			target.physics.offset = new THREE.Matrix4().fromArray( sea.offset );
 
 		}
 
@@ -264,10 +261,7 @@ THREE.SEA3D.prototype.readCarController = function ( sea ) {
 
 			if ( wheel.offset ) {
 
-				var offset = new THREE.Matrix4();
-				offset.elements.set( wheel.offset );
-
-				target.physics.offset = offset;
+				target.physics.offset = new THREE.Matrix4().fromArray( wheel.offset );
 
 			}
 

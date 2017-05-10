@@ -53,9 +53,11 @@
 
 			var g_animation = null, g_morph = null, g_example = null;
 
-			var isPhysics = false, isAnimations = false;
+			var isPhysics = false, isAnimations = false, isMorphs = false;
 
 			var loader = null;
+
+			var currentAnimations = [], currentMorphs = [];
 
 			init();
 
@@ -74,7 +76,7 @@
 				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
 				camera.position.set( 1000, - 300, 1000 );
 
-				renderer = new THREE.WebGLRenderer( {antialias: false } );
+				renderer = new THREE.WebGLRenderer( {antialias: true } );
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				renderer.setClearColor( 0x171717, 1 );
@@ -141,6 +143,8 @@
 				g_example.add('button', { name:'MECK', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( '../Examples/Programmer/Three.JS/assets/meck.tjs.sea' );  } );
 				g_example.add('button', { name:'PHYSICS', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( '../Examples/Programmer/Three.JS/assets/physics.tjs.sea' );  } );
 				g_example.add('button', { name:'CAR', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( '../Examples/Programmer/Three.JS/assets/car.tjs.sea' );  } );
+				g_example.add('button', { name:'TSUNADE', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( '../Examples/Programmer/Three.JS/assets/tsunade.tjs.sea' );  } );
+				g_example.add('button', { name:'TEMARI', fontColor:'#D4B87B', height:20, p:0 }).onChange( function(n){ seaPlayer.load( '../Examples/Programmer/Three.JS/assets/temari.tjs.sea' );  } );
 				g_example.open();
 
 			}
@@ -151,26 +155,38 @@
 
 				if( g_animation === null ) g_animation = gui.add('group', { name:'ANIMATIONS' });
 				o.material.skinning = true;
-				
+
 				var name, i;
+
 				for( i = 0; i < o.animations.length; i++){
 	                name = o.animations[i].name;
-	                g_animation.add('button', { name:name, p:0 }).onChange( function(n){  o.play(n, 0.5);  } );
+	                if( currentAnimations.indexOf(name) === -1 ) {
+	                	g_animation.add('button', { name:name, p:0 }).onChange( function(n){  o.play(n, 0.5);  } );
+	                	currentAnimations.push( name );
+	                }
 	            }
 
 				//for(var a in o.animations ) g_animation.add('button', { name:a, p:0 }).onChange( function(n){ o.play(n);  } );
 				
-				g_animation.open();
+				//g_animation.open();
 
 			}
 
 			function addMorphs( o ){
 
+				isMorphs = true;
+
 				if( g_morph === null ) g_morph = gui.add('group', { name:'MORPHS' });
 				o.material.morphTargets = true;
-				for(var m in o.morphTargetDictionary ) g_morph.add('slide', { name:m, min:0, max:1, value:o.morphTargetDictionary[m] }).onChange( function(v){ o.setWeight( this.txt, v ); } );
 
-				g_morph.open();
+				for( var name in o.morphTargetDictionary ){ 
+					if( currentMorphs.indexOf(name) === -1 ) {
+					    g_morph.add('slide', { name:name, min:0, max:1, value:o.morphTargetDictionary[name] }).onChange( function(v){ o.setWeight( this.txt, v ); } );
+					    currentMorphs.push( name );
+					}
+				}
+
+				//g_morph.open();
 
 			}
 
@@ -180,6 +196,10 @@
 
 				isPhysics = false;
 				isAnimations = false;
+				isMorphs = false;
+
+				currentAnimations = [];
+				currentMorphs = [];
 
 				loadPic.style.display = 'block';
 
@@ -234,10 +254,13 @@
 						if(o.material.type === 'MeshBasicMaterial') o.material = new THREE.MeshStandardMaterial( {envMap:envMap} );
 					}
 
+					// animation check
+				    if( o.animations ) addAnimator( o );
+				    
 
-				    if(o.animations) addAnimator( o );
-
-				    if(o.morphTargetDictionary) addMorphs( o );
+				    // morph check
+				    if( o.morphTargetDictionary ) addMorphs( o );
+				    
 
 				    if(o.geometry){
 				    	o.castShadow = true;
@@ -260,6 +283,10 @@
 					}
 
 				}
+
+
+				if( isAnimations ) g_animation.open();
+				if( isMorphs ) g_morph.open();
 
 				if( needComputeCentroid ){
 
