@@ -47,6 +47,8 @@
 
 			var container, gui;
 
+			var isMobile = false;
+
 			var camera, scene, renderer, controls, clock, req, envMap;
 
 			var title, info, loadPic;
@@ -63,6 +65,10 @@
 
 			function init() {
 
+				var n = navigator.userAgent;
+		        if (n.match(/Android/i) || n.match(/webOS/i) || n.match(/iPhone/i) || n.match(/iPad/i) || n.match(/iPod/i) || n.match(/BlackBerry/i) || n.match(/Windows Phone/i)) isMobile = true;
+		        else isMobile = false;  
+
 				SEA3D.AMMO.init(); // init physics engine
 
 				clock = new THREE.Clock();
@@ -76,7 +82,7 @@
 				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
 				camera.position.set( 1000, - 300, 1000 );
 
-				renderer = new THREE.WebGLRenderer( {antialias: true } );
+				renderer = new THREE.WebGLRenderer( {antialias: isMobile ? false : true } );
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				renderer.setClearColor( 0x171717, 1 );
