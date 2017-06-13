@@ -1837,6 +1837,18 @@ SEA3D.SkeletonAnimation = function ( name, data, sea3d ) {
 SEA3D.SkeletonAnimation.prototype.type = "skla";
 
 //
+//	UVW Animation
+//
+
+SEA3D.UVWAnimation = function ( name, data, sea3d ) {
+
+	SEA3D.Animation.call( this, name, data, sea3d );
+
+};
+
+SEA3D.UVWAnimation.prototype.type = "auvw";
+
+//
 //	Morph
 //
 
@@ -2772,16 +2784,17 @@ SEA3D.File = function ( config ) {
 	this.addClass( SEA3D.DirectionalLight );
 	this.addClass( SEA3D.HemisphereLight );
 	this.addClass( SEA3D.AmbientLight );
+	this.addClass( SEA3D.Animation, true );
 	this.addClass( SEA3D.Skeleton, true );
 	this.addClass( SEA3D.SkeletonLocal, true );
 	this.addClass( SEA3D.SkeletonAnimation, true );
+	this.addClass( SEA3D.UVWAnimation, true );
 	this.addClass( SEA3D.JointObject );
 	this.addClass( SEA3D.Camera );
 	this.addClass( SEA3D.OrthographicCamera );
 	this.addClass( SEA3D.Morph, true );
 	this.addClass( SEA3D.VertexAnimation, true );
 	this.addClass( SEA3D.CubeMap, true );
-	this.addClass( SEA3D.Animation, true );
 	this.addClass( SEA3D.Dummy );
 	this.addClass( SEA3D.Line );
 	this.addClass( SEA3D.SoundPoint );

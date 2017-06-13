@@ -1985,7 +1985,7 @@ THREE.SEA3D.prototype.readSprite = function ( sea ) {
 
 THREE.SEA3D.prototype.readMesh = function ( sea ) {
 
-	var i, count, geo = sea.geometry.tag, mesh, mat, skeleton, skeletonAnimation, vertexAnimation, morpher;
+	var i, count, geo = sea.geometry.tag, mesh, mat, skeleton, skeletonAnimation, vertexAnimation, uvwAnimationClips, morpher;
 
 	for ( i = 0, count = sea.modifiers ? sea.modifiers.length : 0; i < count; i ++ ) {
 
@@ -2017,13 +2017,14 @@ THREE.SEA3D.prototype.readMesh = function ( sea ) {
 
 	for ( i = 0, count = sea.animations ? sea.animations.length : 0; i < count; i ++ ) {
 
-		var anm = sea.animations[ i ];
+		var anm = sea.animations[ i ],
+			anmTag = anm.tag;
 
-		switch ( anm.tag.type ) {
+		switch ( anmTag.type ) {
 
 			case SEA3D.SkeletonAnimation.prototype.type:
 
-				skeletonAnimation = anm.tag;
+				skeletonAnimation = anmTag;
 
 				geo.animations = skeletonAnimation.tag || this.getAnimationType( {
 					sea: skeletonAnimation,
@@ -2035,11 +2036,19 @@ THREE.SEA3D.prototype.readMesh = function ( sea ) {
 
 			case SEA3D.VertexAnimation.prototype.type:
 
-				vertexAnimation = anm.tag;
+				vertexAnimation = anmTag;
 
 				geo.morphAttributes = vertexAnimation.tag.attribs;
 				geo.morphTargets = vertexAnimation.tag.targets;
 				geo.animations = vertexAnimation.tag.animations;
+
+				break;
+
+			case SEA3D.UVWAnimation.prototype.type:
+
+				uvwAnimationClips = anmTag.tag || this.getAnimationType( {
+					sea: anmTag,
+				} );
 
 				break;
 
@@ -2110,6 +2119,17 @@ THREE.SEA3D.prototype.readMesh = function ( sea ) {
 
 	}
 
+	if ( uvwAnimationClips ) {
+
+		mesh.uvwAnimator = new THREE.SEA3D.Animator( uvwAnimationClips, new THREE.AnimationMixer( mat.map ) );
+
+		if ( this.config.autoPlay ) {
+
+			mesh.uvwAnimator.play( 0 );
+
+		}
+
+	}
 
 	mesh.name = sea.name;
 
@@ -3082,6 +3102,30 @@ THREE.SEA3D.prototype.readAnimation = function ( sea ) {
 
 					break;
 
+				case SEA3D.Animation.OFFSET_U:
+
+					name = '.offset[x]';
+
+					break;
+
+				case SEA3D.Animation.OFFSET_V:
+
+					name = '.offset[y]';
+
+					break;
+
+				case SEA3D.Animation.SCALE_U:
+
+					name = '.repeat[x]';
+
+					break;
+
+				case SEA3D.Animation.SCALE_V:
+
+					name = '.repeat[y]';
+
+					break;
+
 			}
 
 			if ( ! name ) continue;
@@ -3643,7 +3687,8 @@ THREE.SEA3D.prototype.setTypeRead = function () {
 	this.file.typeRead[ SEA3D.JointObject.prototype.type ] = this.readJointObject;
 	this.file.typeRead[ SEA3D.CubeMap.prototype.type ] = this.readCubeMap;
 	this.file.typeRead[ SEA3D.CubeRender.prototype.type ] = this.readCubeRender;
-	this.file.typeRead[ SEA3D.Animation.prototype.type ] = this.readAnimation;
+	this.file.typeRead[ SEA3D.Animation.prototype.type ] = 
+	this.file.typeRead[ SEA3D.UVWAnimation.prototype.type ] = this.readAnimation;
 	this.file.typeRead[ SEA3D.SoundPoint.prototype.type ] = this.readSoundPoint;
 	this.file.typeRead[ SEA3D.TextureURL.prototype.type ] = this.readTextureURL;
 	this.file.typeRead[ SEA3D.CubeMapURL.prototype.type ] = this.readCubeMapURL;

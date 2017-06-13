@@ -29,9 +29,7 @@ THREE.SEA3D.prototype.isLegacy = function ( sea ) {
 
 	var sea3d = sea.sea3d;
 
-	if ( sea3d.sign == 'S3D' && ! sea._legacy ) {
-
-		sea._legacy = sea3d.typeUnique[ sea.type ] == true;
+	if ( sea3d.sign === "S3D" ) {
 
 		return sea3d.config.legacy;
 
@@ -403,7 +401,9 @@ THREE.SEA3D.prototype.getAnimationType = function ( req ) {
 
 	var sea = req.sea;
 
-	if ( this.isLegacy( sea ) ) {
+	if ( this.isLegacy( sea ) && ! sea.done ) {
+
+		sea.done = true;
 
 		switch ( sea.type ) {
 
@@ -416,6 +416,7 @@ THREE.SEA3D.prototype.getAnimationType = function ( req ) {
 				break;
 
 			case SEA3D.Animation.prototype.type:
+			case SEA3D.UVWAnimation.prototype.type:
 
 				if ( req.scope instanceof THREE.Object3D ) {
 
