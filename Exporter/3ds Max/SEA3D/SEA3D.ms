@@ -8179,15 +8179,15 @@ rollout _SEAAnimation "Animation"
 	checkbox _enabled "Enabled" pos:[7,7] checked:seaconfig_animation
 	checkbox _static "All Static" pos:[147,7] checked:seaconfig_allstatic tooltip:"Makes all objects as static. Recommended for scenery."
 	
-	spinner _start "Start:" pos:[17,27] range:[-1000000,1000000,animationRange.start.frame as integer] width:85 type:#integer 
-	spinner _end "End:" pos:[117,27] range:[-1000000,1000000,animationRange.end.frame as integer] width:85 type:#integer
+	spinner _bindframe "Bind Frame:" pos:[6,27] fieldwidth:127 range:[-1000000,1000000,seaconfig_bindframe] type:#integer tooltip:"Bind Frame represent the initial frame."
 	
-	checkbox _instance "Instance Animations" pos:[7,49] checked:seaconfig_instanceanimation toolTip:"Add animation mesh for an instantiated object that does not contain animation."
-	checkbox _forceAnm "Force Animation Export" pos:[7,69] checked:seaconfig_force_animation toolTip:"Export animation of the objects not enabled."
+	spinner _start "Start:" pos:[17,49] range:[-1000000,1000000,animationRange.start.frame as integer] width:85 type:#integer 
+	spinner _end "End:" pos:[117,49] range:[-1000000,1000000,animationRange.end.frame as integer] width:85 type:#integer
 	
-	checkbox _bindoffset "Relative Transform" pos:[7,89] checked:seaconfig_bindoffset tooltip:"Starts from global or local(relative) position of the object. Bind Frame represent the initial frame."
-	spinner _bindframe "Bind Frame:" pos:[9,109] range:[-1000000,1000000,seaconfig_bindframe] type:#integer
-	
+	checkbox _instance "Instance Animations" pos:[7,69] checked:seaconfig_instanceanimation toolTip:"Add animation mesh for an instantiated object that does not contain animation."
+	checkbox _forceAnm "Force Animation Export" pos:[7,89] checked:seaconfig_force_animation toolTip:"Export animation of the objects not enabled."
+	checkbox _bindoffset "Relative Transform" pos:[7,109] checked:seaconfig_bindoffset tooltip:"Starts from global or local(relative) position of the object from Bind Frame."
+
 	fn updateAnimationRange =
 	(
 		seaTimeRange = #(_start.value, _end.value)
@@ -8213,7 +8213,7 @@ rollout _SEAAnimation "Animation"
 		(
 			_SEAAnimation.height = 132
 		)
-		else _SEAAnimation.height = 27
+		else _SEAAnimation.height = 47
 	)
 
 	fn onchange =
