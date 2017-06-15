@@ -8181,7 +8181,7 @@ rollout _SEAAnimation "Animation"
 	checkbox _enabled "Enabled" pos:[7,7] checked:seaconfig_animation
 	checkbox _static "All Static" pos:[147,7] checked:seaconfig_allstatic tooltip:"Makes all objects as static. Recommended for scenery."
 	
-	spinner _bindframe "Bind frame:" pos:[6,27] fieldwidth:127 range:[-1000000,1000000,seaconfig_bindframe] type:#integer tooltip:"Bind Frame represent the initial frame."
+	spinner _bindframe "Bind frame:" pos:[6,27] fieldwidth:129 range:[-1000000,1000000,seaconfig_bindframe] type:#integer tooltip:"Bind Frame represent the initial frame."
 	
 	spinner _start "Start:" pos:[17,49] range:[-1000000,1000000,animationRange.start.frame as integer] width:85 type:#integer 
 	spinner _end "End:" pos:[117,49] range:[-1000000,1000000,animationRange.end.frame as integer] width:85 type:#integer
