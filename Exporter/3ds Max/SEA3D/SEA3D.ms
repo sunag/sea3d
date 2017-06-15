@@ -411,7 +411,7 @@ fn CreateSEAConfig =
 	seaconfig.AddBoolean "relativesize" false
 	seaconfig.AddBoolean "meshoptimizer" true	
 	seaconfig.AddBoolean "joinvertices" false	
-	seaconfig.AddBoolean "forcelights" false
+	seaconfig.AddBoolean "moveslide" true
 	seaconfig.AddBoolean "fileinfo" false
 	seaconfig.AddString "fileinfo-name" ""
 	seaconfig.AddString "fileinfo-author" ""
@@ -488,6 +488,7 @@ fn SetSEAConfig seaconfig =
 	seaconfig.AddBoolean "relativesize" seaconfig_relativesize	
 	seaconfig.AddBoolean "meshoptimizer" seaconfig_meshoptimizer
 	seaconfig.AddBoolean "joinvertices" seaconfig_joinvertices
+	seaconfig.AddBoolean "moveslide" seaconfig_moveslide
 	seaconfig.AddBoolean "fileinfo" seaconfig_fileinfo[1]
 	seaconfig.AddString "fileinfo-name" seaconfig_fileinfo[2]
 	seaconfig.AddString "fileinfo-author" seaconfig_fileinfo[3]
@@ -564,6 +565,7 @@ fn GetSEAConfig seaconfig =
 	seaconfig_relativesize =  seaconfig.GetBoolean "relativesize",
 	seaconfig_meshoptimizer = seaconfig.GetBoolean "meshoptimizer",
 	seaconfig_joinvertices = seaconfig.GetBoolean "joinvertices",
+	seaconfig_moveslide = seaconfig.GetBoolean "moveslide",
 	seaconfig_fileinfo = #(seaconfig.getBoolean "fileinfo",seaconfig.GetString "fileinfo-name",seaconfig.GetString "fileinfo-author",seaconfig.GetString "fileinfo-website"),
 	seaconfig_fog = #(seaconfig.getBoolean "fog", color (seaconfig.GetRed "fog-color") (seaconfig.GetGreen "fog-color") (seaconfig.GetBlue "fog-color"), seaconfig.GetFloat "fog-min", seaconfig.GetFloat "fog-max")
 )
@@ -1427,7 +1429,7 @@ global
 fn seatime t =
 (
 	set time t
-	sliderTime = t
+	if seaconfig_moveslide do sliderTime = t
 )
 
 fn seaupdatewindow = 
@@ -7983,7 +7985,7 @@ fn exportSEA3D filename =
 
 rollout _SEA "SEA3D"
 (		
-	radiobuttons compressItem "Compression Algorithm" pos:[7,4] default:2 labels:#("None", "Deflate", "Lzma") 		
+	radiobuttons compressItem "Compression algorithm" pos:[7,4] default:2 labels:#("None", "Deflate", "Lzma") 		
 	radiobuttons exportItem "Export" pos:[7,40] default:2 labels:#("All", "Visible", "Selected")		
 	
 	label presetSample "Presets" pos:[7,75]	
@@ -8144,11 +8146,11 @@ rollout _SEA "SEA3D"
 
 rollout _SEAGlobal "Global"
 (
-	radiobuttons extMethod "Export Method" labels:#
+	radiobuttons extMethod "Export method" labels:#
 	(
 		"Scene Hierarchy", 
 		"Global Transform",
-		"Snapshot (not allow animation)"
+		"Snapshot (Not allow animation)"
 	) pos:[7,7]	
 
 	fn onchange =
@@ -8179,14 +8181,14 @@ rollout _SEAAnimation "Animation"
 	checkbox _enabled "Enabled" pos:[7,7] checked:seaconfig_animation
 	checkbox _static "All Static" pos:[147,7] checked:seaconfig_allstatic tooltip:"Makes all objects as static. Recommended for scenery."
 	
-	spinner _bindframe "Bind Frame:" pos:[6,27] fieldwidth:127 range:[-1000000,1000000,seaconfig_bindframe] type:#integer tooltip:"Bind Frame represent the initial frame."
+	spinner _bindframe "Bind frame:" pos:[6,27] fieldwidth:127 range:[-1000000,1000000,seaconfig_bindframe] type:#integer tooltip:"Bind Frame represent the initial frame."
 	
 	spinner _start "Start:" pos:[17,49] range:[-1000000,1000000,animationRange.start.frame as integer] width:85 type:#integer 
 	spinner _end "End:" pos:[117,49] range:[-1000000,1000000,animationRange.end.frame as integer] width:85 type:#integer
 	
-	checkbox _instance "Instance Animations" pos:[7,69] checked:seaconfig_instanceanimation toolTip:"Add animation mesh for an instantiated object that does not contain animation."
-	checkbox _forceAnm "Force Animation Export" pos:[7,89] checked:seaconfig_force_animation toolTip:"Export animation of the objects not enabled."
-	checkbox _bindoffset "Relative Transform" pos:[7,109] checked:seaconfig_bindoffset tooltip:"Starts from global or local(relative) position of the object from Bind Frame."
+	checkbox _instance "Instance animations" pos:[7,69] checked:seaconfig_instanceanimation toolTip:"Add animation mesh for an instantiated object that does not contain animation."
+	checkbox _bindoffset "Relative transform" pos:[7,89] checked:seaconfig_bindoffset tooltip:"Starts from global or local(relative) position of the object from Bind Frame."
+	checkbox _forceAnm "Animation of not enabled objects" pos:[7,109] checked:seaconfig_force_animation toolTip:"Export animation of the objects not enabled."
 
 	fn updateAnimationRange =
 	(
@@ -8579,8 +8581,8 @@ rollout _SEAMaterials "Materials"
 	checkbox _enabled "Enabled" pos:[7,7] checked:seaconfig_material
 	checkbox _share "Shared" pos:[157,7] checked:seaconfig_sharematerials tooltip:"Sharing material that has the same attributes."
 	checkbox _enabledTexture "Texture" pos:[7,27] checked:seaconfig_texture
-	checkbox _enabledAnimationTakes "Enabled Animation Takes" pos:[7,47] checked:seaconfig_texture
-	checkbox _bakeUnkMat "Convert Incompatible Textures" pos:[7,67] checked:seaconfig_baketextures
+	checkbox _enabledAnimationTakes "Enabled animation takes" pos:[7,47] checked:seaconfig_texture
+	checkbox _bakeUnkMat "Convert incompatible textures" pos:[7,67] checked:seaconfig_baketextures
 	
 	fn updateRollout =
 	(
@@ -9135,14 +9137,15 @@ rollout _SEAEnvironment "Environment"
 
 rollout _SEAUtils "Utils"
 (	
-	checkbox _warning "Show Warnings" pos:[7,7] checked:seaconfig_warning	
-	checkbox _instances "Enabled Instances" pos:[7,27] checked:seaconfig_instances		
-	checkbox _optimizer "Mesh Optimizer" pos:[7,47] checked:seaconfig_meshoptimizer	
-	checkbox _joinVertices "Join Identical Vertices" pos:[7,67] checked:seaconfig_joinvertices	
-	checkbox _autoRename "Auto Rename" pos:[7,87] checked:seaconfig_auto_rename
-	checkbox _positiveScale "Force Positive Scale" pos:[7,107] checked:seaconfig_positive_scale
-	checkbox _colorMat "Replace empty Material to Color" pos:[7,127] checked:seaconfig_materialcolor	 
-	checkbox _exception "Exception Protection" pos:[7,147] checked:seaconfig_exceptionprotection tooltip:"Protects your scene against unknown errors (disable to debug mode). Use with caution!"	
+	checkbox _warning "Show warnings" pos:[7,7] checked:seaconfig_warning	
+	checkbox _instances "Enabled instances" pos:[7,27] checked:seaconfig_instances		
+	checkbox _optimizer "Mesh optimizer" pos:[7,47] checked:seaconfig_meshoptimizer	
+	checkbox _joinVertices "Join identical vertices" pos:[7,67] checked:seaconfig_joinvertices	
+	checkbox _autoRename "Auto rename" pos:[7,87] checked:seaconfig_auto_rename
+	checkbox _positiveScale "Force positive scale" pos:[7,107] checked:seaconfig_positive_scale
+	checkbox _moveSlide "Move slide in animation" pos:[7,127] checked:seaconfig_moveslide
+	checkbox _colorMat "Replace empty material to color" pos:[7,147] checked:seaconfig_materialcolor
+	checkbox _exception "Exception protection" pos:[7,167] checked:seaconfig_exceptionprotection tooltip:"Protects your scene against unknown errors (disable to debug mode). Use with caution!"	
 
 	fn onchange =
 	(
@@ -9173,6 +9176,13 @@ rollout _SEAUtils "Utils"
 	on _warning changed s do
 	(
 		seaconfig_warning = s
+		
+		seadispatchChange()
+	)
+	
+	on _moveSlide changed s do
+	(
+		seaconfig_moveslide = s
 		
 		seadispatchChange()
 	)
@@ -9323,7 +9333,7 @@ rollout _SEAttribs "Custom Attributes"
 
 rollout _SEABake "Bake"
 (
-	groupbox _texSizeGroup "Texture Size" pos:[7,7] width:202 height:62
+	groupbox _texSizeGroup "Texture size" pos:[7,7] width:202 height:62
 	
 	spinner _bakeVal "Power of 2:" pos:[43,27] range:[0,12,seaconfig_bakesize] width:80 type:#integer scale:.1 
 	spinner _bakeQuality "Quality:" pos:[25,47] range:[1,100,seaconfig_bakequality] width:98 type:#integer scale:.2
@@ -9354,15 +9364,15 @@ rollout _SEABake "Bake"
 	colorpicker _bright  pos:[57,uisize+=18] checked:true fieldWidth:15 height:15 color:[255,255,255] modal:true
 	spinner _maxDist  pos:[160,uisize] range:[0,9999,50.0] width:40 scale:.01 
 	label _labelBright "Bright" pos:[15,uisize]
-	label _labelMaxDist "Max Dist." pos:[110,uisize]
+	label _labelMaxDist "Max dist." pos:[110,uisize]
 	
 	colorpicker _dark  pos:[57,uisize+=18] checked:true fieldWidth:15 height:15 color:[0,0,0] modal:false
 	spinner _falloff pos:[160,uisize] range:[0,9999,0.5] width:40 scale:.01 
 	label _labelDark "Dark" pos:[15,uisize]
 	label _labelFalloff "Falloff" pos:[110,uisize]
 	
-	checkbox _relativeSize "Relative Size" pos:[7,uisize+=29] checked:seaconfig_relativesize tooltip:"Bake size relative to the object size."		
-	groupbox _texSizeGroup2 "Minimum Size" pos:[7,uisize+=20] width:202 height:42
+	checkbox _relativeSize "Relative size" pos:[7,uisize+=29] checked:seaconfig_relativesize tooltip:"Bake size relative to the object size."		
+	groupbox _texSizeGroup2 "Minimum size" pos:[7,uisize+=20] width:202 height:42
 	spinner _bakeVal2 "Power of 2:" pos:[43,uisize+=20] range:[1,13,seaconfig_minbakesize] width:80 type:#integer scale:.1 
 	label _size2 pos:[133,uisize+1] width:65
 	
@@ -9670,10 +9680,10 @@ rollout _SEABake "Bake"
 rollout _ATFExtension "ATF Extension"
 (
 	checkbox _enabled "Enabled" pos:[7,7] checked:seaconfig_atf		
-	checkbox _enabledAutoUpdate "Auto Update" pos:[130,7] checked:seaconfig_atf_auto tooltip:"Automatically updates ATF textures if modified."
+	checkbox _enabledAutoUpdate "Auto update" pos:[130,7] checked:seaconfig_atf_auto tooltip:"Automatically updates ATF textures if modified."
 	checkbox _enabledJpegXr "JPEG-XR + LZMA" pos:[7,27] checked:seaconfig_atf_jpegxr tooltip:"Compress block compressed textures using JPEG-XR+LZMA to reduce file."
 	checkbox _enabledForce "Force" pos:[130,27] checked:seaconfig_atf_force tooltip:"Force auto update."
-	radiobuttons compressItem "Texture Compression Algorithm" pos:[7,47] default:1 labels:#("All", "DXT", "ETC1", "PVRTC")
+	radiobuttons compressItem "Texture compression algorithm" pos:[7,47] default:1 labels:#("All", "DXT", "ETC1", "PVRTC")
 	
 	fn updateRollout =
 	(

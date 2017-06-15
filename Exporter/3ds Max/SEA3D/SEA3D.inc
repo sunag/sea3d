@@ -6,7 +6,7 @@
 --
 
 global 	
-	sea_rawversion = 18001, --VVSSBB ( Exporter version )
+	sea_rawversion = 18002, --VVSSBB ( Exporter version )
 	sea_version = 18000 --VVSSBB
 
 global
