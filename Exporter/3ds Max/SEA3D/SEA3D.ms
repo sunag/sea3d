@@ -7936,12 +7936,11 @@ fn exportSEA3D filename =
 	seaUnits[1] = units.DisplayType
 	seaUnits[2] = units.MetricType
 	
-	local WM_SETREDRAW=0xB
-	local commandHWND = windows.getChildHWND #max "Command Panel"
-	
 	local sea3d = undefined
 	
-	windows.sendmessage commandHWND[1]  WM_SETREDRAW 0 0
+	local WM_SETREDRAW = 0xB
+	
+	windows.sendmessage (windows.getmaxhwnd()) WM_SETREDRAW 0 0
 	
 	units.DisplayType = #Generic
 	units.MetricType = #Centimeters
@@ -7966,7 +7965,7 @@ fn exportSEA3D filename =
 	units.DisplayType = seaUnits[1]
 	units.MetricType = seaUnits[2]
 	
-	windows.sendmessage commandHWND[1]  WM_SETREDRAW 1 0
+	windows.sendmessage (windows.getmaxhwnd()) WM_SETREDRAW 1 0
 	
 	if sea3d != undefined then
 	(
