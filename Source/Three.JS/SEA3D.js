@@ -1811,6 +1811,8 @@ SEA3D.Animation.ANGLE = 12;
 SEA3D.Animation.ALPHA = 13;
 SEA3D.Animation.VOLUME = 14;
 
+SEA3D.Animation.MORPH = 250;
+
 SEA3D.Animation.prototype = Object.create( SEA3D.AnimationBase.prototype );
 SEA3D.Animation.prototype.constructor = SEA3D.Animation;
 
@@ -1881,6 +1883,32 @@ SEA3D.Morph.prototype = Object.create( SEA3D.GeometryBase.prototype );
 SEA3D.Morph.prototype.constructor = SEA3D.Morph;
 
 SEA3D.Morph.prototype.type = "mph";
+
+//
+//	Morph Animation
+//
+
+SEA3D.MorphAnimation = function ( name, data, sea3d ) {
+
+	SEA3D.AnimationBase.call( this, name, data, sea3d );
+
+	this.dataList = [];
+
+	for ( var i = 0, l = data.readUByte(); i < l; i ++ ) {
+
+		this.dataList.push( {
+			kind: SEA3D.Animation.MORPH,
+			type: SEA3D.Stream.FLOAT,
+			name: data.readUTF8Tiny(),
+			blockSize: 1,
+			data: data.readVector( SEA3D.Stream.FLOAT, this.numFrames, 0 )
+		} );
+
+	}
+
+};
+
+SEA3D.MorphAnimation.prototype.type = "mpha";
 
 //
 //	Vertex Animation
@@ -2793,6 +2821,7 @@ SEA3D.File = function ( config ) {
 	this.addClass( SEA3D.Camera );
 	this.addClass( SEA3D.OrthographicCamera );
 	this.addClass( SEA3D.Morph, true );
+	this.addClass( SEA3D.MorphAnimation, true );
 	this.addClass( SEA3D.VertexAnimation, true );
 	this.addClass( SEA3D.CubeMap, true );
 	this.addClass( SEA3D.Dummy );

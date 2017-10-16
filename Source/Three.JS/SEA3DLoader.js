@@ -1985,7 +1985,7 @@ THREE.SEA3D.prototype.readSprite = function ( sea ) {
 
 THREE.SEA3D.prototype.readMesh = function ( sea ) {
 
-	var i, count, geo = sea.geometry.tag, mesh, mat, skeleton, skeletonAnimation, vertexAnimation, uvwAnimationClips, morpher;
+	var i, count, geo = sea.geometry.tag, mesh, mat, skeleton, morpher, skeletonAnimation, vertexAnimation, uvwAnimationClips, morphAnimation;
 
 	for ( i = 0, count = sea.modifiers ? sea.modifiers.length : 0; i < count; i ++ ) {
 
@@ -2047,11 +2047,19 @@ THREE.SEA3D.prototype.readMesh = function ( sea ) {
 			case SEA3D.UVWAnimation.prototype.type:
 
 				uvwAnimationClips = anmTag.tag || this.getAnimationType( {
-					sea: anmTag,
+					sea: anmTag
 				} );
 
 				break;
 
+			case SEA3D.MorphAnimation.prototype.type:
+
+				morphAnimation = anmTag.tag || this.getAnimationType( {
+					sea: anmTag
+				} );
+
+				break;
+				
 		}
 
 	}
@@ -2126,6 +2134,18 @@ THREE.SEA3D.prototype.readMesh = function ( sea ) {
 		if ( this.config.autoPlay ) {
 
 			mesh.uvwAnimator.play( 0 );
+
+		}
+
+	}
+
+	if ( morphAnimation ) {
+
+		mesh.morphAnimator = new THREE.SEA3D.Animator( morphAnimation, new THREE.AnimationMixer( mesh ) );
+
+		if ( this.config.autoPlay ) {
+
+			mesh.morphAnimator.play( 0 );
 
 		}
 
@@ -3021,6 +3041,7 @@ THREE.SEA3D.prototype.readMorpher = function ( sea ) {
 		var node = sea.node[ i ];
 
 		attribs.position[ i ] = new THREE.Float32BufferAttribute( node.vertex, 3 );
+		attribs.position[ i ].name = node.name;
 
 		if ( node.normal ) {
 
@@ -3126,6 +3147,12 @@ THREE.SEA3D.prototype.readAnimation = function ( sea ) {
 
 					break;
 
+				case SEA3D.Animation.MORPH:
+
+					name = '.morphTargetInfluences[' + anm.name + ']';
+
+					break;
+
 			}
 
 			if ( ! name ) continue;
@@ -3151,7 +3178,7 @@ THREE.SEA3D.prototype.readAnimation = function ( sea ) {
 
 					}
 
-					tracks.push( new THREE.VectorKeyframeTrack( name, times, values, intrpl ) );
+					tracks.push( new THREE.NumberKeyframeTrack( name, times, values, intrpl ) );
 
 					break;
 
@@ -3688,6 +3715,7 @@ THREE.SEA3D.prototype.setTypeRead = function () {
 	this.file.typeRead[ SEA3D.CubeMap.prototype.type ] = this.readCubeMap;
 	this.file.typeRead[ SEA3D.CubeRender.prototype.type ] = this.readCubeRender;
 	this.file.typeRead[ SEA3D.Animation.prototype.type ] = 
+	this.file.typeRead[ SEA3D.MorphAnimation.prototype.type ] = 
 	this.file.typeRead[ SEA3D.UVWAnimation.prototype.type ] = this.readAnimation;
 	this.file.typeRead[ SEA3D.SoundPoint.prototype.type ] = this.readSoundPoint;
 	this.file.typeRead[ SEA3D.TextureURL.prototype.type ] = this.readTextureURL;
