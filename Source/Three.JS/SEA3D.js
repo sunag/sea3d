@@ -2366,13 +2366,6 @@ SEA3D.Material = function ( name, data, sea3d ) {
 				};
 				break;
 
-			
-				tech = {
-					texture: sea3d.getObject( data.readUInt() )
-				};
-				
-				break;
-
 			case SEA3D.Material.EMISSIVE:
 			
 				tech = {
