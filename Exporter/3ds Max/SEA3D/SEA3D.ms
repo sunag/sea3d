@@ -21,20 +21,20 @@ global
 	EXT_GEOMETRY_DELTA = ".geDL",
 	EXT_SCENE_OBJECT = ".o3d",
 	EXT_MESH = ".m3d",
-	EXT_SPRITE3D = ".m2d",	
-	--EXT_CONTAINER3D = ".c3d",	
-	EXT_JOINT_OBJECT = ".jnt",	
-	EXT_ANIMATION = ".anm", -- Generic SEA3D Animation (Lights, Meshes, Helpers, Textures and others)	
+	EXT_SPRITE3D = ".m2d",
+	--EXT_CONTAINER3D = ".c3d",
+	EXT_JOINT_OBJECT = ".jnt",
+	EXT_ANIMATION = ".anm", -- Generic SEA3D Animation (Lights, Meshes, Helpers, Textures and others)
 	EXT_ANIMATION_UVW = ".auvw",
 	EXT_GIF = ".gif",
 	EXT_PNG = ".png",
-	EXT_JPEG = ".jpg",	
+	EXT_JPEG = ".jpg",
 	EXT_JPEG_XR = ".wdp",
-	EXT_DDS = ".dds",		
+	EXT_DDS = ".dds",
 	EXT_DDS_CUBE = ".ddsc",
-	EXT_ATF = ".atf",	
-	EXT_ATF_CUBE = ".atfc",	
-	EXT_TEXTURE = ".tex",		
+	EXT_ATF = ".atf",
+	EXT_ATF_CUBE = ".atfc",
+	EXT_TEXTURE = ".tex",
 	EXT_MORPH = ".mph",
 	EXT_MORPH_ANIMATION = ".mpha",
 	EXT_VERTEX_COLOR = ".vtc", 
@@ -54,12 +54,12 @@ global
 	EXT_MP3 = ".mp3",	
 	EXT_SOUND_POINT = ".sp",
 	EXT_SOUND_MIXER = ".smix",
-	--EXT_DATA = ".data", -- CUSTOM BYTEARRAY	
-	--EXT_SCRIPT = ".src", -- SCRIPT	
-	EXT_LINE = ".line",	
+	--EXT_DATA = ".data", -- CUSTOM BYTEARRAY
+	--EXT_SCRIPT = ".src", -- SCRIPT
+	EXT_LINE = ".line",
 	EXT_DUMMY = ".dmy",
 	EXT_RTT_CUBE = ".rttc",
-	EXT_RTT_PLANAR = ".rttp",	
+	EXT_RTT_PLANAR = ".rttp",
 	EXT_ACTIONS = ".act"
 
 global
@@ -71,7 +71,7 @@ global
 	DT_BYTE = "byte",
 	DT_BITMAP = "bitmap",
 	DT_TEXTURE = "texture",
-	DT_COMPOSITE = "composite",	
+	DT_COMPOSITE = "composite",
 	DT_CUBE = "cube",
 	DT_CUBE_RTT = "cube_rtt",
 	DT_PLANAR_RTT = "planar_rtt"
@@ -83,7 +83,7 @@ global
 
 global
 	BAKE_COMPLETE_MAP = "completemap",
-	BAKE_DIFFUSE_MAP = "diffusemap",		
+	BAKE_DIFFUSE_MAP = "diffusemap",
 	BAKE_LIGHT_MAP = "lightmap",
 	BAKE_AO = "ao"
 
@@ -554,15 +554,15 @@ fn GetSEAConfig seaconfig =
 	seaconfig_instances = seaconfig.GetBoolean "instances",
 	seaconfig_sharematerials = seaconfig.GetBoolean "sharematerials",
 	seaconfig_allstatic = seaconfig.GetBoolean "allstatic",
-	seaconfig_baketextures =  seaconfig.GetBoolean "baketextures",
-	seaconfig_renderall =  seaconfig.GetBoolean "renderall",
-	seaconfig_newmapping =  seaconfig.GetBoolean "newmapping",
-	seaconfig_bakesize =  seaconfig.GetInteger "bakesize",
+	seaconfig_baketextures = seaconfig.GetBoolean "baketextures",
+	seaconfig_renderall = seaconfig.GetBoolean "renderall",
+	seaconfig_newmapping = seaconfig.GetBoolean "newmapping",
+	seaconfig_bakesize = seaconfig.GetInteger "bakesize",
 	seaconfig_bakeoutput = seaconfig.GetString "bakeoutput",
-	seaconfig_minbakesize =  seaconfig.GetInteger "minbakesize",
-	seaconfig_bakequality =  seaconfig.GetInteger "bakequality",
-	seaconfig_bakeext =  seaconfig.GetString "bakeext",
-	seaconfig_relativesize =  seaconfig.GetBoolean "relativesize",
+	seaconfig_minbakesize = seaconfig.GetInteger "minbakesize",
+	seaconfig_bakequality = seaconfig.GetInteger "bakequality",
+	seaconfig_bakeext = seaconfig.GetString "bakeext",
+	seaconfig_relativesize = seaconfig.GetBoolean "relativesize",
 	seaconfig_meshoptimizer = seaconfig.GetBoolean "meshoptimizer",
 	seaconfig_joinvertices = seaconfig.GetBoolean "joinvertices",
 	seaconfig_moveslide = seaconfig.GetBoolean "moveslide",
@@ -647,7 +647,7 @@ sea_changes = #(),
 seaTimeRange = #(animationRange.start.frame as integer,animationRange.end.frame as integer,0 as integer,framerate),
 seaUnits = #(#Generic, #Centimeters),
 seaao = #(32,color 255 255 255,color 0 0 0,1.0,50.0,0.5),
-sea3d = undefined,	
+sea3d = undefined,
 seabuild = false,
 seaAssetNames = #(),
 seaErrors = #(),
@@ -670,8 +670,8 @@ seanames = undefined,
 seamats = undefined,
 seamatnames = undefined,
 seasceneobject = undefined,
-seaboneobject = undefined,	
-seaboneinobject = undefined,	
+seaboneobject = undefined,
+seaboneinobject = undefined,
 seabonelist = undefined,
 seaprogressbar = undefined,
 seaactions = undefined,
@@ -1263,7 +1263,7 @@ SEA3DSpriteDef = attributes SEA3DSpriteDef
 			else if userprop == "add" then state = 2
 			else if userprop == "multiply" then state = 3
 			else if userprop == "alpha" then state = 4
-				
+			
 			return state
 		)
 		
@@ -1649,7 +1649,7 @@ fn getNearestPowerOf2 v =
 	(
 		local upper = getPowerOf2 (getUpperPowerOf2 v)
 		local lower = getPowerOf2 (getLowerPowerOf2 v)		
-				
+		
 		if (v - lower) > (upper - v) then return upper
 		else return lower
 	)
@@ -2047,7 +2047,7 @@ fn creatSEA3DSprite =
 	p.lengthsegs = 1
 	p.width = 50
 	p.widthsegs = 1
-		
+	
 	setUserProp p "material-blendtype" "add"
 	
 	sc = EmptyModifier()
@@ -2383,7 +2383,7 @@ function removeObjectTransform object =
 (
 	object.position.controller = Position_XYZ()
 	object.position = [0,0,0]
-		
+	
 	object.rotation.controller = Euler_XYZ()
 	object.rotation = eulerangles 0 0 0 --quat 0 0 0 1	
 	
@@ -2435,7 +2435,7 @@ function containsSEA3DTag obj =
 	for i = 1 to obj.modifiers.count do
 	(
 		local m = obj.modifiers[i]
-				
+		
 		if (classof m) == EmptyModifier then
 		(
 			try
@@ -2791,7 +2791,7 @@ function getTexture filename =
 )
 
 function appendBitmap filename n map: =
-(	
+(
 	f = toLowerString filename	
 	
 	local seaBmp = getTexture filename		
@@ -3035,7 +3035,7 @@ function appendTexture map n type enabledComposite =
 			local dm = map.mapList[i]
 			local mm = map.mask[i]
 			local emm = map.maskEnabled[i]
-			local blendMode =  seacompositepalette[ map.blendMode[i] + 1 ]
+			local blendMode = seacompositepalette[ map.blendMode[i] + 1 ]
 			local opacity = map.opacity[i]
 			local nm = map.layerName[i]
 			
@@ -3067,7 +3067,7 @@ function appendTexture map n type enabledComposite =
 				if nm == SH_LIGHT_MAP then
 				(
 					local uvChannel = undefined
-								
+					
 					if seaconfig_multiplechannel and seaconfig_uv then
 					(
 						uvChannel = diffuseTexture.coords.mapChannel - 1
@@ -3216,7 +3216,7 @@ function writeRotation data obj useparent: p: t: tp: offset: =
 	(
 		trans = rotateMatrix trans offset
 	)
-		
+	
 	writeQuat data trans.rotation
 )
 
@@ -3530,7 +3530,7 @@ function writeDataList data list =
 	(
 		local type = list[i][1]
 		local value = list[i][2]
-				
+		
 		if type == DT_UINT then data.WriteInt32 value
 		else if type == DT_FLOAT then data.WriteFloat value
 		else if type == DT_STRING then data.WriteUTF8 value					
@@ -3623,7 +3623,7 @@ fn compileStandardMaterial mat =
 			#(DT_FLOAT, .5)
 		)
 	)		
-					
+	
 	if (seaconfig_texture and mat.diffuseMapEnable and mat.diffuseMap != undefined) then
 	(
 		local tex = appendTexture mat.diffusemap mat.name "Diffuse Map" true
@@ -3690,7 +3690,7 @@ fn compileStandardMaterial mat =
 			)
 		)
 	)
-			
+	
 	if (seaconfig_texture and mat.bumpMap  != undefined and mat.bumpMapEnable) do
 	(
 		if (classof mat.bumpMap == Normal_Bump) then
@@ -3840,7 +3840,7 @@ fn compileStandardMaterial mat =
 --			)
 --		)
 --	)
-			
+	
 	return sea
 )
 
@@ -4901,7 +4901,7 @@ fn compileObject n =
 				appendSceneObject n
 				
 				local soundName = soundMod.soundparam
-						
+				
 				if soundName != undefined and soundName.count > 0 and (findItem sea_sounds_names soundName) > 0 then
 				(
 					append seaObjectList (seaobj = (SEASound n soundName soundMod))
@@ -4982,7 +4982,7 @@ fn compileObject n =
 		if sea3dtag != undefined then
 		(
 			local tagversion = 1.0
-					
+			
 			try
 			(			
 				tagversion = sea3dtag.tagversion												
@@ -5199,7 +5199,7 @@ function getSequenceData obj =
 	local bounds = getSequenceBounds obj sequence:sequence
 	
 	if sequence == undefined do return undefined
-		
+	
 	local body = newNode()
 	local names = #()
 	
@@ -6080,11 +6080,11 @@ function getSoundAsset name =
 	
 	local asset = newAsset()
 	local data = asset.Data	
-		
+	
 	asset.Filename = name + (getExtension filename)
-		
+	
 	data.ReadFile filename
-		
+	
 	return asset
 )
 
@@ -6115,7 +6115,7 @@ function getTextureAsset sea =
 			if invalidate == false and seaconfig_atf_auto then
 			(			
 				local fileDate = FileClass.GetLastWriteTime filename
-							
+				
 				local dateA = FileClass.GetLastWriteTime filename
 				local dateB = FileClass.GetLastWriteTime atf_filename
 				
@@ -6210,7 +6210,7 @@ function getSingleCubeAsset sea =
 			if invalidate == false and seaconfig_atf_auto then
 			(
 				local fileDate = FileClass.GetLastWriteTime filename
-							
+				
 				local dateA = FileClass.GetLastWriteTime filename
 				local dateB = FileClass.GetLastWriteTime atf_filename
 				
@@ -6293,7 +6293,7 @@ function getCubeAsset sea =
 			if invalidate == false and seaconfig_atf_auto then
 			(			
 				local fileDate = FileClass.GetLastWriteTime filename
-							
+				
 				local dateA = FileClass.GetLastWriteTime filename
 				local dateB = FileClass.GetLastWriteTime atf_filename
 				
@@ -6370,7 +6370,7 @@ function getCubeAsset sea =
 			data.WriteDataObject faceData
 		)
 	)
-		
+	
 	asset.Compressed = seaconfig_compress_texture			
 	
 	return asset
@@ -6379,8 +6379,8 @@ function getCubeAsset sea =
 function getCompositeAsset sea =
 (
 	local asset = newAsset()
-	local data = asset.Data				
-	local count = sea.textures.count			
+	local data = asset.Data
+	local count = sea.textures.count
 
 	-- TEXTURE
 	asset.Filename = sea.obj.name + EXT_COMPOSITE
@@ -6404,7 +6404,7 @@ function getCompositeAsset sea =
 		local useOpacity = opacity != 1
 		
 		local ext_attrib = 0
-			
+		
 		if useTexture do
 			ext_attrib = (bit.set ext_attrib 1 true)	
 		
@@ -6661,7 +6661,7 @@ function getPropertiesAsset attrib name =
 --	)
 	
 	if count == 0 then return undefined
-		
+	
 	-- PROPERTIES
 	local asset = newAsset()
 	local data = asset.Data
@@ -6675,7 +6675,7 @@ function getPropertiesAsset attrib name =
 		local n = names[i]
 		local v = values[i]
 		local c = classof v
-				
+		
 		data.WriteUTF8 n
 		
 		if c == BooleanClass then
@@ -7197,7 +7197,7 @@ function getLightAsset sea =
 	-- HEADER
 	local header = 0x0000
 	local body = newNode()
-			
+	
 	-- OBJECT3D
 	writeObject3D body sea &header
 	
@@ -7305,7 +7305,7 @@ function getSprite3DAsset sea =
 	-- HEADER
 	local header = 0x0000
 	local body = newNode()
-		
+	
 	-- OBJECT3D
 	writeObject3D body sea &header
 	
@@ -7676,7 +7676,7 @@ function exportSEAObjects =
 				sea.geo_index = appendAsset (getGeometryAsset sea)
 				sea.asset = appendAsset (getMeshAsset sea) type:EXT_SCENE_OBJECT
 			)
-					
+			
 			for i=1 to sea.instances.count do
 			(										
 				local instSEA = sea.instances[i]			
@@ -7958,7 +7958,7 @@ fn exportSEA3D filename =
 		(
 			sea3d = buildSEA3D()
 		)
-			
+		
 		seaDispose()
 	)
 	
@@ -9452,7 +9452,7 @@ rollout _SEABake "Bake"
 	
 	fn updateRollout =
 	(
-		--_output.visible = _createNewMap.visible =  seaconfig_renderall
+		--_output.visible = _createNewMap.visible = seaconfig_renderall
 		
 		if _output.visible then
 		(
