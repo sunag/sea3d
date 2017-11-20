@@ -35,6 +35,7 @@ global
 	EXT_ATF = ".atf",
 	EXT_ATF_CUBE = ".atfc",
 	EXT_TEXTURE = ".tex",
+	EXT_TEXTURE_URL = ".urlT",
 	EXT_MORPH = ".mph",
 	EXT_MORPH_ANIMATION = ".mpha",
 	EXT_VERTEX_COLOR = ".vtc",
@@ -402,6 +403,7 @@ fn CreateSEAConfig =
 	seaconfig.AddBoolean "sharematerials" false
 	seaconfig.AddBoolean "allstatic" false
 	seaconfig.AddBoolean "baketextures" true
+	seaconfig.AddBoolean "embedtextures" true
 	seaconfig.AddBoolean "renderall" false
 	seaconfig.AddInteger "bakesize" 8
 	seaconfig.AddInteger "minbakesize" 8	
@@ -478,6 +480,7 @@ fn SetSEAConfig seaconfig =
 	seaconfig.AddBoolean "sharematerials" seaconfig_sharematerials
 	seaconfig.AddBoolean "allstatic" seaconfig_allstatic
 	seaconfig.AddBoolean "baketextures" seaconfig_baketextures
+	seaconfig.AddBoolean "embedtextures" seaconfig_embedtextures
 	seaconfig.AddBoolean "renderall" seaconfig_renderall
 	seaconfig.AddBoolean "newmapping" seaconfig_newmapping
 	seaconfig.AddInteger "bakesize" seaconfig_bakesize
@@ -555,6 +558,7 @@ fn GetSEAConfig seaconfig =
 	seaconfig_sharematerials = seaconfig.GetBoolean "sharematerials",
 	seaconfig_allstatic = seaconfig.GetBoolean "allstatic",
 	seaconfig_baketextures = seaconfig.GetBoolean "baketextures",
+	seaconfig_embedtextures = seaconfig.GetBoolean "embedtextures",
 	seaconfig_renderall = seaconfig.GetBoolean "renderall",
 	seaconfig_newmapping = seaconfig.GetBoolean "newmapping",
 	seaconfig_bakesize = seaconfig.GetInteger "bakesize",
@@ -2801,35 +2805,42 @@ function appendBitmap filename n map: =
 	
 	local _bitmap = undefined
 	
-	if ext == EXT_JPEG or ext == EXT_PNG or ext == EXT_GIF or ext == EXT_JPEG_XR then
-	(				
-		if fileExist filename then
+	if seaconfig_embedtextures then
+	(
+		if ext == EXT_JPEG or ext == EXT_PNG or ext == EXT_GIF or ext == EXT_JPEG_XR then
 		(
-			_bitmap = SEABitmap filename			
+			if fileExist filename then
+			(
+				_bitmap = SEABitmap filename
+			)
+			else if seaconfig_baketextures then
+			(
+				_bitmap = SEABitmap filename (bakeTexture map)		
+			)
+			else
+			(
+				error1016 f n
+			)
 		)
 		else if seaconfig_baketextures then
 		(
 			_bitmap = SEABitmap filename (bakeTexture map)		
 		)
-		else
-		(
-			error1016 f n
-		)			
 	)
-	else if seaconfig_baketextures then
+	else
 	(
-		_bitmap = SEABitmap filename (bakeTexture map)		
+		_bitmap = SEABitmap filename
 	)
 	
 	if _bitmap != undefined then
 	(
 		append seaBitmapList _bitmap			
 		return _bitmap
-	)		
+	)
 	else
-	(						
+	(
 		error1014 (getName filename) n
-	)															
+	)
 )
 
 function appendCube map textures n =
@@ -6103,7 +6114,7 @@ function getTextureAsset sea =
 	
 	local extension = getExtension filename
 	
-	if ATF_SUPPORTS and seaconfig_atf then
+	if seaconfig_embedtextures and ATF_SUPPORTS and seaconfig_atf then
 	(
 		local atf_filename = (getCleanFilename filename) + EXT_ATF
 		
@@ -6178,11 +6189,20 @@ function getTextureAsset sea =
 			warning2401 (getName filename)
 		)
 	)
-		
-	asset.Filename = (getName filename) + (getExtension filename)
-	assetCompressed = seaconfig_compress_texture
 	
-	data.ReadFile filename	
+	if seaconfig_embedtextures then
+	(
+		asset.Filename = (getName filename) + (getExtension filename)
+		asset.Compressed = seaconfig_compress_texture
+		
+		data.ReadFile filename
+	)
+	else
+	(
+		asset.Filename = (getName filename) + EXT_TEXTURE_URL
+		
+		data.WriteUTFBytes ((getName filename) + (getExtension filename))
+	)
 	
 	return asset
 )
@@ -8582,17 +8602,18 @@ rollout _SEAMaterials "Materials"
 	checkbox _enabledTexture "Texture" pos:[7,27] checked:seaconfig_texture
 	checkbox _enabledAnimationTakes "Enabled animation takes" pos:[7,47] checked:seaconfig_texture
 	checkbox _bakeUnkMat "Convert incompatible textures" pos:[7,67] checked:seaconfig_baketextures
+	checkbox _embedTextures "Embed textures" pos:[7,87] checked:seaconfig_embedtextures
 	
 	fn updateRollout =
 	(
 		_share.enabled = _enabledTexture.enabled = seaconfig_material
-		_enabledAnimationTakes.enabled = _bakeUnkMat.enabled = seaconfig_material and seaconfig_texture
+		_enabledAnimationTakes.enabled = _bakeUnkMat.enabled = _embedTextures.enabled = seaconfig_material and seaconfig_texture
 		
 		if seaconfig_material then
 		(
 			if seaconfig_texture then
 			(
-				_SEAMaterials.height = 88
+				_SEAMaterials.height = 108
 			)
 			else
 			(
@@ -8609,6 +8630,7 @@ rollout _SEAMaterials "Materials"
 		_enabledTexture.checked = seaconfig_texture
 		_enabledAnimationTakes.checked = seaconfig_textureAnimationTakes
 		_bakeUnkMat.checked = seaconfig_baketextures
+		_embedTextures.checked = seaconfig_embedtextures
 		
 		updateRollout()
 	)
@@ -8631,6 +8653,13 @@ rollout _SEAMaterials "Materials"
 	on _bakeUnkMat changed s do
 	(
 		seaconfig_baketextures = s
+		
+		seadispatchChange()
+	)
+	
+	on _embedTextures changed s do
+	(
+		seaconfig_embedtextures = s
 		
 		seadispatchChange()
 	)
