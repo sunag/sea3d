@@ -7564,6 +7564,12 @@ THREE.SEA3D.prototype.readActions = function ( sea ) {
 
 				break;
 
+			case SEA3D.Actions.CAMERA:
+
+				this.domain.camera = this.camera = act.camera.tag;
+
+				break;
+
 			case SEA3D.Actions.ENVIRONMENT_COLOR:
 
 				this.domain.background = this.background = this.background || {};
@@ -7776,6 +7782,7 @@ THREE.SEA3D.prototype.parse = function ( onParseComplete, onParseProgress ) {
 	delete this.sounds;
 	delete this.glsl;
 	delete this.dummy;
+	delete this.camera;
 	delete this.background;
 	delete this.properties;
 	delete this.scriptTargets;
