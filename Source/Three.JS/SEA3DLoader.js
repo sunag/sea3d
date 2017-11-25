@@ -1957,14 +1957,24 @@ THREE.SEA3D.prototype.readSprite = function ( sea ) {
 
 			this.setBlending( mat, sea.blendMode );
 
-			mat.map = sea.material.tag.map;
-			mat.map.flipY = true;
+			var map = sea.material.tag.map;
+
+			if ( map ) {
+
+				map.flipY = true;
+				mat.map = map;
+
+			}
 
 			mat.color.set( sea.material.tag.color );
 			mat.opacity = sea.material.tag.opacity;
 			mat.fog = sea.material.receiveFog;
 
-		} else mat = sea.material.tag.sprite;
+		} else {
+
+			mat = sea.material.tag.sprite;
+
+		}
 
 	}
 
