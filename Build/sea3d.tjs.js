@@ -5966,7 +5966,9 @@ THREE.SEA3D.prototype.readGeometryBuffer = function ( sea ) {
 
 	}
 
-	geo.setIndex( new THREE.BufferAttribute( sea.indexes, 1 ) );
+	// not indexes? use polygon soup
+	if ( sea.indexes ) geo.setIndex( new THREE.BufferAttribute( sea.indexes, 1 ) );
+
 	geo.addAttribute( 'position', new THREE.BufferAttribute( sea.vertex, 3 ) );
 
 	if ( sea.uv ) {
