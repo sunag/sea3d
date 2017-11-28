@@ -13,10 +13,11 @@ Object.assign( THREE.SEA3D.prototype, {
 
 	_onHead: THREE.SEA3D.prototype.onHead,
 	_updateTransform: THREE.SEA3D.prototype.updateTransform,
+	_readMorph: THREE.SEA3D.prototype.readMorph,
 	_readVertexAnimation: THREE.SEA3D.prototype.readVertexAnimation,
 	_readGeometryBuffer: THREE.SEA3D.prototype.readGeometryBuffer,
 	_readLine: THREE.SEA3D.prototype.readLine,
-	_getAnimationType: THREE.SEA3D.prototype.getAnimationType,
+	_getModifier: THREE.SEA3D.prototype.getModifier,
 	_readAnimation: THREE.SEA3D.prototype.readAnimation
 
 } );
@@ -50,6 +51,20 @@ THREE.SEA3D.prototype.flipVec3 = function ( v ) {
 		v[ i ] = - v[ i ];
 
 		i += 3;
+
+	}
+
+	return v;
+
+};
+
+THREE.SEA3D.prototype.addVector = function ( v, t ) {
+
+	if ( ! v ) return;
+
+	for ( var i = 0; i < v.length; i ++ ) {
+
+		v[ i ] += t[ i ];
 
 	}
 
@@ -397,7 +412,7 @@ THREE.SEA3D.prototype.readAnimation = function ( sea ) {
 
 };
 
-THREE.SEA3D.prototype.getAnimationType = function ( req ) {
+THREE.SEA3D.prototype.getModifier = function ( req ) {
 
 	var sea = req.sea;
 
@@ -416,6 +431,7 @@ THREE.SEA3D.prototype.getAnimationType = function ( req ) {
 				break;
 
 			case SEA3D.Animation.prototype.type:
+			case SEA3D.MorphAnimation.prototype.type:
 			case SEA3D.UVWAnimation.prototype.type:
 
 				if ( req.scope instanceof THREE.Object3D ) {
@@ -430,11 +446,16 @@ THREE.SEA3D.prototype.getAnimationType = function ( req ) {
 
 				break;
 
+			case SEA3D.Morph.prototype.type:
+				
+				this.readMorphLegacy( sea, req.geometry );
+			
+				break;
 		}
 
 	}
 
-	return this._getAnimationType( req );
+	return this._getModifier( req );
 
 };
 
@@ -653,6 +674,34 @@ THREE.SEA3D.prototype.readSkeletonAnimationLegacy = function () {
 	};
 
 }();
+
+THREE.SEA3D.prototype.readMorphLegacy = function ( sea, geo ) {
+
+	for ( var i = 0; i < sea.node.length; i ++ ) {
+
+		var node = sea.node[ i ];
+		
+		this.flipVec3( node.vertex );
+		this.flipVec3( node.normal );
+		
+		this.addVector( node.vertex, geo.vertex );
+		this.addVector( node.normal, geo.normal );
+		
+	}
+
+	this._readMorph( sea );
+
+};
+
+THREE.SEA3D.prototype.readMorph = function ( sea ) {
+
+	if ( ! this.isLegacy( sea ) ) {
+
+		this._readMorph( sea );
+
+	}
+
+};
 
 THREE.SEA3D.prototype.readVertexAnimation = function ( sea ) {
 

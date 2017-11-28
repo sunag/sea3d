@@ -1797,7 +1797,7 @@ THREE.SEA3D.prototype.addDefaultAnimation = function ( sea, animatorClass ) {
 
 			case SEA3D.Animation.prototype.type:
 
-				var animation = anm.tag.tag || this.getAnimationType( {
+				var animation = anm.tag.tag || this.getModifier( {
 					sea: anm.tag,
 					scope: scope,
 					relative: anm.relative
@@ -2016,10 +2016,13 @@ THREE.SEA3D.prototype.readMesh = function ( sea ) {
 
 			case SEA3D.Morph.prototype.type:
 
-				morpher = mod;
+				morpher = mod.tag || this.getModifier( {
+					sea: mod,
+					geometry: sea.geometry
+				} );
 
-				geo.morphAttributes = morpher.tag.attribs;
-				geo.morphTargets = morpher.tag.targets;
+				geo.morphAttributes = morpher.attribs;
+				geo.morphTargets = morpher.targets;
 
 				break;
 
@@ -2038,7 +2041,7 @@ THREE.SEA3D.prototype.readMesh = function ( sea ) {
 
 				skeletonAnimation = anmTag;
 
-				geo.animations = skeletonAnimation.tag || this.getAnimationType( {
+				geo.animations = skeletonAnimation.tag || this.getModifier( {
 					sea: skeletonAnimation,
 					skeleton: skeleton,
 					relative: true
@@ -2058,7 +2061,7 @@ THREE.SEA3D.prototype.readMesh = function ( sea ) {
 
 			case SEA3D.UVWAnimation.prototype.type:
 
-				uvwAnimationClips = anmTag.tag || this.getAnimationType( {
+				uvwAnimationClips = anmTag.tag || this.getModifier( {
 					sea: anmTag
 				} );
 
@@ -2066,7 +2069,7 @@ THREE.SEA3D.prototype.readMesh = function ( sea ) {
 
 			case SEA3D.MorphAnimation.prototype.type:
 
-				morphAnimation = anmTag.tag || this.getAnimationType( {
+				morphAnimation = anmTag.tag || this.getModifier( {
 					sea: anmTag
 				} );
 
@@ -2078,7 +2081,7 @@ THREE.SEA3D.prototype.readMesh = function ( sea ) {
 
 	var uMorph = morpher != undefined || vertexAnimation != undefined,
 		uMorphNormal =
-					( morpher && morpher.tag.attribs.normal != undefined ) ||
+					( morpher.attribs.normal != undefined ) ||
 					( vertexAnimation && vertexAnimation.tag.attribs.normal != undefined );
 
 	if ( sea.material ) {
@@ -3041,10 +3044,10 @@ THREE.SEA3D.prototype.readJointObject = function ( sea ) {
 };
 
 //
-//	Morpher
+//	Morph
 //
 
-THREE.SEA3D.prototype.readMorpher = function ( sea ) {
+THREE.SEA3D.prototype.readMorph = function ( sea ) {
 
 	var attribs = { position: [] }, targets = [];
 
@@ -3378,10 +3381,10 @@ THREE.SEA3D.prototype.readVertexAnimation = function ( sea ) {
 };
 
 //
-//	Animation Selector
+//	Selector
 //
 
-THREE.SEA3D.prototype.getAnimationType = function ( req ) {
+THREE.SEA3D.prototype.getModifier = function ( req ) {
 
 	var sea = req.sea;
 
@@ -3390,6 +3393,20 @@ THREE.SEA3D.prototype.getAnimationType = function ( req ) {
 		case SEA3D.SkeletonAnimation.prototype.type:
 
 			this.readSkeletonAnimation( sea, req.skeleton );
+
+			break;
+
+		case SEA3D.Animation.prototype.type:
+		case SEA3D.MorphAnimation.prototype.type:
+		case SEA3D.UVWAnimation.prototype.type:
+
+			this.readAnimation( sea );
+
+			break;
+
+		case SEA3D.Morph.prototype.type:
+
+			this.readMorph( sea, req.geometry );
 
 			break;
 
@@ -3740,7 +3757,7 @@ THREE.SEA3D.prototype.setTypeRead = function () {
 	this.file.typeRead[ SEA3D.TextureURL.prototype.type ] = this.readTextureURL;
 	this.file.typeRead[ SEA3D.CubeMapURL.prototype.type ] = this.readCubeMapURL;
 	this.file.typeRead[ SEA3D.TextureUpdate.prototype.type ] = this.readTextureUpdate;
-	this.file.typeRead[ SEA3D.Morph.prototype.type ] = this.readMorpher;
+	this.file.typeRead[ SEA3D.Morph.prototype.type ] = this.readMorph;
 	this.file.typeRead[ SEA3D.VertexAnimation.prototype.type ] = this.readVertexAnimation;
 	this.file.typeRead[ SEA3D.Actions.prototype.type ] = this.readActions;
 	this.file.typeRead[ SEA3D.FileInfo.prototype.type ] = this.readFileInfo;
