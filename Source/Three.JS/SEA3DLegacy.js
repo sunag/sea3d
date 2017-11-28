@@ -447,10 +447,11 @@ THREE.SEA3D.prototype.getModifier = function ( req ) {
 				break;
 
 			case SEA3D.Morph.prototype.type:
-				
+
 				this.readMorphLegacy( sea, req.geometry );
-			
+
 				break;
+
 		}
 
 	}
@@ -680,13 +681,13 @@ THREE.SEA3D.prototype.readMorphLegacy = function ( sea, geo ) {
 	for ( var i = 0; i < sea.node.length; i ++ ) {
 
 		var node = sea.node[ i ];
-		
+
 		this.flipVec3( node.vertex );
 		this.flipVec3( node.normal );
-		
+
 		this.addVector( node.vertex, geo.vertex );
 		this.addVector( node.normal, geo.normal );
-		
+
 	}
 
 	this._readMorph( sea );
