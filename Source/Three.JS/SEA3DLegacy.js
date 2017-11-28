@@ -677,8 +677,8 @@ THREE.SEA3D.prototype.readGeometryBuffer = function ( sea ) {
 
 	if ( this.isLegacy( sea ) ) {
 
-		this.flipVec3( sea.vertex, true );
-		this.flipVec3( sea.normal, true );
+		this.flipVec3( sea.vertex );
+		this.flipVec3( sea.normal );
 
 		this.flipIndexes( sea.indexes );
 
