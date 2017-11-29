@@ -1,7 +1,3 @@
-INCLUDES
-
-https://github.com/sunag/sea3d/tree/master/Build/Away3D/
-
 The MIT License (MIT)
 
 Copyright (c) Sunag Entertainment - http://www.sunag.com.br/
