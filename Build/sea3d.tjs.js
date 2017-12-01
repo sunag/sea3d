@@ -6209,7 +6209,7 @@ THREE.SEA3D.prototype.readMesh = function ( sea ) {
 
 	var uMorph = morpher != undefined || vertexAnimation != undefined,
 		uMorphNormal =
-					( morpher.attribs.normal != undefined ) ||
+					( morpher && morpher.attribs.normal != undefined ) ||
 					( vertexAnimation && vertexAnimation.tag.attribs.normal != undefined );
 
 	if ( sea.material ) {
