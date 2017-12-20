@@ -285,15 +285,7 @@ SEA3D.Stream.prototype.readUTF8 = function ( len ) {
 
 	var buffer = this.readBytes( len );
 
-	if ( window.TextDecoder ) {
-
-		return new TextDecoder().decode( buffer );
-
-	} else {
-
-		return decodeURIComponent( escape( String.fromCharCode.apply( null, new Uint8Array( buffer ) ) ) );
-
-	}
+	return THREE.LoaderUtils.decodeText( new Uint8Array( buffer ) );
 
 };
 
@@ -3250,7 +3242,8 @@ SEA3D.File.prototype.load = function ( url ) {
 
 	if (!this.config.path) {
 
-		this.config.path = THREE.Loader.prototype.extractUrlBase( url );
+//		this.config.path = THREE.Loader.prototype.extractUrlBase( url );
+		this.config.path = THREE.LoaderUtils.extractUrlBase( url );
 
 	}
 
