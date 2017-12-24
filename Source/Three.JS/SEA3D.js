@@ -281,19 +281,48 @@ SEA3D.Stream.prototype.readMatrix = function () {
 
 };
 
+SEA3D.decodeText = function ( array ) {
+
+	if ( typeof TextDecoder !== 'undefined' ) {
+
+		return new TextDecoder().decode( array );
+
+	}
+
+	// Avoid the String.fromCharCode.apply(null, array) shortcut, which
+	// throws a "maximum call stack size exceeded" error for large arrays.
+
+	var s = '';
+
+	for ( var i = 0, il = array.length; i < il; i ++ ) {
+
+		// Implicitly assumes little-endian.
+		s += String.fromCharCode( array[ i ] );
+
+	}
+
+	// Merges multi-byte utf-8 characters.
+	return decodeURIComponent( escape( s ) );
+
+};
+
+SEA3D.extractUrlBase = function ( url ) {
+
+	var parts = url.split( '/' );
+
+	if ( parts.length === 1 ) return './';
+
+	parts.pop();
+
+	return parts.join( '/' ) + '/';
+
+}
+
 SEA3D.Stream.prototype.readUTF8 = function ( len ) {
 
 	var buffer = this.readBytes( len );
 
-	if ( window.TextDecoder ) {
-
-		return new TextDecoder().decode( buffer );
-
-	} else {
-
-		return decodeURIComponent( escape( String.fromCharCode.apply( null, new Uint8Array( buffer ) ) ) );
-
-	}
+	return SEA3D.decodeText( new Uint8Array( buffer ) );
 
 };
 
@@ -3250,7 +3279,7 @@ SEA3D.File.prototype.load = function ( url ) {
 
 	if (!this.config.path) {
 
-		this.config.path = THREE.Loader.prototype.extractUrlBase( url );
+		this.config.path = SEA3D.extractUrlBase( url );
 
 	}
 
