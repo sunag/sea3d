@@ -225,7 +225,7 @@ THREE.SEA3D.prototype.flipScaleMatrix = function () {
 //	Legacy
 //
 
-THREE.SEA3D.prototype.convertToRadiansAnimation = function ( animation ) {
+THREE.SEA3D.prototype.degToRadAnimation = function ( animation ) {
 
 	if ( animation.isRadians ) return;
 
@@ -235,7 +235,7 @@ THREE.SEA3D.prototype.convertToRadiansAnimation = function ( animation ) {
 
 		var block = dataList[ i ];
 
-		if ( block.kind === SEA3D.Animation.ANGLE ) {
+		if ( block.kind === SEA3D.Animation.DEGREE ) {
 
 			block.kind = SEA3D.Animation.RADIAN;
 
@@ -475,7 +475,7 @@ THREE.SEA3D.prototype.getModifier = function ( req ) {
 
 			case SEA3D.UVWAnimation.prototype.type:
 
-				this.convertToRadiansAnimation( sea );
+				this.degToRadAnimation( sea );
 
 				this._readAnimation( sea );
 

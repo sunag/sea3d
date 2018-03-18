@@ -199,7 +199,7 @@ global
 	ANM_OFFSET_V = 0x0009,
 	ANM_SCALE_U = 0x000A,
 	ANM_SCALE_V = 0x000B,
-	ANM_ANGLE = 0x000C,
+	ANM_DEGREE = 0x000C,
 	ANM_ALPHA = 0x000D,
 	ANM_VOLUME = 0x000E,
 	ANM_RADIAN = 0x000F
@@ -3425,7 +3425,7 @@ function writeCompositeLayer data tex anm =
 		data.WriteFloat tex.coords.V_Tiling
 	
 	if useRotation do
-		data.WriteFloat tex.coords.W_Angle
+		data.WriteFloat (degToRad tex.coords.W_Angle)
 	
 	if useAnimation do
 		writeAnimationList data #( SEAAnimator anm )		
@@ -5722,7 +5722,7 @@ function processToken data obj token p: t: tp: offsetRotation: =
 	else if key == ANM_SCALE_V then (
 		data.WriteFloat obj.coords.V_Tiling
 	)				
-	else if key == ANM_ANGLE then (
+	else if key == ANM_DEGREE then (
 		data.WriteFloat obj.coords.W_Angle
 	)
 	else if key == ANM_RADIAN then (
