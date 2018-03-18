@@ -1827,7 +1827,7 @@ SEA3D.Animation.SCALE_V = 11;
 SEA3D.Animation.ANGLE = 12;
 SEA3D.Animation.ALPHA = 13;
 SEA3D.Animation.VOLUME = 14;
-SEA3D.Animation.RADIANS = 15;
+SEA3D.Animation.RADIAN = 15;
 
 SEA3D.Animation.MORPH = 250;
 

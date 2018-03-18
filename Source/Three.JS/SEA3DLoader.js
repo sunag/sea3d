@@ -3148,7 +3148,7 @@ THREE.SEA3D.prototype.readAnimation = function ( sea ) {
 
 					break;
 
-				case SEA3D.Animation.RADIANS:
+				case SEA3D.Animation.RADIAN:
 
 					name = '.rotation';
 

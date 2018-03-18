@@ -201,7 +201,8 @@ global
 	ANM_SCALE_V = 0x000B,
 	ANM_ANGLE = 0x000C,
 	ANM_ALPHA = 0x000D,
-	ANM_VOLUME = 0x000E
+	ANM_VOLUME = 0x000E,
+	ANM_RADIAN = 0x000F
 
 global
 	SEA_QUATERNION = 0,
@@ -2183,7 +2184,7 @@ function getCompositeAnimationTokenList obj =
 	)
 	
 	if obj.coords.W_Angle.isAnimated do (
-		append tokenList #(ANM_ANGLE,10) --  rotationUV, float
+		append tokenList #(ANM_RADIAN,10) --  rotationUV, float
 	)
 	
 	return tokenList
@@ -5723,6 +5724,9 @@ function processToken data obj token p: t: tp: offsetRotation: =
 	)				
 	else if key == ANM_ANGLE then (
 		data.WriteFloat obj.coords.W_Angle
+	)
+	else if key == ANM_RADIAN then (
+		data.WriteFloat (degToRad obj.coords.W_Angle)
 	) 
 	
 	else if key == ANM_VOLUME then (

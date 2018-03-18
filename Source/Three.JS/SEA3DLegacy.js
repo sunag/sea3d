@@ -225,6 +225,34 @@ THREE.SEA3D.prototype.flipScaleMatrix = function () {
 //	Legacy
 //
 
+THREE.SEA3D.prototype.convertToRadiansAnimation = function ( animation ) {
+
+	if ( animation.isRadians ) return;
+
+	var dataList = animation.dataList;
+
+	for ( var i = 0; i < dataList.length; i ++ ) {
+
+		var block = dataList[ i ];
+
+		if ( block.kind === SEA3D.Animation.ANGLE ) {
+
+			block.kind = SEA3D.Animation.RADIAN;
+
+			for ( var j = 0; j < block.data.length; j ++ ) {
+
+				block.data[ j ] *= SEA3D.Math.DEG_TO_RAD;
+
+			}
+
+		}
+
+	}
+
+	animation.isRadians = true;
+
+};
+
 THREE.SEA3D.prototype.flipDefaultAnimation = function () {
 
 	var buf1 = new THREE.Matrix4();
@@ -432,13 +460,22 @@ THREE.SEA3D.prototype.getModifier = function ( req ) {
 
 			case SEA3D.Animation.prototype.type:
 			case SEA3D.MorphAnimation.prototype.type:
-			case SEA3D.UVWAnimation.prototype.type:
 
 				if ( req.scope instanceof THREE.Object3D ) {
 
 					this.flipDefaultAnimation( sea, req.scope, req.relative );
 
 				}
+
+				this._readAnimation( sea );
+
+				return sea.tag;
+
+				break;
+
+			case SEA3D.UVWAnimation.prototype.type:
+
+				this.convertToRadiansAnimation( sea );
 
 				this._readAnimation( sea );
 
