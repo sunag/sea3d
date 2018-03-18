@@ -281,7 +281,7 @@ SEA3D.Stream.prototype.readMatrix = function () {
 
 };
 
-SEA3D.decodeText = function ( array ) {
+SEA3D.Stream.prototype.decodeText = function ( array ) {
 
 	if ( typeof TextDecoder !== 'undefined' ) {
 
@@ -306,23 +306,11 @@ SEA3D.decodeText = function ( array ) {
 
 };
 
-SEA3D.extractUrlBase = function ( url ) {
-
-	var parts = url.split( '/' );
-
-	if ( parts.length === 1 ) return './';
-
-	parts.pop();
-
-	return parts.join( '/' ) + '/';
-
-}
-
 SEA3D.Stream.prototype.readUTF8 = function ( len ) {
 
 	var buffer = this.readBytes( len );
 
-	return SEA3D.decodeText( new Uint8Array( buffer ) );
+	return this.decodeText( new Uint8Array( buffer ) );
 
 };
 
@@ -1839,6 +1827,7 @@ SEA3D.Animation.SCALE_V = 11;
 SEA3D.Animation.ANGLE = 12;
 SEA3D.Animation.ALPHA = 13;
 SEA3D.Animation.VOLUME = 14;
+SEA3D.Animation.RADIANS = 15;
 
 SEA3D.Animation.MORPH = 250;
 
@@ -2965,9 +2954,15 @@ SEA3D.File.prototype.getObject = function ( index ) {
 
 };
 
+SEA3D.File.prototype.getObjectIndex = function ( name ) {
+
+	return this.objects[ name ].index;
+
+};
+
 SEA3D.File.prototype.getObjectByName = function ( name ) {
 
-	return this.objects[ name ];
+	return this.getObject( this.getObjectIndex( name ) );
 
 };
 
@@ -3037,6 +3032,7 @@ SEA3D.File.prototype.readSEAObject = function () {
 
 	}
 
+	obj.index = this.objects.length;
 	obj.streaming = streaming;
 	obj.metadata = meta;
 
@@ -3270,6 +3266,18 @@ SEA3D.File.prototype.dispatchError = function ( id, message ) {
 
 };
 
+SEA3D.File.prototype.extractUrlBase = function ( url ) {
+
+	var parts = url.split( '/' );
+
+	if ( parts.length === 1 ) return './';
+
+	parts.pop();
+
+	return parts.join( '/' ) + '/';
+
+};
+
 SEA3D.File.prototype.load = function ( url ) {
 
 	var self = this,
@@ -3279,7 +3287,7 @@ SEA3D.File.prototype.load = function ( url ) {
 
 	if (!this.config.path) {
 
-		this.config.path = SEA3D.extractUrlBase( url );
+		this.config.path = this.extractUrlBase( url );
 
 	}
 
