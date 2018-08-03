@@ -53,6 +53,18 @@ Free cross-platform 3D IDE for games.
 
 **SDK Framework** https://github.com/sunag/sea3d_studio_sdk
 
+SEA3D Exporter
+--
+Easy and wide range of 3d features, export entire scenes to SEA3D with just few clicks.
+
+[![SEA3D Exporter](http://img.youtube.com/vi/dTCztYwwEdE/0.jpg)](http://www.youtube.com/watch?v=dTCztYwwEdE)
+
+SEA3D I.O.
+--
+Optimize your SEA3D with LZMA and Draco compressing.
+
+**http://sunag.github.io/sea3d/IO/index.html**
+
 SEA3D Player
 --
 Focused for artists and very useful to view models, animations and others.
@@ -60,12 +72,6 @@ Focused for artists and very useful to view models, animations and others.
 **WebGL** **http://sunag.github.io/sea3d/Player/index.html**
 
 **Flash** **http://sea3d.poonya.com/player/**
-
-SEA3D Exporter
---
-Easy and wide range of 3d features, export entire scenes to SEA3D with just few clicks.
-
-[![SEA3D Exporter](http://img.youtube.com/vi/dTCztYwwEdE/0.jpg)](http://www.youtube.com/watch?v=dTCztYwwEdE)
 
 SEA3D Lip Sync
 --
