@@ -334,7 +334,7 @@ THREE.SEA3D.Exporter.prototype = Object.assign( Object.create( THREE.EventDispat
 		var onDrop = function() {
 	
 			this.step = 1;
-			this.progress = position < this.drops.length;
+			this.progress = position / this.drops.length;
 			
 			if (position < this.drops.length) {
 			
@@ -418,7 +418,7 @@ THREE.SEA3D.Exporter.prototype = Object.assign( Object.create( THREE.EventDispat
 		var onSerialize = function() {
 		
 			this.step = 0;
-			this.progress = position < objects.length;
+			this.progress = position / objects.length;
 		
 			var now = performance.now();
 			
@@ -944,6 +944,30 @@ THREE.SEA3D.Exporter.prototype = Object.assign( Object.create( THREE.EventDispat
 
 	},
 	
+	serializeSEAGeometry: function( geo ) {
+
+		var sea = {},
+			i;
+		
+		sea.numVertex = geo.attributes.position ? geo.attributes.position.count : 0;
+		sea.isBig = sea.numVertex >= THREE.SEA3D.Exporter.BIG_GEOMETRY;
+		
+		sea.uv = [];
+		
+		if (geo.attributes.uv) sea.uv.push( geo.attributes.uv.array );
+		if (geo.attributes.uv2) sea.uv.push( geo.attributes.uv2.array );
+		
+		sea.normal = geo.attributes.normal.array;
+		sea.vertex = geo.attributes.position.array;
+		
+		sea.groups = geo.groups;
+		
+		if (geo.indexes) geo.index.array.buffer
+
+		return this.serializeBufferGeometry( sea );
+
+	},
+	
 	serializeBufferGeometry: function( geo ) {
 		
 		// DROP
@@ -954,9 +978,19 @@ THREE.SEA3D.Exporter.prototype = Object.assign( Object.create( THREE.EventDispat
 		
 		drop = this.regDrop( geo.uuid );
 		
+		if (this.onGeometry) {
+			
+			drop.type = SEA3D.Geometry.prototype.type;
+			drop.name = geo.name;
+			drop.data = this.onGeometry( geo, drop );
+			
+			if (drop.data) return this.addDrop( drop );
+			
+		}
+
 		// SERIALIZE
 		
-		const NORMAL = 4, UV = 32, JOINTS = 64, GROUP = 1024, TRIANGLE_SOUP = 2048;
+		const IS_BIG = 1, NORMAL = 4, UV = 32, JOINTS = 64, GROUP = 1024, TRIANGLE_SOUP = 2048;
 		
 		var data = new SEA3D.Stream(), 
 			attrib = GROUP,
