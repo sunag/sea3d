@@ -332,7 +332,7 @@ Object.assign( THREE.SEA3D.DomainManager.prototype, {
 
 		this.remove( e.domain );
 
-		if ( this.autoDisposeRootDomain && this.domains.length == 1 ) {
+		if ( this.autoDisposeRootDomain && this.domains.length === 1 ) {
 
 			this.dispose();
 
@@ -829,7 +829,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 		if ( ! animation ) throw new Error( 'Animation "' + name + '" not found.' );
 
-		if ( animation == this.currentAnimation ) {
+		if ( animation === this.currentAnimation ) {
 
 			if ( offset !== undefined || ! animation.repeat ) this.currentAnimationAction.time = offset !== undefined ? offset :
 				( this.currentAnimationAction.timeScale >= 0 ? 0 : this.currentAnimation.duration );
@@ -960,7 +960,7 @@ Object.assign( THREE.SEA3D.Animator.prototype, {
 
 	setRelative: function ( val ) {
 
-		if ( this.relative == val ) return;
+		if ( this.relative === val ) return;
 
 		this.stop();
 
@@ -1302,7 +1302,7 @@ THREE.SEA3D.SkinnedMesh.prototype = Object.assign( Object.create( THREE.SkinnedM
 
 		for ( var i = 0, bl = bones.length; i < bl; i ++ ) {
 
-			if ( name == bones[ i ].name )
+			if ( name === bones[ i ].name )
 				return bones[ i ];
 
 		}
@@ -1659,7 +1659,7 @@ THREE.SEA3D.Domain.prototype.getProperties = THREE.SEA3D.prototype.getProperties
 
 THREE.SEA3D.prototype.isPowerOfTwo = function ( num ) {
 
-	return num ? ( ( num & - num ) == num ) : false;
+	return num ? ( ( num & - num ) === num ) : false;
 
 };
 
@@ -2269,7 +2269,7 @@ THREE.SEA3D.prototype.readCubeMap = function ( sea ) {
 
 	var onLoaded = function () {
 
-		if ( ++ loaded == 6 ) {
+		if ( ++ loaded === 6 ) {
 
 			texture.needsUpdate = true;
 
@@ -2388,7 +2388,7 @@ THREE.SEA3D.prototype.readCubeMapURL = function ( sea ) {
 
 	var texture, format = faces[ 0 ].substr( - 3 );
 
-	if ( format == "hdr" ) {
+	if ( format === "hdr" ) {
 
 		var usePMREM = THREE.PMREMGenerator != null;
 
@@ -2443,7 +2443,7 @@ THREE.SEA3D.prototype.getJSMList = function ( target, scripts ) {
 
 		var script = scripts[ i ];
 
-		if ( script.tag.type == SEA3D.JavaScriptMethod.prototype.type ) {
+		if ( script.tag.type === SEA3D.JavaScriptMethod.prototype.type ) {
 
 			scriptTarget.push( script );
 
@@ -2664,7 +2664,7 @@ THREE.SEA3D.prototype.materialTechnique =
 	techniques[ SEA3D.Material.LIGHT_MAP ] =
 	function ( mat, tech ) {
 
-		if ( tech.blendMode == "multiply" ) mat.aoMap = tech.texture.tag;
+		if ( tech.blendMode === "multiply" ) mat.aoMap = tech.texture.tag;
 		else mat.lightMap = tech.texture.tag;
 
 	};

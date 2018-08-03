@@ -89,7 +89,7 @@ SEA3D.Stream.INTERPOLATION_TABLE =	[
 
 SEA3D.Stream.sizeOf = function ( kind ) {
 
-	if ( kind == 0 ) return 0;
+	if ( kind === 0 ) return 0;
 	else if ( kind >= 1 && kind <= 31 ) return 1;
 	else if ( kind >= 32 && kind <= 63 ) return 2;
 	else if ( kind >= 64 && kind <= 95 ) return 3;
@@ -473,7 +473,7 @@ SEA3D.Stream.prototype.readProperties = function ( sea3d ) {
 			type = this.readUByte();
 
 		types[ name ] = type;
-		props[ name ] = type == SEA3D.Stream.GROUP ? this.readProperties( sea3d ) : this.readToken( type, sea3d );
+		props[ name ] = type === SEA3D.Stream.GROUP ? this.readProperties( sea3d ) : this.readToken( type, sea3d );
 
 	}
 
@@ -1145,8 +1145,8 @@ SEA3D.Object3D = function ( name, data, sea3d ) {
 
 		var objectType = data.readUByte();
 
-		this.isStatic = ( objectType & 1 ) != 0;
-		this.visible = ( objectType & 2 ) == 0;
+		this.isStatic = ( objectType & 1 ) !== 0;
+		this.visible = ( objectType & 2 ) === 0;
 
 	}
 
@@ -1170,7 +1170,7 @@ SEA3D.Entity3D = function ( name, data, sea3d ) {
 
 		var lightType = data.readUByte();
 
-		this.castShadows = ( lightType & 1 ) == 0;
+		this.castShadows = ( lightType & 1 ) === 0;
 
 	}
 
@@ -1335,11 +1335,11 @@ SEA3D.Actions = function ( name, data, sea3d ) {
 
 			act.intrpl = data.readInterpolation();
 
-			if ( act.intrpl.indexOf( 'back.' ) == 0 ) {
+			if ( act.intrpl.indexOf( 'back.' ) === 0 ) {
 
 				act.intrplParam0 = data.readFloat();
 
-			} else if ( act.intrpl.indexOf( 'elastic.' ) == 0 ) {
+			} else if ( act.intrpl.indexOf( 'elastic.' ) === 0 ) {
 
 				act.intrplParam0 = data.readFloat();
 				act.intrplParam1 = data.readFloat();
@@ -1621,7 +1621,7 @@ SEA3D.Mesh = function ( name, data, sea3d ) {
 
 		var len = data.readUByte();
 
-		if ( len == 1 ) this.material[ 0 ] = sea3d.getObject( data.readUInt() );
+		if ( len === 1 ) this.material[ 0 ] = sea3d.getObject( data.readUInt() );
 		else {
 
 			var i = 0;
@@ -1764,8 +1764,8 @@ SEA3D.AnimationBase = function ( name, data, sea3d ) {
 				name: data.readUTF8Tiny(),
 				start: data.readUInt(),
 				count: data.readUInt(),
-				repeat: ( seqFlag & 1 ) != 0,
-				intrpl: ( seqFlag & 2 ) == 0
+				repeat: ( seqFlag & 1 ) !== 0,
+				intrpl: ( seqFlag & 2 ) === 0
 			};
 
 		}
@@ -1776,7 +1776,7 @@ SEA3D.AnimationBase = function ( name, data, sea3d ) {
 	this.numFrames = data.readUInt();
 
 	// no contains sequence
-	if ( this.sequence.length == 0 ) {
+	if ( this.sequence.length === 0 ) {
 
 		this.sequence[ 0 ] = { name: "root", start: 0, count: this.numFrames, repeat: true, intrpl: true };
 
@@ -2189,11 +2189,11 @@ SEA3D.Material = function ( name, data, sea3d ) {
 
 	this.doubleSided = ( this.attrib & 1 ) != 0;
 
-	this.receiveLights = ( this.attrib & 2 ) == 0;
-	this.receiveShadows = ( this.attrib & 4 ) == 0;
-	this.receiveFog = ( this.attrib & 8 ) == 0;
+	this.receiveLights = ( this.attrib & 2 ) === 0;
+	this.receiveShadows = ( this.attrib & 4 ) === 0;
+	this.receiveFog = ( this.attrib & 8 ) === 0;
 
-	this.repeat = ( this.attrib & 16 ) == 0;
+	this.repeat = ( this.attrib & 16 ) === 0;
 
 	if ( this.attrib & 32 )
 		this.alpha = data.readFloat();
@@ -2204,8 +2204,8 @@ SEA3D.Material = function ( name, data, sea3d ) {
 	if ( this.attrib & 128 )
 		this.animations = data.readAnimationList( sea3d );
 
-	this.depthWrite = ( this.attrib & 256 ) == 0;
-	this.depthTest = ( this.attrib & 512 ) == 0;
+	this.depthWrite = ( this.attrib & 256 ) === 0;
+	this.depthTest = ( this.attrib & 512 ) === 0;
 
 	this.premultipliedAlpha = ( this.attrib & 1024 ) != 0;
 
@@ -2277,7 +2277,7 @@ SEA3D.Material = function ( name, data, sea3d ) {
 					alpha: data.readFloat()
 				};
 
-				if ( kind == SEA3D.Material.FRESNEL_REFLECTION ) {
+				if ( kind === SEA3D.Material.FRESNEL_REFLECTION ) {
 
 					tech.power = data.readFloat();
 					tech.normal = data.readFloat();
@@ -2550,7 +2550,7 @@ SEA3D.Composite.prototype.getLayerByName = function ( name ) {
 
 	for ( var i = 0; i < this.layer.length; i ++ ) {
 
-		if ( this.layer[ i ].name == name ) {
+		if ( this.layer[ i ].name === name ) {
 
 			return this.layer[ i ];
 
@@ -2592,7 +2592,7 @@ SEA3D.Composite.LayerBitmap = function ( data, sea3d ) {
 	var attrib = data.readUShort();
 
 	this.channel = attrib & 1 ? data.readUByte() : 0;
-	this.repeat = attrib & 2 == 0;
+	this.repeat = attrib & 2 === 0;
 	this.offsetU = attrib & 4 ? data.readFloat() : 0;
 	this.offsetV = attrib & 8 ? data.readFloat() : 0;
 	this.scaleU = attrib & 16 ? data.readFloat() : 1;
@@ -2715,7 +2715,7 @@ SEA3D.PNG = function ( name, data, sea3d ) {
 	this.data = data;
 	this.sea3d = sea3d;
 
-	this.transparent = data.getByte( 25 ) == 0x06;
+	this.transparent = data.getByte( 25 ) === 0x06;
 
 };
 
@@ -3048,7 +3048,7 @@ SEA3D.File.prototype.readSEAObject = function () {
 
 SEA3D.File.prototype.isDone = function () {
 
-	return this.position == this.length;
+	return this.position === this.length;
 
 };
 
@@ -3109,7 +3109,7 @@ SEA3D.File.prototype.parseObject = function () {
 
 		if ( ( obj.streaming || this.config.forceStreaming ) && this.typeRead[ type ] ) {
 
-			if ( obj.tag == undefined ) {
+			if ( obj.tag === undefined ) {
 
 				this.typeRead[ type ].call( this.scope, obj );
 
@@ -3119,7 +3119,7 @@ SEA3D.File.prototype.parseObject = function () {
 
 	}
 
-	if ( this.position == this.length ) {
+	if ( this.position === this.length ) {
 
 		var elapsedTime = this.timer.elapsedTime;
 		var message = elapsedTime + "ms, " + this.objects.length + " objects";

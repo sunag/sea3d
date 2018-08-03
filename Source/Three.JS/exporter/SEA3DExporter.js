@@ -21,6 +21,9 @@ THREE.SEA3D.Exporter = function( params ) {
 	
 	this.frameRate = 30;
 
+	this.step = 0;
+	this.progress = 0;
+
 	this.protectionAlgorithm = 0;
 	this.compressionAlgorithm = 0;
 
@@ -174,19 +177,19 @@ THREE.SEA3D.Exporter.prototype = Object.assign( Object.create( THREE.EventDispat
 		
 		if (data.length > 3) {
 			
-			if (data[0] == 255 && data[1] == 216 && data[2] == 255) {
+			if (data[0] === 255 && data[1] === 216 && data[2] === 255) {
 				
 				return SEA3D.JPEG.prototype.type;
 				
-			} else if (data[0] == 137 && data[1] == 80 && data[2] == 78) {
+			} else if (data[0] === 137 && data[1] === 80 && data[2] === 78) {
 				
 				return SEA3D.PNG.prototype.type;
 				
-			} else if (data[0] == 73 && data[1] == 73 && data[2] == 188) {
+			} else if (data[0] === 73 && data[1] === 73 && data[2] === 188) {
 				
 				return SEA3D.JPEG_XR.prototype.type;
 				
-			} else if (data[0] == 71 && data[1] == 73 && data[2] == 70) {
+			} else if (data[0] === 71 && data[1] === 73 && data[2] === 70) {
 				
 				return SEA3D.GIF.prototype.type;
 				
@@ -329,6 +332,9 @@ THREE.SEA3D.Exporter.prototype = Object.assign( Object.create( THREE.EventDispat
 		var time = performance.now();
 		
 		var onDrop = function() {
+	
+			this.step = 1;
+			this.progress = position < this.drops.length;
 			
 			if (position < this.drops.length) {
 			
@@ -341,6 +347,8 @@ THREE.SEA3D.Exporter.prototype = Object.assign( Object.create( THREE.EventDispat
 					time = now;
 					
 					requestAnimationFrame(onDrop);
+					
+					if (this.onProgress) this.onProgress( this.progress, this.step );
 					
 					return;
 					
@@ -399,6 +407,8 @@ THREE.SEA3D.Exporter.prototype = Object.assign( Object.create( THREE.EventDispat
 				
 				sea.writeUInt24( 0x5EA3D1 ); // FINAL
 				
+				if (this.onProgress) this.onProgress( this.progress, this.step );
+				
 				if (callback) callback( sea );
 				
 			}
@@ -406,6 +416,9 @@ THREE.SEA3D.Exporter.prototype = Object.assign( Object.create( THREE.EventDispat
 		}.bind( this );
 		
 		var onSerialize = function() {
+		
+			this.step = 0;
+			this.progress = position < objects.length;
 		
 			var now = performance.now();
 			
@@ -415,10 +428,12 @@ THREE.SEA3D.Exporter.prototype = Object.assign( Object.create( THREE.EventDispat
 				
 				requestAnimationFrame(onSerialize);
 				
+				if (this.onProgress) this.onProgress( this.progress, this.step );
+				
 				return;
 				
 			}
-		
+			
 			if (position < objects.length) {
 				
 				this.serialize( objects[position++] );
@@ -520,13 +535,13 @@ THREE.SEA3D.Exporter.prototype = Object.assign( Object.create( THREE.EventDispat
 			header = new SEA3D.Stream(),
 			attrib = 0;
 		
-		if (mat.side == THREE.DoubleSide) attrib |= 1;
+		if (mat.side === THREE.DoubleSide) attrib |= 1;
 		
 		if (mat.lights === false) attrib |= 2;
 		if (mat.shadows === false) attrib |= 4;
 		if (mat.fog === false) attrib |= 8;				
 		
-		if (mat.map && mat.map.wrapS == THREE.ClampToEdgeWrapping) {
+		if (mat.map && mat.map.wrapS === THREE.ClampToEdgeWrapping) {
 
 			attrib |= 16;
 
@@ -543,13 +558,13 @@ THREE.SEA3D.Exporter.prototype = Object.assign( Object.create( THREE.EventDispat
 			
 			var blendMode = "normal";
 			
-			if (mat.blending == THREE.AdditiveBlending) blendMode = "add";
-			else if (mat.blending == THREE.SubtractiveBlending) blendMode = "subtract";
-			else if (mat.blending == THREE.MultiplyBlending) blendMode = "multiply";
-			else if (mat.blending == THREE.CustomBlending &&
-				mat.blendSrc == THREE.OneFactor &&
-				mat.blendDst == THREE.OneMinusSrcColorFactor &&
-				mat.blendEquation == THREE.AddEquation) blendMode = "screen";
+			if (mat.blending === THREE.AdditiveBlending) blendMode = "add";
+			else if (mat.blending === THREE.SubtractiveBlending) blendMode = "subtract";
+			else if (mat.blending === THREE.MultiplyBlending) blendMode = "multiply";
+			else if (mat.blending === THREE.CustomBlending &&
+				mat.blendSrc === THREE.OneFactor &&
+				mat.blendDst === THREE.OneMinusSrcColorFactor &&
+				mat.blendEquation === THREE.AddEquation) blendMode = "screen";
 			
 			attrib |= 64;
 			header.writeBlendMode( blendMode );

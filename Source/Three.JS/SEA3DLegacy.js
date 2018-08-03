@@ -804,7 +804,7 @@ THREE.SEA3D.EXTENSIONS_LOADER.push( { setTypeRead: function () {
 
 	// CONFIG
 
-	this.config.legacy = this.config.legacy == undefined ? true : this.config.legacy;
+	this.config.legacy = this.config.legacy !== undefined ? this.config.legacy : true;
 
 	this.file.typeRead[ SEA3D.Skeleton.prototype.type ] = this.readSkeleton;
 
