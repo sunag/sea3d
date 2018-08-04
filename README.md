@@ -13,16 +13,15 @@ Open-source format and tools for game developers.
 
 * Open-source | Cross-platform
 * Streamming and Progressive Download
-* Export Animation (Takes), Texture, Material, Skeleton (Skin), Vertex Animation, Morph (+1000 slots), Camera, Lights, Environment and Helpers
+* Export Animation ( Takes ), Texture, Material, Skeleton ( Skin ), Vertex Animation, Morph ( +1000 slots ), Camera, Lights, Environment and Helpers
 * Instancing of Geometry, Material, Texture and Animation
 * Lossy Compression ( Google Draco and Open3DGC )
 * Lossless Compression ( Deflate and Lzma Compression )
-* Native Scripting Language (Export to Java Script)
+* Native Scripting Language ( Export to Java Script )
 * Scene Hierarchy
 * Physics and Sounds Supports
 * Multiple Channels Texture and Mapping
 * Native Support for DetailMap, LightMap and Multilayer Blend Texture
-* Streaming File Format (Progressive Loader)
 * Custom Shaders and Attributes
 * Automatic Bake
 * Cube Mapping and ATF Textures
