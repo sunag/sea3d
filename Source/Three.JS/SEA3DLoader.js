@@ -2300,21 +2300,49 @@ THREE.SEA3D.prototype.readCubeMap = function ( sea ) {
 //	Updaters
 //
 
-THREE.SEA3D.prototype.readTextureUpdate = function ( sea ) {
+THREE.SEA3D.prototype.readGeometryUpdate = function ( geometry, bytes, sea ) {
 
-	var obj = this.file.objects[ sea.index ],
-		tex = obj.tag;
+	var Class = sea.sea3d.typeClass[ sea.type ],
+		seaUpdate = new Class( "", bytes, sea.sea3d );
+
+	seaUpdate.tag = geometry;
+
+	this.readGeometryBuffer( seaUpdate );
+
+};
+
+THREE.SEA3D.prototype.readTextureUpdate = function ( texture, bytes, type ) {
 
 	var image = new Image();
 
 	image.onload = function () {
 
-		tex.image = image;
-		tex.needsUpdate = true;
+		texture.image = image;
+		texture.needsUpdate = true;
 
 	};
 
-	image.src = this.createObjectURL( sea.bytes.buffer, "image/" + obj.type );
+	image.src = this.createObjectURL( bytes.buffer, "image/" + type );
+
+};
+
+THREE.SEA3D.prototype.readAssetUpdate = function ( sea ) {
+
+	var obj = this.file.objects[ sea.index ],
+		bytes = sea.bytes,
+		tag = obj.tag;
+
+	if (!tag) return;
+	
+	if ( tag.isBufferGeometry ) {
+
+		this.readGeometryUpdate( tag, bytes, obj );
+
+	} else if ( tag.isTexture ) {
+
+		this.readTextureUpdate( tag, bytes, obj.type );
+
+	}
 
 };
 
@@ -3748,7 +3776,7 @@ THREE.SEA3D.prototype.setTypeRead = function () {
 	this.file.typeRead[ SEA3D.SoundPoint.prototype.type ] = this.readSoundPoint;
 	this.file.typeRead[ SEA3D.TextureURL.prototype.type ] = this.readTextureURL;
 	this.file.typeRead[ SEA3D.CubeMapURL.prototype.type ] = this.readCubeMapURL;
-	this.file.typeRead[ SEA3D.TextureUpdate.prototype.type ] = this.readTextureUpdate;
+	this.file.typeRead[ SEA3D.AssetUpdate.prototype.type ] = this.readAssetUpdate;
 	this.file.typeRead[ SEA3D.Morph.prototype.type ] = this.readMorph;
 	this.file.typeRead[ SEA3D.VertexAnimation.prototype.type ] = this.readVertexAnimation;
 	this.file.typeRead[ SEA3D.Actions.prototype.type ] = this.readActions;

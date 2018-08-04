@@ -2766,10 +2766,10 @@ SEA3D.MP3 = function ( name, data, sea3d ) {
 SEA3D.MP3.prototype.type = "mp3";
 
 //
-//	Texture Update
+//	Asset Update
 //
 
-SEA3D.TextureUpdate = function ( name, data, sea3d ) {
+SEA3D.AssetUpdate = function ( name, data, sea3d ) {
 
 	this.name = name;
 	this.data = data;
@@ -2780,7 +2780,7 @@ SEA3D.TextureUpdate = function ( name, data, sea3d ) {
 
 };
 
-SEA3D.TextureUpdate.prototype.type = "uTex";
+SEA3D.AssetUpdate.prototype.type = "upDt";
 
 //
 //	FILE FORMAT
@@ -2860,10 +2860,10 @@ SEA3D.File = function ( config ) {
 	this.addClass( SEA3D.JavaScriptMethod, true );
 	this.addClass( SEA3D.GLSL, true );
 
-	// Updaters
-	this.addClass( SEA3D.TextureUpdate, true );
+	// UPDATER
+	this.addClass( SEA3D.AssetUpdate, true );
 
-	// Extensions
+	// EXTENSION
 	var i = SEA3D.File.Extensions.length;
 
 	while ( i -- ) {
