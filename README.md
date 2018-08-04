@@ -12,6 +12,7 @@ Open-source format and tools for game developers.
 **List of Features**
 
 * Open-source | Cross-platform
+* Streamming and Progressive Download
 * Export Animation (Takes), Texture, Material, Skeleton (Skin), Vertex Animation, Morph (+1000 slots), Camera, Lights, Environment and Helpers
 * Instancing of Geometry, Material, Texture and Animation
 * Lossy Compression ( Open3DGC )
