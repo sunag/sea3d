@@ -243,8 +243,8 @@ function Builder() {
 		losslessCompressionLevel: 10,
 		lossyCompression:true,
 		lossyCompressionLevel: 10,
-		quantBitsPosition: 8,
-		quantBitsNormal: 8,
+		quantBitsPosition: 10,
+		quantBitsNormal: 10,
 		quantBitsTexCoord: 8
 	};
 
@@ -440,7 +440,7 @@ function GUI() {
 
 	} );
 
-	this.guiDraco.add('slide', { name:'Q. Vertex', min:3, max:15, value:builder.settings.quantBitsPosition, step:1, mode:1 }).onChange( function(v){
+	this.guiDraco.add('slide', { name:'Q. Position', min:3, max:15, value:builder.settings.quantBitsPosition, step:1, mode:1 }).onChange( function(v){
 
 		builder.settings.quantBitsPosition = v;
 
