@@ -58,30 +58,36 @@ SEA3D.GeometryDraco = function ( name, data, sea3d ) {
 
 	var buffer = new module.DecoderBuffer();
 	buffer.Init( dracoData, dracoData.length );
-
-	var geometryType = decoder.GetEncodedGeometryType( buffer );
-
+	
 	var mesh = new module.Mesh();
 
 	var decodingStatus = decoder.DecodeBufferToMesh( buffer, mesh );
 
 	if ( ! decodingStatus.ok() ) {
 
-		console.error( "SEA3D Draco Decoding failed:", decodingStatus.error_msg() );
+		data.position += 5; // jump "DRACO" magic string
+		var version = data.readUByte() + '.' + data.readUByte(); // draco version
+
+		console.error( "SEA3D Draco", version, "decoding failed:", decodingStatus.error_msg(), "You may need update 'draco_decoder.js'." );
+
+		// use an empty geometry
+		this.vertex = new Float32Array();
+
+		return;
 
 	}
 
 	var index = 0;
 
-	this.vertex = this.readFloat32Array( module, decoder, mesh, index ++ );
+	this.vertex = this.readFloat32Array( module, decoder, mesh, index ++, module.POSITION );
 
-	if ( attrib & 4 ) this.normal = this.readFloat32Array( module, decoder, mesh, index ++ );
+	if ( attrib & 4 ) this.normal = this.readFloat32Array( module, decoder, mesh, index ++, module.NORMAL );
 
 	if ( attrib & 32 ) {
 
 		for ( i = 0; i < this.uv.length; i ++ ) {
 
-			this.uv[ i ] = this.readFloat32Array( module, decoder, mesh, index ++ );
+			this.uv[ i ] = this.readFloat32Array( module, decoder, mesh, index ++, module.TEX_COORD );
 
 		}
 
