@@ -440,7 +440,7 @@ function GUI() {
 
 	} );
 
-	this.guiDraco.add('slide', { name:'Q. Position', min:3, max:15, value:builder.settings.quantBitsPosition, step:1, mode:1 }).onChange( function(v){
+	this.guiDraco.add('slide', { name:'Q. Vertex', min:3, max:15, value:builder.settings.quantBitsPosition, step:1, mode:1 }).onChange( function(v){
 
 		builder.settings.quantBitsPosition = v;
 
