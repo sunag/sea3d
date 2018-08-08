@@ -59,7 +59,7 @@ Easy and wide range of 3d features, export entire scenes to SEA3D with just few 
 
 [![SEA3D Exporter](https://img.youtube.com/vi/dTCztYwwEdE/0.jpg)](https://www.youtube.com/watch?v=dTCztYwwEdE)
 
-SEA3D I.O.
+SEA3D I.O. Tools
 --
 Optimize your SEA3D with LZMA and Draco compressing.
 
