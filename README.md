@@ -32,7 +32,7 @@ Open-source format and tools for game developers.
 
 Official Page / Examples
 --
-**http://sunag.github.io/sea3d/**
+**https://sunag.github.io/sea3d/**
 
 Help and Questions? Use SEA3D Forum
 --
