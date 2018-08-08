@@ -82,7 +82,7 @@ Runtime speech recognition and lip sync using MFCCs by Sunag Technology. **(soon
 SEA3D Social Pages
 --
 
-**Facebook** https://www.facebook.com.br/sea3d/
+**Facebook** https://www.facebook.com/sea3d/
 
 **Twitter** https://twitter.com/sea3dformat
 
