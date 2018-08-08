@@ -16,7 +16,7 @@ Open-source format and tools for game developers.
 * Export Animation ( Takes ), Texture, Material, Skeleton ( Skin ), Vertex Animation, Morph ( +1000 slots ), Camera, Lights, Environment and Helpers
 * Instancing of Geometry, Material, Texture and Animation
 * Lossy Compression ( Google Draco and Open3DGC )
-* Lossless Compression ( Deflate and Lzma Compression )
+* Lossless Compression ( Lzma and Deflate )
 * Native Scripting Language ( Export to Java Script )
 * Scene Hierarchy
 * Physics and Sounds Supports
