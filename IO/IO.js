@@ -243,8 +243,8 @@ function Builder() {
 		losslessCompressionLevel: 10,
 		lossyCompression:true,
 		lossyCompressionLevel: 10,
-		quantBitsPosition: 8,
-		quantBitsNormal: 8,
+		quantBitsPosition: 10,
+		quantBitsNormal: 10,
 		quantBitsTexCoord: 8
 	};
 

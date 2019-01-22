@@ -173,7 +173,7 @@ SEA3D.GeometryDraco.prototype.readFloat32Array = function ( module, decoder, mes
 
 };
 
-SEA3D.GeometryDraco.prototype.readUint16Array = function ( module, decoder, mesh, attrib, type ) {
+SEA3D.GeometryDraco.prototype.readUint16Array = function ( module, decoder, mesh, attrib ) {
 
 	var attribute = decoder.GetAttribute( mesh, attrib ),
 		numPoints = mesh.num_points();
