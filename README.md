@@ -47,7 +47,7 @@ Free cross-platform 3D IDE for games.
 
 [<img src="http://sunag.github.io/sea3d/Media/SEA3D-Studio.jpg"/>](http://sea3d.poonya.com/studio/)
 
-**Download / Introduction** http://community.poonya.com/252
+**Introduction / Download** http://community.poonya.com/252
 
 **Download Lite** http://sea3d.poonya.com/studio/setup/SEA3DStudioLite.zip
 
