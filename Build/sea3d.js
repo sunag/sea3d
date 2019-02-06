@@ -6303,16 +6303,16 @@ THREE.SEA3D.prototype.readMesh = function ( sea ) {
 
 		if ( sea.material.length > 1 ) {
 
-			var mats = [];
+			mat = [];
 
 			for ( i = 0; i < sea.material.length; i ++ ) {
 
-				mats[ i ] = sea.material[ i ].tag;
+				mat[ i ] = sea.material[ i ].tag;
 
-				mats[ i ].skinning = skeleton != undefined;
-				mats[ i ].morphTargets = uMorph;
-				mats[ i ].morphNormals = uMorphNormal;
-				mats[ i ].vertexColors = sea.geometry.color ? THREE.VertexColors : THREE.NoColors;
+				mat[ i ].skinning = skeleton != undefined;
+				mat[ i ].morphTargets = uMorph;
+				mat[ i ].morphNormals = uMorphNormal;
+				mat[ i ].vertexColors = sea.geometry.color ? THREE.VertexColors : THREE.NoColors;
 
 			}
 
