@@ -209,11 +209,11 @@ Draco.prototype.fromSEA3DGeometry = function( geo ) {
 
 	if (flags & GROUP) {
 
-		data.writeByte( geo.groups.length );
+		stream.writeByte( geo.groups.length );
 
 		for(i = 0; i < geo.groups.length; i++) {
 
-			data.writeVInt( geo.groups[i].count );
+			stream.writeVInt( geo.groups[i].count );
 
 		}
 
