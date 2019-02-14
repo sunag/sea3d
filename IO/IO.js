@@ -59,6 +59,7 @@ Player.prototype.load = function( data, origin ) {
 
 	this.loader = new THREE.SEA3D( {
 		//autoPlay : true,
+		scripts : false,
 		container : this.scene
 	});
 
