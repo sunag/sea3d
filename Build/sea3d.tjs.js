@@ -7612,7 +7612,7 @@ THREE.SEA3D.prototype.readVertexAnimation = function ( sea ) {
 
 		}
 
-		animations.push( THREE.SEA3D.AnimationClip.fromClip( THREE.AnimationClip.CreateFromMorphTargetSequence( seq.name, seqTargets, sea.frameRate ), seq.repeat ) );
+		animations.push( THREE.SEA3D.AnimationClip.fromClip( THREE.AnimationClip.CreateFromMorphTargetSequence( seq.name, seqTargets, sea.frameRate, !seq.repeat ), seq.repeat ) );
 
 	}
 
