@@ -211,7 +211,8 @@ THREE.SEA3D.prototype.flipScaleMatrix = function () {
 
 			this.flipScaleMatrix( parent, parentRotate );
 
-			local.multiplyMatrices( parent.getInverse( parent ), local );
+//			local.multiplyMatrices( parent.getInverse( parent ), local );
+			local.multiplyMatrices( parent.copy( parent ).invert(), local );
 
 		}
 
@@ -224,34 +225,6 @@ THREE.SEA3D.prototype.flipScaleMatrix = function () {
 //
 //	Legacy
 //
-
-THREE.SEA3D.prototype.degToRadAnimation = function ( animation ) {
-
-	if ( animation.isRadians ) return;
-
-	var dataList = animation.dataList;
-
-	for ( var i = 0; i < dataList.length; i ++ ) {
-
-		var block = dataList[ i ];
-
-		if ( block.kind === SEA3D.Animation.DEGREE ) {
-
-			block.kind = SEA3D.Animation.RADIAN;
-
-			for ( var j = 0; j < block.data.length; j ++ ) {
-
-				block.data[ j ] *= SEA3D.Math.DEG_TO_RAD;
-
-			}
-
-		}
-
-	}
-
-	animation.isRadians = true;
-
-};
 
 THREE.SEA3D.prototype.flipDefaultAnimation = function () {
 
@@ -460,22 +433,13 @@ THREE.SEA3D.prototype.getModifier = function ( req ) {
 
 			case SEA3D.Animation.prototype.type:
 			case SEA3D.MorphAnimation.prototype.type:
+			case SEA3D.UVWAnimation.prototype.type:
 
 				if ( req.scope instanceof THREE.Object3D ) {
 
 					this.flipDefaultAnimation( sea, req.scope, req.relative );
 
 				}
-
-				this._readAnimation( sea );
-
-				return sea.tag;
-
-				break;
-
-			case SEA3D.UVWAnimation.prototype.type:
-
-				this.degToRadAnimation( sea );
 
 				this._readAnimation( sea );
 
@@ -558,7 +522,8 @@ THREE.SEA3D.prototype.readSkeleton = function () {
 
 			// convert to world matrix
 
-			mtx_local.getInverse( mtx_tmp_inv );
+//			mtx_local.getInverse( mtx_tmp_inv );
+			mtx_local.copy( mtx_tmp_inv ).invert();
 
 			// convert to three.js order
 
@@ -569,7 +534,8 @@ THREE.SEA3D.prototype.readSkeleton = function () {
 				// to world
 
 				mtx_tmp_inv.fromArray( sea.joint[ bone.parentIndex ].inverseBindMatrix );
-				mtx_parent.getInverse( mtx_tmp_inv );
+//				mtx_parent.getInverse( mtx_tmp_inv );
+				mtx_parent.copy( mtx_tmp_inv ).invert();
 
 				// convert parent to three.js order
 
@@ -577,7 +543,8 @@ THREE.SEA3D.prototype.readSkeleton = function () {
 
 				// to local
 
-				mtx_parent.getInverse( mtx_parent );
+//				mtx_parent.getInverse( mtx_parent );
+				mtx_parent.copy( mtx_parent ).invert();
 
 				mtx_local.multiplyMatrices( mtx_parent, mtx_local );
 
@@ -660,7 +627,8 @@ THREE.SEA3D.prototype.readSkeletonAnimationLegacy = function () {
 
 						mtx_tmp_inv.fromArray( skl.joint[ bone.parentIndex ].inverseBindMatrix );
 
-						mtx_parent.getInverse( mtx_tmp_inv );
+//						mtx_parent.getInverse( mtx_tmp_inv );
+						mtx_parent.copy( mtx_tmp_inv ).invert();
 
 						mtx_global.multiplyMatrices( mtx_parent, mtx_local );
 
@@ -674,7 +642,8 @@ THREE.SEA3D.prototype.readSkeletonAnimationLegacy = function () {
 
 						// to local
 
-						mtx_parent.getInverse( mtx_parent );
+//						mtx_parent.getInverse( mtx_parent );
+						mtx_parent.copy( mtx_parent ).invert();
 
 						mtx_local.multiplyMatrices( mtx_parent, mtx_global );
 
@@ -804,7 +773,7 @@ THREE.SEA3D.EXTENSIONS_LOADER.push( { setTypeRead: function () {
 
 	// CONFIG
 
-	this.config.legacy = this.config.legacy !== undefined ? this.config.legacy : true;
+	this.config.legacy = this.config.legacy == undefined ? true : this.config.legacy;
 
 	this.file.typeRead[ SEA3D.Skeleton.prototype.type ] = this.readSkeleton;
 
