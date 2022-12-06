@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>WarGame</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<style>
+    * {  margin:0; padding:0; border:0;}
+    body { background-color:#444444; overflow:hidden; color:#c8c8c8; font-family:Verdana; font-size:12px; }
+    #container { overflow:hidden; }
+    #interface{ position:absolute; left:0; top:90px; width:0px; height:0px; }
+    #info{ pointer-events:none; position:absolute; left:10px; top:10px; width:400px; height:400px; }
+    #logo{ pointer-events:none; position:absolute; left:0; bottom:0; width:300px; height:150px; }
+</style>
+
+<script src="js/three.min.js"></script>
+<script src="js/controls/OrbitControls.js"></script>
+<script src="js/loaders/sea3d.min.js"></script>
+<script src="js/Detector.js"></script>
+<script src="js/miniGUI.js"></script>
+
+</head>
+
+<!-- Author CODE & MODEL: loth - http://3dflashlo.wordpress.com/ -->
+<!-- Author BOID WAR: akm2 - http://jsdo.it/akm2/                -->
+
+<body>
+<div id='container'></div>
+<div id="info"></div>
+<div id='interface'></div>
+<div id='logo'><object type="image/svg+xml" data="assets/sea3db.svg" id="logo"></object></div>
+
+<!--                                -->
+<!--           WAR WORKER           -->
+<!--                                -->
+
+<script id="workerWar" type="javascript/worker">
+
+var simulator = null;
+var perf = "";
+var ToRad = Math.PI / 180;
+var peace = false;
+var SimSetting;
+
+self.onmessage = function(e) {
+
+    var warMatrixs = e.data.warMatrixs;
+    var warMouse = e.data.warMouse;
+    var maxBoids;
+    var deadPool = [];
+    
+    var t = 0;
+
+    if ( simulator == null && e.data.url !== "") { // init
+        // Load war script
+        SimSetting = e.data.SimSetting;
+        importScripts(e.data.url);
+        maxBoids = 0;
+        simulator = new WAR.Simulator(SimSetting.people);
+        simulator.resize(360*SimSetting.worldScale, 270*SimSetting.worldScale);
+        simulator.init();
+
+    } else { // loop
+    	if(e.data.isPeace!==peace){
+    		peace = e.data.isPeace;
+    		simulator.setPeace(peace);
+    	}
+    	simulator.deadPool.length = 0;
+    	simulator.setMouse(warMouse[0], warMouse[1]);
+
+    	t = Date.now();
+        simulator.loop();
+        deadPool = simulator.deadPool;
+        maxBoids = simulator.boids.length;
+    	if(e.data.click && maxBoids<SimSetting.max && warMouse[2] !==1 ){simulator.add(warMouse[0], warMouse[1]);}
+
+        var i = maxBoids;
+        var p;
+        while(i--){
+        	p = simulator.boids[i];
+
+            warMatrixs[(4*i) + 0 ] = p.x;
+            warMatrixs[(4*i) + 1 ] = p.y;
+            warMatrixs[(4*i) + 2 ] = p.r;
+            warMatrixs[(4*i) + 3 ] = p.type.id;
+        }
+    }
+    self.postMessage({ oldTime:t, maxBoids:maxBoids, deadPool:deadPool, warMatrixs:warMatrixs }, [warMatrixs.buffer]);
+}
+
+</script>
+
+<!--                                -->
+<!--          MAIN SCRIPT           -->
+<!--                                -->
+
+<script>
+if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+var info = document.getElementById("info");
+var menu = document.getElementById("interface");
+
+// THREE var
+var container, camera, scene, renderer, controls, mouse, key, clock, contentRay, content, projector, raycaster, marker;
+var vsize = { x:window.innerWidth, y:window.innerHeight, z:window.innerWidth/window.innerHeight };
+var fps = [0,0,0,0];
+var ToRad = Math.PI / 180;
+var bgcolor = 0x444444;
+var meshs = [];
+var deadMeshs = [];
+var deadanim = [];
+
+var planete;
+var planetegeo;
+var sourceInfo = "";
+var nloop = 0;
+
+// WAR var
+var sim;
+var People = 60;
+var PlaneteSize = 5;
+var PeopleSize = 0.01;
+var hname=[], wgeo=[], hgeo=[], panim=[];
+var materials = [];
+var SimSetting = { people:30, max:250, worldScale:4 };
+var q0 = new THREE.Quaternion();
+var q1 = new THREE.Quaternion();
+var q2 = new THREE.Quaternion();
+var v = new THREE.Vector3();
+var ToRad = Math.PI / 180;
+var warMatrixs = new Float32Array(1000*4);
+var oldTime = 0;
+var dtwar = 1/60;
+var isPeace = false;
+var warSendTime;
+var warDeadPool;
+var warMouse = [0,0,0];
+var workerWar = new Worker(window.URL.createObjectURL(new Blob([document.querySelector('#workerWar').textContent], {type : 'text/javascript'}) ));
+workerWar.postMessage = workerWar.webkitPostMessage || workerWar.postMessage;
+
+init();
+loop();
+
+//-----------------------------------
+// WAR WORKER 
+//-----------------------------------
+
+workerWar.onmessage = function(e) {
+    // Get fresh data from the worker
+    warMatrixs = e.data.warMatrixs;
+    warDeadPool = e.data.deadPool;
+    // remove dead
+    var i = warDeadPool.length;
+    while(i--){
+    	removeP(warDeadPool[i]);
+    }
+
+    i = e.data.maxBoids;
+    var x, y, m;
+    while(i--){
+    	if(!meshs[i])addP(i, warMatrixs[(4*i) + 3]);
+    	else{
+    		m = meshs[i];
+    		x = -(45+22.5)+(warMatrixs[(4*i) + 1]/SimSetting.worldScale)*0.5;
+    		y = (warMatrixs[(4*i) + 0]/SimSetting.worldScale);
+    		m.position.copy(latLongToVector3( x,y, PlaneteSize+0.25 ) );
+            q1.setFromAxisAngle(new THREE.Vector3(0,1,0), warMatrixs[4*i + 2]+(180*ToRad) );
+            q2.setFromAxisAngle(new THREE.Vector3(1,0,0), -90*ToRad );
+            q0.multiplyQuaternions(q2, q1);
+            m.children[0].quaternion.slerp(q0,0.1);
+    		m.lookAt(v);
+    	}
+    }
+
+    sourceInfo ="Polulation:"+e.data.maxBoids+"<br>";
+	var delay = (1000 / 60)- (Date.now()-warSendTime);
+    if(delay < 0) delay = 0;
+
+    setTimeout(sendDataToWarWorker, delay);
+}
+
+function sendDataToWarWorker(url){
+    warSendTime = Date.now();
+    workerWar.postMessage({ SimSetting:SimSetting, People:People, url: url || "", click:mouse.click, warMouse:warMouse, isPeace:isPeace, warMatrixs:warMatrixs },[warMatrixs.buffer]);
+    mouse.click = false;
+}
+
+//-----------------------------------
+// THREE JS SIDE 
+//-----------------------------------
+
+function init() {
+
+    var g = new miniGUI.OnOff ({ container:menu, value:isPeace, y:0,name:"Peace", onChange: function(value){ isPeace = value; } });
+
+    mouse = { mx:0, my:0, down:false, click:false };
+
+    clock = new THREE.Clock();
+
+    renderer = new THREE.WebGLRenderer( {precision: "lowp", antialias: false } );
+    renderer.setSize( vsize.x, vsize.y );
+    renderer.setClearColor( bgcolor, 1 );
+
+    container = document.getElementById("container");
+    container.appendChild( renderer.domElement );
+
+    renderer.gammaInput = true;
+    renderer.gammaOutput = true;
+    renderer.shadowMapCullFace = THREE.CullFaceBack;
+    renderer.shadowMapEnabled = true;
+    renderer.autoClearColor = false;
+    renderer.autoClear = false;
+
+    // scene
+    scene = new THREE.Scene();
+
+    content = new THREE.Object3D();
+	scene.add(content);
+
+	contentRay = new THREE.Object3D();
+	content.add(contentRay);
+
+    // camera
+    camera = new THREE.PerspectiveCamera( 30, vsize.z, 0.5, 1000 );
+    camera.position.set( -20, 10, 20 );
+    controls = new THREE.OrbitControls(camera, container);
+    controls.maxDistance = 200;
+    controls.update();
+
+    projector = new THREE.Projector();
+	raycaster = new THREE.Raycaster();
+
+    scene.add( new THREE.AmbientLight( bgcolor ) );
+
+    var light = new THREE.DirectionalLight( 0xffffff, 1.3 );
+    var d = 10;
+
+    light.position.set( d, d, d );
+
+    light.castShadow = true;
+    //light.shadowCameraVisible = true;
+
+    light.shadowMapWidth = 1024;
+    light.shadowMapHeight = 1024;
+
+    light.shadowCameraLeft = -d;
+    light.shadowCameraRight = d;
+    light.shadowCameraTop = d;
+    light.shadowCameraBottom = -d;
+
+    light.shadowCameraFar = 3*d;
+    light.shadowCameraNear = d;
+    light.shadowDarkness = 0.25;
+    light.shadowBias =  -0.002;
+
+    scene.add( light );
+
+    var lightPoint = new THREE.PointLight ( 0x4488ff, 1 );
+    lightPoint.position.set( -d/3, -d, -d);
+    scene.add( lightPoint );
+
+    // background
+    var backGeo = new THREE.Mesh( new THREE.IcosahedronGeometry(500,1), new THREE.MeshBasicMaterial( { map:gradTexture([[1, 0.5,0], ['#4488ff', '#444444', 'black']]), side:THREE.BackSide, depthWrite: false }  ));
+    scene.add( backGeo );
+
+    // PLANETE FOR RAY TEST
+    planete = new THREE.Mesh( new THREE.SphereGeometry( PlaneteSize, 20, 20 ), new THREE.MeshBasicMaterial() );
+    contentRay.add( planete );
+    planete.visible=false;
+
+    var planeteMat = new THREE.MeshPhongMaterial( {  specular: 0x505050, shininess: 10, color:0x555555, metal:true} );
+    var pplanete= new THREE.Mesh( new THREE.SphereGeometry( 5,60,50), planeteMat );
+    pplanete.castShadow = true;
+    pplanete.receiveShadow = true;
+    content.add( pplanete );
+
+    // MARKER
+    var geometry = new THREE.CylinderGeometry( 0, 0.15, 0.5, 3 );
+	geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 0.25, 0 ) );
+	geometry.applyMatrix( new THREE.Matrix4().makeRotationX( Math.PI / 2 ) );
+	marker = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: 0xffffff } ) );
+	content.add(marker);
+	marker.castShadow = true;
+    marker.receiveShadow = true;
+    
+
+    // LOAD SEA3D MESH
+    loadSea3d();
+
+    // events
+    var body = document.body;
+    window.addEventListener( 'resize', resize, false );
+    container.addEventListener( 'mousemove', onMouseMove, false );
+    container.addEventListener( 'mousedown', onMouseDown, false );
+    container.addEventListener( 'mouseout', onMouseUp, false );
+    container.addEventListener( 'mouseup', onMouseUp, false );
+}
+
+function resize() {
+    vsize = { x:window.innerWidth, y:window.innerHeight, z:window.innerWidth/window.innerHeight };
+	camera.aspect = vsize.z;
+	camera.updateProjectionMatrix();
+	renderer.setSize( vsize.x, vsize.y );
+}
+
+function loop() {
+    requestAnimationFrame( loop, renderer.domElement );
+    var delta = clock.getDelta();
+    nloop++
+    if(nloop==2){
+        THREE.AnimationHandler.update( delta*2 );
+        nloop = 0;
+    }
+    renderer.render( scene, camera );
+    displayInfo();
+}
+
+function displayInfo(){
+    fps[2] = Date.now();
+    if (fps[2]-1000>fps[1]){ fps[1]=fps[2]; fps[3]=fps[0]; fps[0]=0; } fps[0]++;
+
+    var txtinfo =[
+        "<h3>WAR GAME</h3><br>",
+        sourceInfo,
+        "Three: " + fps[3] +" fps<br>"
+    ].join("\n");
+    info.innerHTML = txtinfo;
+}
+
+//-----------------------------------
+// SEA3D LOADING
+//-----------------------------------
+
+function loadSea3d(){
+    var loader = new THREE.SEA3D( true );
+    loader.onComplete = function( e ) {
+        hname = ["hero_1_warrior", "hero_2_valkyrie", "monster_zombi", "monster_nurce" ];
+        var m;
+        var i = loader.meshes.length;
+        while(i--){
+            m = loader.meshes[i];
+            switch(m.name){
+                case hname[0]: hgeo[0] = m.geometry; materials[0] = m.material; break;
+                case hname[1]: hgeo[1] = m.geometry; materials[1] = m.material;break;
+                case hname[2]: hgeo[2] = m.geometry; materials[2] = m.material;break;
+                case hname[3]: hgeo[3] = m.geometry; materials[3] = m.material;break;
+                case "weapon0": wgeo[0] = m.geometry; materials[4] = m.material;break;
+                case "weapon1": wgeo[1] = m.geometry; break;
+            }
+        }
+
+        // start war worker
+        sendDataToWarWorker(document.location.href.replace(/\/[^/]*$/,"/") + "js/war.min.js");
+    }
+    loader.load( 'assets/model/game.low.sea' );
+}
+
+//-----------------------------------
+// ADD PEOPLE
+//-----------------------------------
+
+function addP(i, n) {
+	var mesh = new THREE.Object3D();
+	mesh.name = n;
+	var child = new THREE.SkinnedMesh( hgeo[n], materials[n] );
+	child.scale.set(PeopleSize,PeopleSize,-PeopleSize);
+
+	// add weapon
+	if(wgeo[n]){
+        w = new THREE.Mesh( wgeo[n], materials[4], false );
+        bone = child.skeleton.bones[12];
+        w.name = bone.name;
+        w.matrix = bone.skinMatrix;
+        w.matrixAutoUpdate = false;
+        child.add( w );
+    }
+
+    // add animation
+	panim[i] = new THREE.Animation( child, hname[n]+ '/walk' );
+	panim[i].play( 0.05 * Math.random() );
+
+	child.castShadow = true;
+    child.receiveShadow = true;
+    mesh.add(child);
+    content.add( mesh );
+	meshs[i] = mesh;
+}
+
+//-----------------------------------
+// PLAY DEAD 
+//-----------------------------------
+
+function removeP(i) {
+    if(meshs[i]){
+    	var n = meshs[i].name;
+    	var m = meshs[i].matrixWorld.clone();
+
+    	// creat copy and play dead
+    	var mesh = new THREE.Object3D();
+    	var child = new THREE.SkinnedMesh( hgeo[n], materials[n] );
+    	child.scale.set(PeopleSize,PeopleSize,-PeopleSize);
+    	child.quaternion.copy(meshs[i].children[0].quaternion);
+    	child.castShadow = true;
+        child.receiveShadow = true;
+        mesh.add(child);
+        content.add( mesh );
+        mesh.position.copy(meshs[i].position);
+        mesh.lookAt(new THREE.Vector3());
+
+        var an = new THREE.Animation( child, hname[n]+ '/death' );
+        an.loop = false;
+        an.play();
+
+        deadanim.push(an);
+    	deadMeshs.push(mesh);
+
+    	panim[i].stop();
+    	//panim[i].reset();
+    	meshs[i].remove( meshs[i].children[0]);
+    	content.remove( meshs[i] );
+    	meshs.splice(i, 1);
+        panim.splice(i, 1);
+    }
+}
+
+//-----------------------------------
+// RAYTEST
+//-----------------------------------
+
+function rayTest(sh) {
+	if ( contentRay.children.length > 0 ) {
+		var vector = new THREE.Vector3( mouse.mx, mouse.my, 1 );
+		projector.unprojectVector( vector, camera );
+		raycaster.set( camera.position, vector.sub( camera.position ).normalize() );
+		var intersects = raycaster.intersectObjects( contentRay.children );
+		if ( intersects.length > 0 ) {
+			marker.position.set( 0, 0, 0 );
+			marker.lookAt(intersects[0].face.normal);
+			marker.position.copy( intersects[0].point );
+
+			var p = intersects[0].point.clone();
+			var rX = (360-getElementAngle(0,0, p.x, p.z));
+			var l = Math.sqrt( p.x * p.x + p.z * p.z );
+			var rY = ((270)+getElementAngle(0,0, l, p.y));
+
+			var px = (360-(rX))-90;
+			if(px<0)px = 360+px;
+			var py = (270/2)+((rY-270-90)*2);
+
+			warMouse = [px*SimSetting.worldScale, py*SimSetting.worldScale, 0];
+
+	    } else {
+		    warMouse = [-9999,-9999, 1];
+	    }
+	} 
+}
+
+//-----------------------------------
+// MATH
+//-----------------------------------
+
+function getElementAngle(x1, y1, x2, y2) {
+	var adj = x2 - x1;
+	var opp = y2 - y1;	
+	var angle = Math.abs(Math.atan(opp/adj) * 180/Math.PI);
+	if (adj > 0 && opp < 0 ) angle = 90 - angle;
+	else if (adj >= 0 && opp >= 0) angle += 90;
+	else if (adj < 0 && opp >= 0) angle = 180 + (90 - angle);
+	else angle += 270;
+	return angle;
+}
+
+function latLongToVector3(Lat, Lon, radius) {
+	var p = new THREE.Vector3();
+    var phi = (Lat)*ToRad;
+    var theta = (Lon)*ToRad;
+    p.x = radius * Math.cos(phi) * Math.cos(theta);
+    p.y = radius * Math.sin(phi);
+    p.z = radius * Math.cos(phi)* Math.sin(theta);
+    return p;
+}
+
+//-----------------------------------
+// MOUSE
+//-----------------------------------
+
+function onMouseDown(e) {
+    e.preventDefault();
+    mouse.mx = ( e.clientX / vsize.x ) * 2 - 1;
+	mouse.my = - ( e.clientY / vsize.y ) * 2 + 1;
+    mouse.down = true;
+    mouse.click = true;
+
+    rayTest(true);
+}
+
+function onMouseUp(e) {
+    mouse.down = false;
+}
+
+function onMouseMove(e) {
+    e.preventDefault();
+   // if ( mouse.down ) {
+    	mouse.mx = ( e.clientX / vsize.x ) * 2 - 1;
+	    mouse.my = - ( e.clientY / vsize.y ) * 2 + 1;
+	    rayTest(false);
+	//}
+}
+
+//-----------------------------------------------------
+//  TEXTURE
+//-----------------------------------------------------
+
+function gradTexture(color) {
+    var c = document.createElement("canvas");
+    var ct = c.getContext("2d");
+    c.width = 16; c.height = 256;
+    var gradient = ct.createLinearGradient(0,0,0,256);
+    var i = color[0].length;
+    while(i--){ gradient.addColorStop(color[0][i],color[1][i]); }
+    ct.fillStyle = gradient;
+    ct.fillRect(0,0,16,256);
+    var texture = new THREE.Texture(c);
+    texture.needsUpdate = true;
+    return texture;
+}
+
+</script>
+</body>
+</html>

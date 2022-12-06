@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Dragon</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<style>
+    * {  margin:0; padding:0; border:0;}
+    body { background-color:#444444; overflow:hidden; color:#c8c8c8; font-family:Verdana; font-size:12px; }
+    #container { overflow:hidden; }
+    #interface{ position:absolute; left:0; top:90px; width:0px; height:0px; }
+    #info{ pointer-events:none; position:absolute; left:10px; top:10px; width:400px; height:400px; }
+    #logo{ pointer-events:none; position:absolute; left:0; bottom:0; width:300px; height:150px; }
+</style>
+
+<script src="js/three.min.js"></script>
+<script src="js/controls/OrbitControls.js"></script>
+<script src="js/loaders/sea3d.min.js"></script>
+<script src="js/Detector.js"></script>
+<script src="js/miniGUI.js"></script>
+
+</head>
+
+<!-- Author CODE & MODEL: loth - http://3dflashlo.wordpress.com/ -->
+
+<body>
+<div id='container'></div>
+<div id="info"></div>
+<div id='interface'></div>
+<div id='logo'><object type="image/svg+xml" data="assets/sea3db.svg" id="logo"></object></div>
+
+<script>
+if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+// Parameters
+var ToRad = Math.PI / 180;
+var info = document.getElementById("info");
+var menu = document.getElementById("interface");
+var sourceInfo = "<h3>DRAGON</h3><br>";
+
+// THREE var
+var container, camera, scene, renderer, controls, clock;
+var fps = [0,0,0,0];
+var bgcolor = 0x444444;
+var dragonSkin;
+var meshs = [];
+var squel = [];
+var nloop = 0;
+var isSkeletonVisible = false;
+
+init();
+loop();
+
+function init() {
+
+    var b1 = new miniGUI.OnOff ({ container:menu, value:isSkeletonVisible, y:10,name:"Skeleton", onChange: function(value){ toogleSkeleton(value) } });
+
+    clock = new THREE.Clock();
+
+    renderer = new THREE.WebGLRenderer( { antialias:true } );
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setClearColor( bgcolor, 1 );
+
+    container = document.getElementById("container");
+    container.appendChild( renderer.domElement );
+
+    renderer.gammaInput = true;
+    renderer.gammaOutput = true;
+    renderer.shadowMapEnabled = true;
+    renderer.autoClearColor = false;
+    renderer.autoClear = false;
+
+    // scene
+    scene = new THREE.Scene();
+
+    // camera
+    camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 0.5, 1000 );
+    camera.position.set( -20, 10, 200 );
+    controls = new THREE.OrbitControls(camera, container);
+    controls.maxDistance = 300;
+    controls.update();
+
+    scene.add( camera );
+
+    // lights
+    var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 1 );
+    hemiLight.color.setHex( 0xb6a385 );
+    hemiLight.groundColor.setHex( 0x4b5054);
+    hemiLight.position.set( 0, 100, 0 );
+    scene.add( hemiLight );
+
+    var light, materials;
+    scene.add( new THREE.AmbientLight( bgcolor ) );
+
+    light = new THREE.DirectionalLight( 0xffffff, 1.1 );
+    var d = 120;
+
+    light.position.set( d, d, d );
+
+    light.castShadow = true;
+    //light.shadowCameraVisible = true;
+
+    light.shadowMapWidth = 1024;
+    light.shadowMapHeight = 1024;
+
+    light.shadowCameraLeft = -d;
+    light.shadowCameraRight = d;
+    light.shadowCameraTop = d;
+    light.shadowCameraBottom = -d;
+
+    light.shadowCameraFar = 3*d;
+    light.shadowCameraNear = d;
+    light.shadowDarkness = 0.5;
+
+    scene.add( light );
+
+    var lightPoint = new THREE.PointLight ( 0x4488ff, 1 );
+    lightPoint.position.set( -d/3, d, -d);
+    scene.add( lightPoint );
+
+    // background
+    var backGeo = new THREE.Mesh( new THREE.IcosahedronGeometry(500,1), new THREE.MeshBasicMaterial( { map:gradTexture([[0.5,0], ['#444444', 'black']]), side:THREE.BackSide, depthWrite: false }  ));
+    scene.add( backGeo );
+
+    // ground
+    var mesh = new THREE.Mesh(  new THREE.PlaneGeometry( 400, 400, 1, 1 ), new THREE.MeshBasicMaterial( { color: bgcolor } ) );
+    mesh.castShadow = false;
+    mesh.receiveShadow = true;
+    mesh.rotation.x = -90 * ToRad;
+    scene.add( mesh );
+
+    window.addEventListener( 'resize', resize, false );
+
+    // load sea3d model
+    loadSea3d();
+}
+
+function resize() {
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+}
+
+function loop() {
+    requestAnimationFrame( loop );
+    var delta = clock.getDelta();
+    nloop++
+    if(nloop===2){
+        nloop = 0;
+        THREE.AnimationHandler.update( delta*2 );
+        if(squel.length && isSkeletonVisible){
+            for(var i=0, j=squel.length; i<j; i++){
+                squel[i].update()
+            }
+        }
+    }
+    renderer.render( scene, camera );
+    displayInfo();
+}
+
+function displayInfo(){
+    fps[2] = Date.now();
+    if (fps[2]-1000>fps[1]){ fps[1]=fps[2]; fps[3]=fps[0]; fps[0]=0; } fps[0]++;
+
+    var txtinfo =[
+        sourceInfo,
+        "Three: " + fps[3] +" fps"
+    ].join("\n");
+    info.innerHTML = txtinfo;
+}
+
+//-----------------------------------
+// SEA3D LOADING
+//-----------------------------------
+
+function loadSea3d(){
+    var loader = new THREE.SEA3D( true );
+    loader.onComplete = function( e ) {
+        var m = loader.meshes[0];
+        dragonSkin = m.material;
+        populate(m.geometry);
+    }
+    loader.load( 'assets/model/dragon.sea' );
+}
+
+function toogleSkeleton(value){
+    for(var i=0, j=squel.length; i<j; i++){
+        isSkeletonVisible = value;
+        squel[i].visible = value;
+    }
+}
+
+function populate(geometry){
+    var i, rx, rz, m, w;
+
+    var nnn, anim, rand, bone;
+    var num = 40;
+
+    var skeletonHelper;
+
+    for(i=0; i<num; i++){
+        rand = Math.floor(Math.random()*5);
+        rx =  -100+(Math.random()*200);
+        rz =  -100+(Math.random()*200);
+
+        m = new THREE.SkinnedMesh(geometry, dragonSkin, false );
+        m.scale.set(0.1,0.1,-0.1);
+
+        skeletonHelper = new THREE.SkeletonHelper( m );
+        skeletonHelper.material.linewidth = 3;
+        m.add( skeletonHelper );
+        squel[i] = skeletonHelper;
+        squel[i].visible = isSkeletonVisible;
+
+        m.rotation.y = (Math.random()*360) * ToRad;
+
+        m.position.x = -rx;
+        if(rand!==4)m.position.y = 5.5;
+        else m.position.y = 1;
+        m.position.z = -rz;
+
+        m.castShadow = true;//m.receiveShadow = true;
+        nnn = Math.round(Math.random()*2);
+        if(nnn>0){ anim = "dragon/fly"; m.position.y += 10+ (Math.random()*5)}
+        else {anim = "dragon/walk"; m.position.y += 3}
+
+        var animation = new THREE.Animation( m, anim );
+        animation.play( 10 * Math.random() );
+        scene.add(m);  
+    }
+}
+
+//-----------------------------------------------------
+//  TEXTURE
+//-----------------------------------------------------
+
+function gradTexture(color) {
+    var c = document.createElement("canvas");
+    var ct = c.getContext("2d");
+    c.width = 16; c.height = 256;
+    var gradient = ct.createLinearGradient(0,0,0,256);
+    var i = color[0].length;
+    while(i--){ gradient.addColorStop(color[0][i],color[1][i]); }
+    ct.fillStyle = gradient;
+    ct.fillRect(0,0,16,256);
+    var texture = new THREE.Texture(c);
+    texture.needsUpdate = true;
+    return texture;
+}
+
+</script>
+</body>
+</html>

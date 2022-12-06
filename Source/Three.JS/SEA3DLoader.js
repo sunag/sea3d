@@ -526,11 +526,15 @@ THREE.SEA3D.ScriptHandler.dispatchUpdate = function ( delta ) {
 //	Animation Clip
 //
 
-THREE.SEA3D.AnimationClip = function ( name, duration, tracks, repeat ) {
+THREE.SEA3D.AnimationClip = class AnimationClip extends THREE.AnimationClip {
 
-	THREE.AnimationClip.call( this, name, duration, tracks );
+	constructor( name, duration, tracks, repeat ) {
+		
+		super( name, duration, tracks );
 
-	this.repeat = repeat !== undefined ? repeat : true;
+		this.repeat = repeat !== undefined ? repeat : true;
+		
+	}
 
 };
 
@@ -539,12 +543,6 @@ THREE.SEA3D.AnimationClip.fromClip = function ( clip, repeat ) {
 	return new THREE.SEA3D.AnimationClip( clip.name, clip.duration, clip.tracks, repeat );
 
 };
-
-THREE.SEA3D.AnimationClip.prototype = Object.assign( Object.create( THREE.AnimationClip.prototype ), {
-
-	constructor: THREE.SEA3D.AnimationClip
-
-} );
 
 //
 //	Animation
@@ -1034,11 +1032,12 @@ THREE.SEA3D.Object3DAnimator.prototype = Object.assign( Object.create( THREE.SEA
 
 	setRelative: function ( val ) {
 
-		THREE.SEA3D.Animator.prototype.setRelative.call( this, val );
+		// @FIX
+		/*THREE.SEA3D.Animator.prototype.setRelative.call( this, val );
 
 		this.object3d.setAnimator( this.relative );
 
-		this.updateAnimations( this.clips, new THREE.AnimationMixer( this.relative ? this.object3d.animate : this.object3d ) );
+		this.updateAnimations( this.clips, new THREE.AnimationMixer( this.relative ? this.object3d.animate : this.object3d ) );*/
 
 	}
 
@@ -1239,33 +1238,31 @@ THREE.SEA3D.Dummy.prototype = Object.assign( Object.create( THREE.Mesh.prototype
 //	Mesh
 //
 
-THREE.SEA3D.Mesh = function ( geometry, material ) {
+THREE.SEA3D.Mesh = class Mesh extends THREE.Mesh {
 
-	THREE.Mesh.call( this, geometry, material );
+	constructor( geometry, material ) {
+		
+		super( geometry, material );
 
-};
-
-THREE.SEA3D.Mesh.prototype = Object.assign( Object.create( THREE.Mesh.prototype ), THREE.SEA3D.Object3D.prototype, {
-
-	constructor: THREE.SEA3D.Mesh,
-
-	setWeight: function ( name, val ) {
+	}
+	
+	setWeight ( name, val ) {
 
 		var index = typeof name === "number" ? name : this.morphTargetDictionary[ name ];
 
 		this.morphTargetInfluences[ index ] = val;
 
-	},
-
-	getWeight: function ( name ) {
+	}
+	
+	getWeight ( name ) {
 
 		var index = typeof name === "number" ? name : this.morphTargetDictionary[ name ];
 
 		return this.morphTargetInfluences[ index ];
 
-	},
+	}
 
-	copy: function ( source ) {
+	copy ( source ) {
 
 		THREE.Mesh.prototype.copy.call( this, source );
 
@@ -1278,27 +1275,36 @@ THREE.SEA3D.Mesh.prototype = Object.assign( Object.create( THREE.Mesh.prototype 
 
 	}
 
-} );
+};
 
 //
 //	Skinning
 //
 
-THREE.SEA3D.SkinnedMesh = function ( geometry, material ) {
+THREE.SEA3D.SkinnedMesh = class SkinnedMesh extends THREE.SkinnedMesh {
 
-	THREE.SkinnedMesh.call( this, geometry, material );
+	constructor( geometry, material ) {
+		
+		super( geometry, material );
 
-	this.bind( new THREE.Skeleton( this.initBones() ), this.matrixWorld );
+		const intp = new THREE.SEA3D.Animator()
 
-	this.updateAnimations( geometry.animations, new THREE.AnimationMixer( this ) );
+		this.updateAnimations = intp.updateAnimations;
+		this.addAnimation = intp.addAnimation;
+		this.play = intp.play;
+		this.getAnimationByName = intp.getAnimationByName;
+		this.updateTimeScale  = intp.updateTimeScale;
+		this.update = intp.update;
 
-};
+		Object.assign( this, intp, intp.prototype );
+		
+		this.bind( new THREE.Skeleton( this.initBones() ), this.matrixWorld );
 
-THREE.SEA3D.SkinnedMesh.prototype = Object.assign( Object.create( THREE.SkinnedMesh.prototype ), THREE.SEA3D.Mesh.prototype, THREE.SEA3D.Animator.prototype, {
-
-	constructor: THREE.SEA3D.SkinnedMesh,
-
-	initBones: function () {
+		this.updateAnimations( geometry.animations, new THREE.AnimationMixer( this ) );
+		
+	}
+	
+	initBones () {
 
 		var bones = [], bone, gbone;
 		var i, il;
@@ -1356,9 +1362,9 @@ THREE.SEA3D.SkinnedMesh.prototype = Object.assign( Object.create( THREE.SkinnedM
 
 		return bones;
 
-	},
+	}
 
-	boneByName: function ( name ) {
+	boneByName ( name ) {
 
 		var bones = this.skeleton.bones;
 
@@ -1369,9 +1375,9 @@ THREE.SEA3D.SkinnedMesh.prototype = Object.assign( Object.create( THREE.SkinnedM
 
 		}
 
-	},
+	}
 
-	copy: function ( source ) {
+	copy ( source ) {
 
 		THREE.SkinnedMesh.prototype.copy.call( this, source );
 
@@ -1384,7 +1390,7 @@ THREE.SEA3D.SkinnedMesh.prototype = Object.assign( Object.create( THREE.SkinnedM
 
 	}
 
-} );
+};
 
 //
 //	Vertex Animation
@@ -1423,17 +1429,15 @@ THREE.SEA3D.VertexAnimationMesh.prototype = Object.assign( Object.create( THREE.
 //	Camera
 //
 
-THREE.SEA3D.Camera = function ( fov, aspect, near, far ) {
+THREE.SEA3D.Camera = class Camera extends THREE.PerspectiveCamera {
 
-	THREE.PerspectiveCamera.call( this, fov, aspect, near, far );
-
-};
-
-THREE.SEA3D.Camera.prototype = Object.assign( Object.create( THREE.PerspectiveCamera.prototype ), THREE.SEA3D.Object3D.prototype, {
-
-	constructor: THREE.SEA3D.Camera,
-
-	copy: function ( source ) {
+	constructor( fov, aspect, near, far ) {
+		
+		super( fov, aspect, near, far );
+		
+	}
+	
+	copy( source ) {
 
 		THREE.PerspectiveCamera.prototype.copy.call( this, source );
 
@@ -1446,7 +1450,7 @@ THREE.SEA3D.Camera.prototype = Object.assign( Object.create( THREE.PerspectiveCa
 
 	}
 
-} );
+};
 
 //
 //	Orthographic Camera
@@ -1481,17 +1485,15 @@ THREE.SEA3D.OrthographicCamera.prototype = Object.assign( Object.create( THREE.O
 //	PointLight
 //
 
-THREE.SEA3D.PointLight = function ( hex, intensity, distance, decay ) {
+THREE.SEA3D.PointLight = class PointLight extends THREE.PointLight {
 
-	THREE.PointLight.call( this, hex, intensity, distance, decay );
-
-};
-
-THREE.SEA3D.PointLight.prototype = Object.assign( Object.create( THREE.PointLight.prototype ), THREE.SEA3D.Object3D.prototype, {
-
-	constructor: THREE.SEA3D.PointLight,
-
-	copy: function ( source ) {
+	constructor( hex, intensity, distance, decay ) {
+		
+		super( hex, intensity, distance, decay );
+		
+	}
+	
+	copy( source ) {
 
 		THREE.PointLight.prototype.copy.call( this, source );
 
@@ -1504,7 +1506,7 @@ THREE.SEA3D.PointLight.prototype = Object.assign( Object.create( THREE.PointLigh
 
 	}
 
-} );
+};
 
 //
 //	Point Sound
@@ -1891,26 +1893,26 @@ THREE.SEA3D.prototype.readGeometryBuffer = function ( sea ) {
 	// not indexes? use polygon soup
 	if ( sea.indexes ) geo.setIndex( new THREE.BufferAttribute( sea.indexes, 1 ) );
 
-	geo.addAttribute( 'position', new THREE.BufferAttribute( sea.vertex, 3 ) );
+	geo.setAttribute( 'position', new THREE.BufferAttribute( sea.vertex, 3 ) );
 
 	if ( sea.uv ) {
 
-		geo.addAttribute( 'uv', new THREE.BufferAttribute( sea.uv[ 0 ], 2 ) );
-		if ( sea.uv.length > 1 ) geo.addAttribute( 'uv2', new THREE.BufferAttribute( sea.uv[ 1 ], 2 ) );
+		geo.setAttribute( 'uv', new THREE.BufferAttribute( sea.uv[ 0 ], 2 ) );
+		if ( sea.uv.length > 1 ) geo.setAttribute( 'uv2', new THREE.BufferAttribute( sea.uv[ 1 ], 2 ) );
 
 	}
 
-	if ( sea.normal ) geo.addAttribute( 'normal', new THREE.BufferAttribute( sea.normal, 3 ) );
+	if ( sea.normal ) geo.setAttribute( 'normal', new THREE.BufferAttribute( sea.normal, 3 ) );
 	else geo.computeVertexNormals();
 
-	if ( sea.tangent4 ) geo.addAttribute( 'tangent', new THREE.BufferAttribute( sea.tangent4, 4 ) );
+	if ( sea.tangent4 ) geo.setAttribute( 'tangent', new THREE.BufferAttribute( sea.tangent4, 4 ) );
 
-	if ( sea.color ) geo.addAttribute( 'color', new THREE.BufferAttribute( sea.color[ 0 ], sea.numColor ) );
+	if ( sea.color ) geo.setAttribute( 'color', new THREE.BufferAttribute( sea.color[ 0 ], sea.numColor ) );
 
 	if ( sea.joint ) {
 
-		geo.addAttribute( 'skinIndex', new THREE.Float32BufferAttribute( sea.joint, sea.jointPerVertex ) );
-		geo.addAttribute( 'skinWeight', new THREE.Float32BufferAttribute( sea.weight, sea.jointPerVertex ) );
+		geo.setAttribute( 'skinIndex', new THREE.Float32BufferAttribute( sea.joint, sea.jointPerVertex ) );
+		geo.setAttribute( 'skinWeight', new THREE.Float32BufferAttribute( sea.weight, sea.jointPerVertex ) );
 
 	}
 
@@ -1958,7 +1960,7 @@ THREE.SEA3D.prototype.readLine = function ( sea ) {
 	if ( sea.closed )
 		sea.vertex.push( sea.vertex[ 0 ], sea.vertex[ 1 ], sea.vertex[ 2 ] );
 
-	geo.addAttribute( 'position', new THREE.Float32BufferAttribute( sea.vertex, 3 ) );
+	geo.setAttribute( 'position', new THREE.Float32BufferAttribute( sea.vertex, 3 ) );
 
 	var line = new THREE.Line( geo, new THREE.LineBasicMaterial( { color: THREE.SEA3D.HELPER_COLOR, linewidth: 3 } ) );
 	line.name = sea.name;

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Droid</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<style>
+    * {  margin:0; padding:0; border:0;}
+    body { background-color:#444444; overflow:hidden; color:#c8c8c8; font-family:Verdana; font-size:12px; }
+    #container { overflow:hidden; }
+    #interface{ position:absolute; left:0; top:90px; width:0px; height:0px; }
+    #info{ pointer-events:none; position:absolute; left:10px; top:10px; width:400px; height:400px; }
+    #logo{ pointer-events:none; position:absolute; left:0; bottom:0; width:300px; height:150px; }
+</style>
+
+<script src="js/three.min.js"></script>
+<script src="js/controls/OrbitControls.js"></script>
+<script src="js/loaders/sea3d.min.js"></script>
+<script src="js/loaders/animatorClone.js"></script>
+<script src="js/Detector.js"></script>
+<script src="js/miniGUI.js"></script>
+
+</head>
+
+<!-- Author CODE & MODEL: loth - http://3dflashlo.wordpress.com/ -->
+
+<body>
+<div id='container'></div>
+<div id="info"></div>
+<div id='interface'></div>
+<div id='logo'><object type="image/svg+xml" data="assets/sea3db.svg" id="logo"></object></div>
+
+<script>
+if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+// Parameters
+var ToRad = Math.PI / 180;
+var info = document.getElementById("info");
+var menu = document.getElementById("interface");
+var sourceInfo = "<h3>DROID + ANIM BLENDING & MORPH</h3><br>";
+
+// THREE var
+var container, camera, scene, renderer, controls, clock;
+var fps = [0,0,0,0];
+var gui = [];
+var bgcolor = 0x444444;
+var meshs = [];
+var anims = [];
+var squel = [];
+var animWeights = [];
+var loopAnimations = [];
+var animations, morphs;
+var animControl = { timeScale:1 };
+var isFrameStepping = false;
+var isSkeletonVisible = false;
+var timeToStep = 0;
+
+init();
+loop();
+
+function init() {
+
+    clock = new THREE.Clock();
+
+    renderer = new THREE.WebGLRenderer( { antialias:true } );
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setClearColor( bgcolor, 1 );
+
+    container = document.getElementById("container");
+    container.appendChild( renderer.domElement );
+
+    renderer.gammaInput = true;
+    renderer.gammaOutput = true;
+    renderer.shadowMapCullFace = THREE.CullFaceBack;
+    renderer.shadowMapEnabled = true;
+    renderer.autoClear = false;
+
+    scene = new THREE.Scene();
+
+    camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 0.5, 1000 );
+    camera.position.set( -20, 10, 30 );
+    controls = new THREE.OrbitControls(camera, container);
+    controls.target =  new THREE.Vector3(0,3,0);
+    controls.maxDistance = 300;
+    controls.update();
+
+    scene.add( new THREE.AmbientLight( bgcolor ) );
+
+    var light = new THREE.DirectionalLight( 0xffffff, 1.1 );
+    var d = 20;
+    light.position.set( d/3, d, d);
+    light.target = new THREE.Object3D(0,3,0);
+    light.castShadow = true;
+    //light.shadowCameraVisible = true;
+
+    light.shadowMapWidth = 1024;
+    light.shadowMapHeight = 1024;
+
+    light.shadowCameraLeft = -d;
+    light.shadowCameraRight = d;
+    light.shadowCameraTop = d;
+    light.shadowCameraBottom = -d;
+
+    light.shadowCameraFar = d*2;
+    light.shadowCameraNear = d;
+    light.shadowDarkness = 0.25;
+    light.shadowBias =  -0.002;
+    scene.add( light );
+
+    var lightPoint = new THREE.PointLight ( 0x4488ff, 1 );
+    lightPoint.position.set( -d/3, d, -d);
+    scene.add( lightPoint );
+
+    // background
+    var backGeo = new THREE.Mesh( new THREE.IcosahedronGeometry(500,1), new THREE.MeshBasicMaterial( { map:gradTexture([[0.5,0], ['#444444', 'black']]), side:THREE.BackSide, depthWrite: false }  ));
+    scene.add( backGeo );
+
+    // ground
+    var mesh = new THREE.Mesh( new THREE.PlaneGeometry( 400, 400, 1, 1 ), new THREE.MeshBasicMaterial( { color: bgcolor } ) );
+    mesh.castShadow = false;
+    mesh.receiveShadow = true;
+    mesh.rotation.x = -90 * ToRad;
+    scene.add( mesh );
+
+    window.addEventListener( 'resize', resize, false );
+
+    // load sea3d model
+    loadSea3d();
+}
+
+function resize() {
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+}
+
+function loop() {
+
+    requestAnimationFrame( loop, renderer.domElement );
+    var i;
+    var delta = clock.getDelta();
+    var stepSize = (!isFrameStepping) ? delta * animControl.timeScale: timeToStep;
+
+    // modify blend weights
+    i = anims.length;
+    while(i--) { anims[i].update( stepSize ); }
+    THREE.AnimationHandler.update( stepSize );
+    
+    // update skeleton
+    if(isSkeletonVisible){
+        i = squel.length;
+        while(i--) { squel[i].update(); }
+    }
+
+    renderer.render( scene, camera );
+
+    timeToStep = 0;
+    displayInfo()
+}
+
+function displayInfo(){
+    fps[2] = Date.now();
+    if (fps[2]-1000>fps[1]){ fps[1]=fps[2]; fps[3]=fps[0]; fps[0]=0; } fps[0]++;
+
+    var txtinfo =[
+        sourceInfo,
+        "Three: " + fps[3] +" fps"
+    ].join("\n");
+    info.innerHTML = txtinfo;
+}
+
+//-----------------------------------
+// SEA3D LOADING
+//-----------------------------------
+
+function loadSea3d(){
+    var loader = new THREE.SEA3D( true );
+    loader.onComplete = function( e ) {
+        var m = loader.meshes[0];
+        var geoDroid = loader.meshes[0].geometry;
+        var matDroid = loader.meshes[0].material;
+        // get animation name and loop
+        animations = [[], []];
+        var i = m.animations.length;
+        while(i--){
+            animations[0][i] = m.animations[i].name;
+            animations[1][i] = m.animations[i].loop;
+        }
+
+        var NumberModel = 5;
+        var size = 0.05;
+        var mesh, helper;
+
+        i = NumberModel;
+        while(i--){
+            mesh = new THREE.SkinnedMesh(geoDroid, matDroid, false );
+            mesh.scale.set(size,size,-size);
+
+            helper = new THREE.SkeletonHelper( mesh );
+            helper.material.linewidth = 3;
+            mesh.add( helper );
+            squel[i] = helper;
+            squel[i].visible = isSkeletonVisible;
+
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            mesh.position.x = -10+i*5;
+            scene.add(mesh);
+
+            anims[i] = new SEA3D.Animator(mesh, "droid");
+            anims[i].addAnimations( animations );
+
+            meshs[i] = mesh;
+        }
+
+        initInterface();
+    }
+    // THREE.SEA3D.BUFFER is not compatible with morpher
+    loader.parser = THREE.SEA3D.DEFAULT;
+    loader.load( 'assets/model/droid.sea' );
+}
+
+//-----------------------------------
+// MINI GUI
+//-----------------------------------
+
+function initInterface(){
+    gui[0] = new miniGUI.OnOff ({ container:menu, value:isSkeletonVisible, y:0,name:"Skeleton", onChange: function(value){ toogleSkeleton(value) } });
+    gui[1] = new miniGUI.Slide ({ container:menu, value:0, y:30,  color:[75, 200, 75], name:"DoorMorph", onChange: morphModels });
+    gui[2] = new miniGUI.Slide ({ container:menu, value:1, y:30*2, name:"Time", onChange: function(value){ animControl.timeScale = value; }  });
+
+    var name, i=0;
+    for(var j=0; j < animations[0].length; j++ ){
+        // add only loop animations
+        if(animations[1][j]){
+            name =  animations[0][j];
+            loopAnimations[i] =  animations[0][j];
+            animWeights[i] = 0;
+            if(name=='walk') animWeights[i]=1; 
+            gui[i+3] = new miniGUI.Slide ({ container:menu, value:animWeights[i], y:30*(3+i)+20, id:i, name:name, color:[230, 125, 30], onChange: function(value){ animWeights[this.id] = value;  weight();}  });
+            i++;
+        }
+    }
+    onStartAnimation(getAnimationData());
+}
+
+var getAnimationData = function() {
+        return {
+            detail: {
+                anims: loopAnimations,
+                weights: animWeights
+            }
+        };
+}
+function weight() {
+    onWeightAnimation(getAnimationData());
+};
+
+function toogleSkeleton(value){
+    var i = squel.length;
+    isSkeletonVisible = value;
+    while(i--){ squel[i].visible = value; }
+}
+
+function morphModels(value){
+    var i = meshs.length;
+    while(i--){ meshs[i].setWeight("droid001", value); }
+}
+
+function onStartAnimation( event ) {
+    var data = event.detail;
+    var i = anims.length;
+    while(i--){ 
+        anims[i].stopAll();
+        // the blend mesh will combine 1 or more animations
+        var j = data.anims.length;
+        while(j--){
+            anims[i].play(data.anims[j], data.weights[j]);
+        }
+    }
+    isFrameStepping = false;
+}
+
+function onWeightAnimation(event) {
+    var data = event.detail;
+    var i = anims.length;
+    while(i--){
+        var j = data.anims.length;
+        while(j--){
+            anims[i].applyWeight(data.anims[j], data.weights[j]);
+        }
+    }
+}
+
+//-----------------------------------------------------
+//  TEXTURE
+//-----------------------------------------------------
+
+function gradTexture(color) {
+    var c = document.createElement("canvas");
+    var ct = c.getContext("2d");
+    c.width = 16; c.height = 256;
+    var gradient = ct.createLinearGradient(0,0,0,256);
+    var i = color[0].length;
+    while(i--){ gradient.addColorStop(color[0][i],color[1][i]); }
+    ct.fillStyle = gradient;
+    ct.fillRect(0,0,16,256);
+    var texture = new THREE.Texture(c);
+    texture.needsUpdate = true;
+    return texture;
+}
+
+</script>
+</body>
+</html>
